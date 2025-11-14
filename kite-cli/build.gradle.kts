@@ -13,10 +13,17 @@ dependencies {
 
     // Terminal colors and styling (includes emoji support)
     implementation("com.github.ajalt.mordant:mordant:2.2.0")
+
+    // Coroutines for async operations
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
 }
 
 application {
     mainClass.set("io.kite.cli.MainKt")
+}
+
+tasks.named<JavaExec>("run") {
+    workingDir = rootProject.projectDir
 }
 
 tasks.jar {
