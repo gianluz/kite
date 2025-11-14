@@ -11,6 +11,9 @@ dependencies {
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
 
+    // Test dependencies (also available to scripts via classpath)
+    implementation("com.google.code.gson:gson:2.10.1") // For testing script dependencies
+
     // Test dependencies
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
 }
