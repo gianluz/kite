@@ -2,770 +2,774 @@
 
 ## Overview
 
-This document outlines the phased development plan for Kite, organized by epics and individual tasks. Each phase builds
-upon the previous, delivering incremental value.
+This document outlines the phased development plan for Kite, a Kotlin-based CI ride runner. The development is organized
+into 8 phases with clear deliverables, dependencies, and success criteria.
 
-**Total Estimated Timeline**: 10-12 weeks for MVP
+## Terminology
+
+- **Ride**: A workflow/pipeline composed of segments (formerly "pipeline")
+- **Segment**: A unit of work in a ride (formerly "task")
+- **Flow**: The execution order of segments within a ride
+
+## Project Structure
+
+```
+kite/
+├── specs/                         # Complete specifications (9 documents)
+├── kite-core/                     # Core domain models
+├── kite-dsl/                      # Kotlin DSL and scripting
+├── kite-runtime/                  # Execution runtime
+├── kite-cli/                      # CLI interface
+├── DEVELOPMENT_PLAN.md            # This file
+└── CHANGELOG.md                   # Version history
+```
+
+## Development Phases
+
+- **Phase 1**: Foundation & Core DSL (Weeks 1-2) -
+- **Phase 2**: Segment Graph & Execution Engine (Weeks 3-4)
+- **Phase 3**: CLI & File Discovery (Weeks 5-6)
+- **Phase 4**: Platform Adapters (Week 7)
+- **Phase 5**: Built-in Helpers & Features (Week 8)
+- **Phase 6**: Documentation & Examples (Week 9)
+- **Phase 7**: Testing & Refinement (Week 10)
+- **Phase 8**: Plugin System MVP (Weeks 11-12) - Optional
 
 ---
 
 ## Phase 1: Foundation & Core DSL (Weeks 1-2)
 
-**Goal**: Establish project structure, core data models, and basic DSL parsing
+**Goal**: Set up project infrastructure and define core domain models
 
 ### Epic 1.1: Project Setup & Infrastructure
 
 **Story Points**: 5 | **Duration**: 2 days
 
-- [x] **Task 1.1.1**: Initialize Kotlin project structure ✅ COMPLETE
-    - ✅ Create multi-module Gradle project
-  - ✅ Configure Kotlin 2.0.21 and Java 17 LTS compatibility with toolchain
-    - ✅ Set up module structure: `kite-core`, `kite-cli`, `kite-dsl`, `kite-runtime`
-    - ✅ Configure ktlint/detekt for code quality
-  - ✅ Gradle wrapper created (v9.2.0)
-  - ✅ Configuration cache enabled
-    - ✅ Build successful
-    - ✅ CLI runs successfully
+- [x] **Segment 1.1.1**: Initialize Kotlin project structure
+    - Create multi-module Gradle project
+    - Configure Kotlin 2.0.21 with Java 17 LTS compatibility
+    - Set up modules: `kite-core`, `kite-dsl`, `kite-runtime`, `kite-cli`
+    - Configure ktlint and detekt for code quality
+    - Set up Gradle wrapper (v9.2.0) with configuration cache
 
-- [x] **Task 1.1.2**: Set up dependency management ✅ COMPLETE
-    - ✅ Add kotlinx.coroutines (kite-core, kite-runtime)
-    - ✅ Add kotlinx.serialization (kite-core)
-    - ✅ Add Clikt (kite-cli v4.2.1)
-    - ✅ Add Kotlin Scripting dependencies (kite-dsl)
+- [x] **Segment 1.1.2**: Set up dependency management
+    - Add kotlinx.coroutines to `kite-core` and `kite-runtime`
+    - Add kotlinx.serialization to `kite-core`
+    - Add Clikt CLI framework to `kite-cli`
+    - Add Kotlin Scripting dependencies to `kite-dsl`
 
-- [x] **Task 1.1.3**: Configure build and publishing ✅ COMPLETE
-    - ✅ Set up version management (0.1.0-SNAPSHOT)
-    - ✅ Configure Maven publishing (with POM metadata)
-    - ✅ Create GitHub Actions for CI (.github/workflows/ci.yml)
-    - ✅ Set up test infrastructure (JUnit 5, MockK)
-    - ✅ Added .gitignore
+- [x] **Segment 1.1.3**: Configure build and publishing
+    - Set up version management (0.1.0-SNAPSHOT)
+    - Configure Maven publishing with POM metadata
+    - Set up GitHub Actions CI workflow
+    - Configure test infrastructure (JUnit 5, MockK)
 
-- [x] **Task 1.1.4**: Create project documentation structure ✅ COMPLETE
-    - ✅ README with quick start (already exists)
-    - ✅ CONTRIBUTING.md (comprehensive guide)
-    - ✅ LICENSE (already exists)
-    - ✅ CHANGELOG.md (created with initial entries)
+- [x] **Segment 1.1.4**: Create project documentation structure
+    - Create comprehensive specification (9 modular documents in `specs/`)
+    - Update README.md with project overview
+    - Create CONTRIBUTING.md
+    - Initialize CHANGELOG.md
+
+**Deliverables**:
+
+- Multi-module Gradle project with all dependencies
+- CI/CD pipeline configured
+- Complete specification documentation
+- Code quality tools operational
+
+---
 
 ### Epic 1.2: Core Domain Models
 
 **Story Points**: 8 | **Duration**: 3 days
 
-- [ ] **Task 1.2.1**: Define Task model
-    - Create `Task` data class with properties: id, description, dependencies, timeout, retries
-    - Implement task validation logic
-    - Add serialization support
+- [ ] **Segment 1.2.1**: Define Segment model
+    - Create `Segment` data class in `kite-core`
+    - Add properties: `name`, `description`, `dependsOn`, `condition`, `timeout`, `retries`
+    - Create `SegmentStatus` enum (PENDING, RUNNING, SUCCESS, FAILURE, SKIPPED, TIMEOUT)
+    - Add execution lambda with `ExecutionContext` receiver
     - Write unit tests
 
-- [ ] **Task 1.2.2**: Define ExecutionContext model
-    - Create `ExecutionContext` with CI platform detection
-    - Implement branch, commit, MR detection
-    - Add environment variable access
+- [ ] **Segment 1.2.2**: Define ExecutionContext model
+    - Create `ExecutionContext` data class
+    - Add properties: `branch`, `commitSha`, `mrNumber`, `isRelease`, `isLocal`, `ciPlatform`
+    - Add `environment`, `workspace`, `artifacts` accessors
     - Write unit tests
 
-- [ ] **Task 1.2.3**: Define Configuration model
-    - Create `PipelineConfig` data class
-    - Support task references and dependencies
-    - Support parallel blocks
+- [ ] **Segment 1.2.3**: Define Ride Configuration model
+    - Create `Ride` data class in `kite-core`
+    - Add properties: `name`, `segments`, `environment`, `parallel settings`
+    - Create `FlowNode` sealed class (Sequential, Parallel, Segment Reference)
+    - Implement ride validation logic
     - Write unit tests
 
-- [ ] **Task 1.2.4**: Define Platform Adapters interface
-    - Create `CIPlatform` enum (GitLab, GitHub, Local, Generic)
-    - Define `PlatformAdapter` interface
-    - Add platform detection logic
+- [ ] **Segment 1.2.4**: Define Platform Adapters interface
+    - Create `PlatformAdapter` interface
+    - Define detection and context population methods
+    - Create stub implementations (GitLabCI, GitHub Actions, Local)
+    - Write unit tests with mocks
+
+**Deliverables**:
+
+- Domain models with complete test coverage
+- Platform adapter interfaces defined
+- Models are immutable and thread-safe
+
+---
+
+### Epic 1.3: Kotlin Scripting Integration
+
+**Story Points**: 13 | **Duration**: 5 days
+
+- [ ] **Segment 1.3.1**: Set up Kotlin scripting engine
+    - Configure `kotlin-scripting-jvm` dependencies
+    - Create `ScriptCompiler` class
+    - Implement `.kite.kts` compilation
+    - Add script caching mechanism
     - Write unit tests
 
-### Epic 1.3: Kotlin Scripting Engine
-
-**Story Points**: 13 | **Duration**: 4 days
-
-- [ ] **Task 1.3.1**: Set up Kotlin Script engine
-    - Configure kotlin-scripting-jvm
-    - Create script host configuration
-    - Implement script compilation
-    - Handle script errors gracefully
-
-- [ ] **Task 1.3.2**: Implement task definition DSL (`.tasks.kts`)
-    - Create `tasks { }` DSL builder
-    - Implement `task("name") { }` builder
-    - Support `execute { }`, `dependsOn`, `timeout`, `description`
+- [ ] **Segment 1.3.2**: Implement segment definition DSL
+    - Create `SegmentBuilder` class with DSL markers
+    - Implement `segment("name") { }` builder
+    - Add support for `execute { }`, `outputs { }`, `inputs { }` blocks
+    - Implement property delegates for `dependsOn`, `timeout`, `condition`
     - Write DSL tests
 
-- [ ] **Task 1.3.3**: Implement configuration DSL (`.config.kts`)
-    - Create `config { }` DSL builder
-    - Implement `pipeline { }` builder
-    - Support `task()` references and `parallel { }` blocks
+- [ ] **Segment 1.3.3**: Implement ride configuration DSL
+    - Create `RideBuilder` class
+    - Implement `ride { }` builder
+    - Support `segment()` references and `parallel { }` blocks
+    - Add `environment { }` and `onFailure { }` blocks
     - Write DSL tests
 
-- [ ] **Task 1.3.4**: Implement settings DSL (`kite.settings.kts`)
-    - Create `settings { }` DSL builder
-    - Support directory configuration
-    - Support environment variables
-    - Support parallel execution defaults
-    - Write DSL tests
-
-- [ ] **Task 1.3.5**: Create DSL evaluation engine
-    - Load and compile `.kts` files
-    - Extract task/config definitions
-    - Handle script dependencies
-    - Provide helpful error messages
+- [ ] **Segment 1.3.4**: Implement file discovery
+    - Create `FileDiscovery` class in `kite-dsl`
+    - Implement `.kite/segments/*.kite.kts` scanner
+    - Implement `.kite/rides/*.kite.kts` scanner
+    - Add file watching for hot-reload (optional)
     - Write integration tests
 
 **Deliverables**:
 
-- Core models defined and tested
-- Kotlin scripting engine working
-- Can parse `.tasks.kts` and `.config.kts` files
-- Basic project structure established
+- Working Kotlin scripting engine
+- Segment and ride DSLs functional
+- File discovery and loading complete
 
 ---
 
-## Phase 2: Task Graph & Execution Engine (Weeks 3-4)
+## Phase 2: Segment Graph & Execution Engine (Weeks 3-4)
 
-**Goal**: Build task scheduling, dependency resolution, and basic execution
+**Goal**: Build the execution engine that schedules and runs segments
 
-### Epic 2.1: Task Graph Construction
-
-**Story Points**: 13 | **Duration**: 4 days
-
-- [ ] **Task 2.1.1**: Implement task registry
-    - Create `TaskRegistry` to store all defined tasks
-    - Support task lookup by name
-    - Support module-namespaced tasks (e.g., `app:build`)
-    - Write unit tests
-
-- [ ] **Task 2.1.2**: Implement dependency resolution
-    - Create `DependencyResolver`
-    - Build directed acyclic graph (DAG) from tasks
-    - Detect circular dependencies
-    - Write unit tests with various dependency scenarios
-
-- [ ] **Task 2.1.3**: Implement topological sort
-    - Sort tasks in execution order
-    - Handle multiple valid orderings
-    - Write unit tests
-
-- [ ] **Task 2.1.4**: Identify parallelizable tasks
-    - Analyze DAG to find independent tasks
-    - Group tasks by execution level
-    - Support `parallel { }` blocks from config
-    - Write unit tests
-
-- [ ] **Task 2.1.5**: Task graph validation
-    - Validate all referenced tasks exist
-    - Check for cycles
-    - Verify conditional task dependencies
-    - Provide clear error messages
-    - Write integration tests
-
-### Epic 2.2: Task Scheduler
+### Epic 2.1: Segment Graph Construction
 
 **Story Points**: 8 | **Duration**: 3 days
 
-- [ ] **Task 2.2.1**: Implement sequential scheduler
-    - Execute tasks in topological order
-    - Handle task failures (stop on error)
-    - Track execution state
+- [ ] **Segment 2.1.1**: Implement DAG builder
+    - Create `SegmentGraph` class
+    - Implement dependency resolution algorithm
+    - Detect and report circular dependencies
+    - Build adjacency list representation
+    - Write unit tests with various graph topologies
+
+- [ ] **Segment 2.1.2**: Implement topological sort
+    - Implement Kahn's algorithm for topological sorting
+    - Handle parallel execution groups
+    - Calculate execution levels (for visualization)
     - Write unit tests
 
-- [ ] **Task 2.2.2**: Implement parallel scheduler
-    - Use Kotlin coroutines for parallelism
-    - Respect `maxConcurrency` setting
-    - Execute independent tasks in parallel
-    - Handle failures (continue others or stop all)
-    - Write unit tests
+- [ ] **Segment 2.1.3**: Implement graph validation
+    - Validate all segment references exist
+    - Check for unreachable segments
+    - Verify no self-dependencies
+    - Validate parallel block constraints
+    - Write validation tests
 
-- [ ] **Task 2.2.3**: Implement task timeout handling
-    - Add timeout support using coroutines
-    - Kill processes that exceed timeout
-    - Trigger `onTimeout` callbacks
-    - Write unit tests
+**Deliverables**:
 
-- [ ] **Task 2.2.4**: Implement retry logic
-    - Retry failed tasks based on `maxRetries`
-    - Respect `retryDelay` settings
-    - Only retry on specified exceptions
-    - Write unit tests
+- Segment graph data structure
+- Topological sort algorithm
+- Comprehensive validation
+
+---
+
+### Epic 2.2: Segment Scheduler
+
+**Story Points**: 10 | **Duration**: 4 days
+
+- [ ] **Segment 2.2.1**: Implement sequential scheduler
+    - Create `SegmentScheduler` interface
+    - Implement `SequentialScheduler`
+    - Execute segments in topological order
+    - Handle segment skipping (conditions)
+    - Write tests
+
+- [ ] **Segment 2.2.2**: Implement parallel scheduler
+    - Implement `ParallelScheduler` using coroutines
+    - Add `maxConcurrency` support with Semaphore
+    - Implement parallel block execution
+    - Handle failure modes (fail-fast vs continue)
+    - Write concurrency tests
+
+- [ ] **Segment 2.2.3**: Implement execution tracking
+    - Create `ExecutionTracker` for monitoring progress
+    - Track segment states (pending, running, complete, failed)
+    - Implement execution time measurement
+    - Add segment result aggregation
+    - Write tests
+
+**Deliverables**:
+
+- Sequential and parallel schedulers
+- Execution tracking infrastructure
+- Thread-safe concurrent execution
+
+---
 
 ### Epic 2.3: Basic Execution Runtime
 
 **Story Points**: 8 | **Duration**: 3 days
 
-- [ ] **Task 2.3.1**: Implement process execution
-    - Create `ProcessExecutor` for running commands
+- [ ] **Segment 2.3.1**: Implement process executor
+    - Create `ProcessExecutor` class in `kite-runtime`
+    - Implement `exec()` function with command execution
+    - Add timeout support using `ProcessHandle`
     - Capture stdout/stderr
-    - Handle process exit codes
-    - Support environment variables
-    - Write unit tests
+  - Write tests with mock processes
 
-- [ ] **Task 2.3.2**: Implement task execution context
-    - Provide `context` object to tasks
-    - Make CI platform info available
-    - Provide artifact manager
-    - Write unit tests
-
-- [ ] **Task 2.3.3**: Implement basic logging
-    - Console output for task execution
-    - Task start/finish/failure messages
-    - Execution time tracking
+- [ ] **Segment 2.3.2**: Implement segment execution context
+    - Populate `ExecutionContext` from environment
+    - Add Git information detection (branch, SHA)
+    - Implement context isolation per segment
     - Write tests
 
-- [ ] **Task 2.3.4**: Implement condition evaluation
-    - Evaluate task `condition` lambda
-    - Skip tasks when condition is false
-    - Log skipped tasks
-    - Write unit tests
+- [ ] **Segment 2.3.3**: Implement basic error handling
+    - Add try-catch around segment execution
+    - Implement retry logic with exponential backoff
+    - Add `onFailure` callback support
+    - Write error handling tests
 
 **Deliverables**:
 
-- Task graph construction working
-- Sequential and parallel execution functional
-- Basic task execution with timeout and retry
-- Simple logging to console
+- Process execution capability
+- Execution context population
+- Basic error handling and retries
 
 ---
 
 ## Phase 3: CLI & File Discovery (Weeks 5-6)
 
-**Goal**: Build command-line interface and file discovery system
+**Goal**: Build the command-line interface
 
 ### Epic 3.1: CLI Framework
 
-**Story Points**: 13 | **Duration**: 4 days
-
-- [ ] **Task 3.1.1**: Implement main CLI entry point
-    - Set up Clikt command structure
-    - Parse command-line arguments
-    - Handle `--help`, `--version`
-    - Write tests
-
-- [ ] **Task 3.1.2**: Implement `run` command
-    - `kite run --config <name>` - run with config
-    - `kite run <task1> <task2>` - run specific tasks
-    - `--debug` flag for verbose logging
-    - `--dry-run` flag to show execution plan
-    - Write tests
-
-- [ ] **Task 3.1.3**: Implement `tasks` command
-    - `kite tasks` - list all available tasks
-    - Show descriptions
-    - Filter by module
-    - Write tests
-
-- [ ] **Task 3.1.4**: Implement `configs` command
-    - `kite configs` - list all available configs
-    - Show config descriptions
-    - Write tests
-
-- [ ] **Task 3.1.5**: Implement `graph` command
-    - `kite graph --config <name>` - visualize task graph
-    - Show dependencies
-    - Show parallel execution groups
-    - ASCII art visualization
-    - Write tests
-
-- [ ] **Task 3.1.6**: Implement error handling and user feedback
-    - Clear error messages
-    - Suggestions for common mistakes
-    - Exit codes (0 = success, 1 = failure)
-    - Write tests
-
-### Epic 3.2: File Discovery System
-
 **Story Points**: 8 | **Duration**: 3 days
 
-- [ ] **Task 3.2.1**: Implement task file discovery
-    - Scan `.kite/tasks/` directory
-    - Find all `*.tasks.kts` files
-    - Support subdirectories
-    - Cache compilation results
+- [ ] **Segment 3.1.1**: Set up Clikt CLI structure
+    - Create main CLI class with Clikt
+    - Define command hierarchy: `ride`, `run`, `segments`, `rides`, `graph`
+    - Add global options: `--debug`, `--dry-run`, `--verbose`
+    - Implement help text and usage examples
+    - Write CLI tests
+
+- [ ] **Segment 3.1.2**: Implement `ride` command
+    - `kite ride <name>` - Execute named ride
+    - Load ride configuration from `.kite/rides/<name>.kite.kts`
+    - Display progress during execution
+    - Show summary at completion
+    - Write integration tests
+
+- [ ] **Segment 3.1.3**: Implement `run` command
+    - `kite run <segment1> <segment2>...` - Execute specific segments
+    - Build minimal graph from specified segments
+    - Support direct segment execution without ride
     - Write tests
 
-- [ ] **Task 3.2.2**: Implement config file discovery
-    - Scan `.kite/configs/` directory
-    - Find all `*.config.kts` files
-    - Load config by name
+- [ ] **Segment 3.1.4**: Implement listing commands
+    - `kite segments` - List all available segments
+    - `kite rides` - List all available rides
+    - Format output nicely (table format)
+    - Add `--json` flag for machine-readable output
     - Write tests
-
-- [ ] **Task 3.2.3**: Implement settings loading
-    - Look for `.kite/kite.settings.kts`
-    - Apply default settings if not found
-    - Merge with command-line options
-    - Write tests
-
-- [ ] **Task 3.2.4**: Implement workspace detection
-    - Find project root (look for `.kite/` directory)
-    - Support running from subdirectories
-    - Write tests
-
-### Epic 3.3: Parallel Execution Implementation
-
-**Story Points**: 8 | **Duration**: 3 days
-
-- [ ] **Task 3.3.1**: Implement parallel process spawning
-    - Spawn separate processes for parallel tasks
-    - Use Kotlin coroutines for coordination
-    - Respect `maxConcurrency` limit
-    - Write tests
-
-- [ ] **Task 3.3.2**: Implement process isolation
-    - Separate stdout/stderr per task
-    - Independent environment variables
-    - Write tests
-
-- [ ] **Task 3.3.3**: Implement parallel failure handling
-    - Option to continue on failure
-    - Option to stop all on first failure
-    - Collect and report all failures
-    - Write tests
-
-- [ ] **Task 3.3.4**: Performance optimization
-    - Efficient coroutine dispatching
-    - Resource monitoring
-    - Write performance tests
 
 **Deliverables**:
 
-- Functional CLI with all commands
-- File discovery working
-- Parallel execution fully implemented
-- Can run complete pipelines
+- Complete CLI with all commands
+- User-friendly output formatting
+- Help documentation
+
+---
+
+### Epic 3.2: File Discovery & Loading
+
+**Story Points**: 5 | **Duration**: 2 days
+
+- [ ] **Segment 3.2.1**: Implement segment discovery
+    - Scan `.kite/segments/` directory
+    - Compile all `*.kite.kts` files
+    - Build segment registry (name -> Segment)
+    - Cache compiled scripts
+    - Write discovery tests
+
+- [ ] **Segment 3.2.2**: Implement ride discovery
+    - Scan `.kite/rides/` directory
+    - Load ride configurations
+    - Validate segment references
+    - Write tests
+
+- [ ] **Segment 3.2.3**: Implement settings loading
+    - Load `.kite/settings.kite.kts` if present
+    - Apply global configuration
+    - Merge with ride-specific settings
+    - Write tests
+
+**Deliverables**:
+
+- Automatic file discovery
+- Script compilation and caching
+- Settings management
+
+---
+
+### Epic 3.3: Parallel Execution
+
+**Story Points**: 8 | **Duration**: 3 days
+
+- [ ] **Segment 3.3.1**: Implement process-level parallelism
+    - Spawn separate OS processes for parallel segments
+    - Manage process lifecycle (start, monitor, terminate)
+    - Implement process pool with `maxConcurrency`
+    - Write tests
+
+- [ ] **Segment 3.3.2**: Implement log multiplexing
+    - Capture per-segment stdout/stderr
+    - Write separate log files: `logs/<segment-name>.log`
+    - Implement console output modes (interleaved, sequential, summary)
+    - Write tests
+
+- [ ] **Segment 3.3.3**: Add dry-run mode
+    - Implement `--dry-run` flag
+    - Display execution plan without running
+    - Show estimated times and resource usage
+    - Write tests
+
+**Deliverables**:
+
+- Parallel process execution
+- Per-segment logging
+- Dry-run visualization
 
 ---
 
 ## Phase 4: Platform Adapters (Week 7)
 
-**Goal**: Implement CI platform integrations
+**Goal**: Detect CI platform and populate execution context
 
 ### Epic 4.1: Platform Adapter Framework
 
 **Story Points**: 5 | **Duration**: 2 days
 
-- [ ] **Task 4.1.1**: Define platform adapter interface
-    - `detectPlatform()` method
-    - `getEnvironmentInfo()` method
-    - `getBranch()`, `getCommit()`, `getMRNumber()` methods
-    - Write interface tests
-
-- [ ] **Task 4.1.2**: Implement base adapter
-    - Common functionality for all platforms
-    - Environment variable reading
+- [ ] **Segment 4.1.1**: Create platform detection system
+    - Implement `PlatformDetector` class
+    - Check environment variables to detect platform
+    - Return appropriate adapter
     - Write tests
 
-### Epic 4.2: GitLab CI Adapter
-
-**Story Points**: 5 | **Duration**: 2 days
-
-- [ ] **Task 4.2.1**: Implement GitLab CI detection
-    - Check for `CI_SERVER_NAME=GitLab`
-    - Implement `detectPlatform()`
-    - Write tests
-
-- [ ] **Task 4.2.2**: Implement GitLab environment parsing
-    - Parse `CI_COMMIT_BRANCH`, `CI_COMMIT_SHA`
-    - Parse `CI_MERGE_REQUEST_*` variables
-    - Detect if MR is labeled as release
-    - Write tests
-
-- [ ] **Task 4.2.3**: Integration testing
-    - Test with GitLab CI environment variables
-    - Verify context population
-    - Write integration tests
-
-### Epic 4.3: GitHub Actions Adapter
-
-**Story Points**: 5 | **Duration**: 2 days
-
-- [ ] **Task 4.3.1**: Implement GitHub Actions detection
-    - Check for `GITHUB_ACTIONS=true`
-    - Implement `detectPlatform()`
-    - Write tests
-
-- [ ] **Task 4.3.2**: Implement GitHub environment parsing
-    - Parse `GITHUB_REF`, `GITHUB_SHA`
-    - Parse PR information
-    - Check PR labels
-    - Write tests
-
-- [ ] **Task 4.3.3**: Integration testing
-    - Test with GitHub Actions environment variables
-    - Verify context population
-    - Write integration tests
-
-### Epic 4.4: Local Adapter
-
-**Story Points**: 3 | **Duration**: 1 day
-
-- [ ] **Task 4.4.1**: Implement local detection
-    - Default when no CI detected
-    - Write tests
-
-- [ ] **Task 4.4.2**: Implement local environment parsing
-    - Use git commands for branch/commit
-    - Mark as local platform
+- [ ] **Segment 4.1.2**: Implement adapter registry
+    - Register all platform adapters
+    - Support custom/plugin adapters
+    - Priority-based detection
     - Write tests
 
 **Deliverables**:
 
-- Platform adapters for GitLab CI, GitHub Actions, and Local
+- Platform detection system
+- Adapter registry
+
+---
+
+### Epic 4.2: CI Platform Adapters
+
+**Story Points**: 10 | **Duration**: 4 days
+
+- [ ] **Segment 4.2.1**: Implement GitLab CI adapter
+    - Read GitLab CI environment variables
+    - Populate context: branch, commit SHA, MR number, job ID
+    - Detect release MRs from labels
+    - Write tests
+
+- [ ] **Segment 4.2.2**: Implement GitHub Actions adapter
+    - Read GitHub Actions environment variables
+    - Populate context: branch, commit SHA, PR number, workflow
+    - Detect release PRs from labels
+    - Write tests
+
+- [ ] **Segment 4.2.3**: Implement Local adapter
+    - Use Git commands to get branch/SHA
+    - Set `isLocal = true`
+    - Use current working directory as workspace
+    - Write tests
+
+- [ ] **Segment 4.2.4**: Implement Generic adapter
+    - Fallback for unknown CI platforms
+    - Read standard environment variables (CI, BUILD_ID, etc.)
+    - Write tests
+
+**Deliverables**:
+
+- 4 platform adapters (GitLab, GitHub, Local, Generic)
+- Full test coverage
 - Automatic platform detection
-- Context properly populated based on platform
 
 ---
 
 ## Phase 5: Built-in Helpers & Features (Week 8)
 
-**Goal**: Implement helper functions and additional features
+**Goal**: Implement built-in helper functions
 
 ### Epic 5.1: Command Execution Helpers
 
 **Story Points**: 5 | **Duration**: 2 days
 
-- [ ] **Task 5.1.1**: Implement `exec()` helper
-    - Execute command with arguments
-    - Throw on non-zero exit
-    - Return stdout/stderr
+- [ ] **Segment 5.1.1**: Implement exec functions
+    - `exec(command, args...)` - throw on failure
+    - `execOrNull(command, args...)` - return null on failure
+    - `shell(command)` - execute shell command
+    - `execAndCapture()` - capture output
     - Write tests
 
-- [ ] **Task 5.1.2**: Implement `execOrNull()` helper
-    - Execute command
-    - Return null on failure
+- [ ] **Segment 5.1.2**: Add advanced exec options
+    - Support working directory
+    - Support environment variables
+    - Support timeout per command
     - Write tests
 
-- [ ] **Task 5.1.3**: Implement `shell()` helper
-    - Execute shell command (bash/sh)
-    - Support pipes and redirects
-    - Write tests
+**Deliverables**:
 
-### Epic 5.2: File Operations Helpers
+- Complete command execution API
+- Tests for all execution modes
+
+---
+
+### Epic 5.2: File Operation Helpers
 
 **Story Points**: 5 | **Duration**: 2 days
 
-- [ ] **Task 5.2.1**: Implement file helpers
+- [ ] **Segment 5.2.1**: Implement basic file operations
     - `copy()`, `move()`, `delete()`
     - `createDirectory()`
+  - `zipFiles()`, `unzipFiles()`
     - Write tests
 
-- [ ] **Task 5.2.2**: Implement archive helpers
-    - `zipFiles()` - create zip archive
-    - `unzipFiles()` - extract zip archive
+- [ ] **Segment 5.2.2**: Implement file I/O
+    - File reading: `file.readText()`, `file.readLines()`
+    - File writing: `file.writeText()`, `file.appendText()`
     - Write tests
+
+**Deliverables**:
+
+- File operation helpers
+- Tests with temporary files
+
+---
 
 ### Epic 5.3: Artifact Management
 
 **Story Points**: 8 | **Duration**: 3 days
 
-- [ ] **Task 5.3.1**: Implement ArtifactManager
-    - Store artifacts by name
-    - Retrieve artifacts
-    - Track artifact dependencies
+- [ ] **Segment 5.3.1**: Implement ArtifactManager
+    - Create `ArtifactManager` class
+    - Store artifacts in `.kite/artifacts/`
+    - `put(name, file)`, `get(name)`, `has(name)`, `list()`
     - Write tests
 
-- [ ] **Task 5.3.2**: Implement artifact lifecycle
-    - Register artifacts in `outputs { }`
-    - Make available to dependent tasks
-    - Clean up after pipeline
-    - Write tests
+- [ ] **Segment 5.3.2**: Integrate with segment execution
+    - Call `outputs { }` block after segment execution
+    - Make artifacts available to dependent segments
+    - Write integration tests
 
-- [ ] **Task 5.3.3**: Implement artifact copying
-    - Copy artifacts to designated locations
-    - Support glob patterns
-    - Write tests
-
-### Epic 5.4: Enhanced Logging
-
-**Story Points**: 8 | **Duration**: 3 days
-
-- [ ] **Task 5.4.1**: Implement structured logging
-    - JSON log format option
-    - Human-readable console format
-    - Write tests
-
-- [ ] **Task 5.4.2**: Implement per-task logs
-    - Create log file per task
-    - Stream to console in real-time
-    - Write tests
-
-- [ ] **Task 5.4.3**: Implement log configuration
-    - `perTaskLogs` setting
-    - `consoleOutput` modes: interleaved, sequential, summary-only
-    - Write tests
-
-- [ ] **Task 5.4.4**: Implement dry-run visualization
-    - Show execution plan
-    - Estimate execution time
-    - Show resource usage
+- [ ] **Segment 5.3.3**: Implement artifact cleanup
+    - Clean up artifacts after ride completion
+    - Add `--keep-artifacts` flag to preserve them
     - Write tests
 
 **Deliverables**:
 
-- Helper functions available in tasks
-- Artifact management working
-- Enhanced logging with per-task logs
-- Dry-run mode showing execution plan
+- Working artifact management
+- Integration with segment execution
+- Cleanup mechanism
+
+---
+
+### Epic 5.4: Logging System
+
+**Story Points**: 5 | **Duration**: 2 days
+
+- [ ] **Segment 5.4.1**: Implement structured logging
+    - Create `Logger` interface
+    - Implement console logger with levels (info, debug, warn, error)
+    - Implement JSON logger for machine parsing
+    - Write tests
+
+- [ ] **Segment 5.4.2**: Integrate logging throughout
+    - Add logging to execution engine
+    - Add logging to all helpers
+    - Add `--verbose` and `--quiet` flags
+    - Write tests
+
+**Deliverables**:
+
+- Structured logging system
+- Integration throughout codebase
 
 ---
 
 ## Phase 6: Documentation & Examples (Week 9)
 
-**Goal**: Create comprehensive documentation and example projects
+**Goal**: Create user documentation and examples
 
 ### Epic 6.1: User Documentation
 
-**Story Points**: 13 | **Duration**: 4 days
+**Story Points**: 8 | **Duration**: 3 days
 
-- [ ] **Task 6.1.1**: Write getting started guide
+- [ ] **Segment 6.1.1**: Write Getting Started guide
     - Installation instructions
-    - First pipeline tutorial
-    - Common patterns
+  - First ride tutorial
+  - Basic concepts explanation
+  - Publish to `docs/getting-started.md`
 
-- [ ] **Task 6.1.2**: Write DSL reference
-    - Task definition syntax
-    - Configuration syntax
-    - All available options
-    - Examples for each feature
+- [ ] **Segment 6.1.2**: Write CLI reference
+    - Document all commands with examples
+    - Document all flags and options
+    - Publish to `docs/cli-reference.md`
 
-- [ ] **Task 6.1.3**: Write CLI reference
-    - All commands documented
-    - All flags explained
-    - Usage examples
+- [ ] **Segment 6.1.3**: Write DSL reference
+    - Document all DSL functions
+    - Show examples for each feature
+    - Publish to `docs/dsl-reference.md`
 
-- [ ] **Task 6.1.4**: Write best practices guide
-    - Task organization
-    - Configuration strategies
-    - Performance tips
-    - Troubleshooting
+**Deliverables**:
 
-- [ ] **Task 6.1.5**: Write platform integration guides
-    - GitLab CI setup
-    - GitHub Actions setup
-    - Local development workflows
+- Comprehensive user documentation
+- Published to `docs/` directory
+
+---
 
 ### Epic 6.2: Example Projects
 
 **Story Points**: 8 | **Duration**: 3 days
 
-- [ ] **Task 6.2.1**: Create Android example
-    - Complete Android app pipeline
-    - Build, test, lint, deploy tasks
-    - Multiple configs (MR, release, local)
-    - Document in README
+- [ ] **Segment 6.2.1**: Create Android example
+    - Sample Android project with Kite
+    - MR ride: build + parallel tests
+    - Release ride: build + integration tests + deploy
+    - Publish to `examples/android/`
 
-- [ ] **Task 6.2.2**: Create backend/server example
-    - Docker-based pipeline
-    - Build, test, deploy
-    - Document in README
+- [ ] **Segment 6.2.2**: Create backend example
+    - Sample Kotlin backend project
+    - Build, test, Docker build, deploy ride
+    - Publish to `examples/backend/`
 
-- [ ] **Task 6.2.3**: Create monorepo example
-    - Multi-module project
-    - Coordinated builds
-    - Document in README
-
-### Epic 6.3: API Documentation
-
-**Story Points**: 5 | **Duration**: 2 days
-
-- [ ] **Task 6.3.1**: Generate KDoc documentation
-    - Document all public APIs
-    - Generate HTML docs
-    - Publish to GitHub Pages
-
-- [ ] **Task 6.3.2**: Write plugin development guide
-    - How to create plugins
-    - API reference
-    - Publishing guide
+- [ ] **Segment 6.2.3**: Create monorepo example
+    - Multi-module project example
+    - Per-module segments
+    - Full ride orchestration
+    - Publish to `examples/monorepo/`
 
 **Deliverables**:
 
-- Complete user documentation
-- 3+ example projects
-- Published API docs
+- 3 complete example projects
+- README for each example
+
+---
+
+### Epic 6.3: API Documentation
+
+**Story Points**: 3 | **Duration**: 1 day
+
+- [ ] **Segment 6.3.1**: Generate KDoc
+    - Add KDoc comments to all public APIs
+    - Generate HTML documentation with Dokka
+    - Publish to `docs/api/`
+
+**Deliverables**:
+
+- Complete API documentation
+- Published HTML docs
 
 ---
 
 ## Phase 7: Testing & Refinement (Week 10)
 
-**Goal**: Comprehensive testing, bug fixes, and polish
+**Goal**: Comprehensive testing and bug fixes
 
 ### Epic 7.1: Integration Testing
 
-**Story Points**: 13 | **Duration**: 4 days
+**Story Points**: 10 | **Duration**: 4 days
 
-- [ ] **Task 7.1.1**: Create end-to-end test suite
-    - Test complete pipelines
-    - Test all CLI commands
+- [ ] **Segment 7.1.1**: Write end-to-end tests
+    - Test complete ride execution
     - Test error scenarios
-    - Write tests
+  - Test parallel execution
+  - Test artifact passing
 
-- [ ] **Task 7.1.2**: Test platform adapters
-    - Test with real CI environments
-    - Verify GitLab CI integration
-    - Verify GitHub Actions integration
-    - Write tests
+- [ ] **Segment 7.1.2**: Write CLI integration tests
+    - Test all CLI commands
+    - Test flag combinations
+    - Test error handling
 
-- [ ] **Task 7.1.3**: Performance testing
-    - Measure startup time
-    - Measure execution overhead
-    - Optimize bottlenecks
-    - Write performance benchmarks
+- [ ] **Segment 7.1.3**: Write platform adapter tests
+    - Test in Docker with simulated CI env vars
+    - Test local execution
+    - Test context population
 
-- [ ] **Task 7.1.4**: Load testing
-    - Test with large pipelines (100+ tasks)
-    - Test with high parallelism
-    - Identify and fix issues
+**Deliverables**:
+
+- Comprehensive integration test suite
+- > 80% code coverage
+
+---
 
 ### Epic 7.2: Bug Fixes & Polish
 
 **Story Points**: 8 | **Duration**: 3 days
 
-- [ ] **Task 7.2.1**: Fix discovered bugs
-    - Triage and prioritize
-    - Fix critical issues
-    - Write regression tests
+- [ ] **Segment 7.2.1**: Fix identified bugs
+    - Review and fix reported issues
+    - Add regression tests
 
-- [ ] **Task 7.2.2**: Improve error messages
-    - Make errors more helpful
-    - Add suggestions
-    - Test error scenarios
+- [ ] **Segment 7.2.2**: Performance optimization
+    - Profile startup time
+    - Optimize script compilation
+    - Reduce memory footprint
 
-- [ ] **Task 7.2.3**: Performance optimization
-    - Optimize hot paths
-    - Reduce memory usage
-    - Improve startup time
-
-- [ ] **Task 7.2.4**: Polish user experience
-    - Improve CLI output
+- [ ] **Segment 7.2.3**: UX improvements
+    - Improve error messages
     - Better progress indicators
-    - Consistent formatting
+  - Colored output
+
+**Deliverables**:
+
+- All known bugs fixed
+- Performance targets met
+- Polished UX
+
+---
 
 ### Epic 7.3: Release Preparation
 
 **Story Points**: 5 | **Duration**: 2 days
 
-- [ ] **Task 7.3.1**: Prepare release artifacts
+- [ ] **Segment 7.3.1**: Version bump to 1.0.0
+    - Update version in build files
+    - Update CHANGELOG
+    - Create release notes
+
+- [ ] **Segment 7.3.2**: Build distribution artifacts
     - Build executable JAR
-    - Create installation scripts
-    - Test on different platforms (macOS, Linux)
+  - Create Homebrew formula
+  - Create Docker image
+  - Test installations
 
-- [ ] **Task 7.3.2**: Write release notes
-    - Document features
-    - Known limitations
-    - Upgrade guide
-
-- [ ] **Task 7.3.3**: Set up distribution
-    - GitHub Releases
-    - Maven Central (optional)
-    - Docker image
+- [ ] **Segment 7.3.3**: Tag release
+    - Create v1.0.0 tag
+    - Push to GitHub
+    - Create GitHub release
 
 **Deliverables**:
 
-- Fully tested system
-- All bugs fixed
-- Release artifacts ready
-- v1.0.0-alpha or v0.1.0 ready to ship
+- v1.0.0 release ready
+- Distribution artifacts published
 
 ---
 
-## Phase 8 (Optional): Plugin System MVP (Weeks 11-12)
+## Phase 8: Plugin System MVP (Weeks 11-12) - Optional
 
-**Goal**: Implement plugin architecture and one example plugin
+**Goal**: Implement basic plugin system
 
 ### Epic 8.1: Plugin Framework
 
-**Story Points**: 13 | **Duration**: 4 days
+**Story Points**: 10 | **Duration**: 4 days
 
-- [ ] **Task 8.1.1**: Implement KitePlugin interface
-    - Define plugin lifecycle
+- [ ] **Segment 8.1.1**: Define plugin API
+    - Create `KitePlugin` interface
+    - Define `PluginContext` with registration methods
+    - Write plugin API documentation
+
+- [ ] **Segment 8.1.2**: Implement plugin loading
+    - ServiceLoader-based discovery
+    - Plugin initialization
     - Plugin configuration
-    - Write interface
 
-- [ ] **Task 8.1.2**: Implement PluginContext
-    - Register extensions
-    - Register helpers
-    - Register task types
-    - Write implementation
-
-- [ ] **Task 8.1.3**: Implement ServiceLoader discovery
-    - Scan classpath for plugins
-    - Load plugin classes
-    - Initialize plugins
+- [ ] **Segment 8.1.3**: Enable plugin DSL extensions
+    - Allow plugins to register helpers
+    - Allow plugins to extend DSL
     - Write tests
 
-- [ ] **Task 8.1.4**: Implement plugin configuration
-    - Read from `kite.settings.kts`
-    - Pass config to plugins
-    - Write tests
+**Deliverables**:
+
+- Working plugin system
+- Plugin API documentation
+
+---
 
 ### Epic 8.2: Example Plugin (Play Store)
 
-**Story Points**: 13 | **Duration**: 4 days
+**Story Points**: 8 | **Duration**: 3 days
 
-- [ ] **Task 8.2.1**: Create playstore plugin project
-    - Set up build
-    - Add Google Play API dependency
-    - Configure ServiceLoader
-
-- [ ] **Task 8.2.2**: Implement Play Store DSL
-    - `playStore { }` block
-    - Upload APK functionality
-    - Release notes support
+- [ ] **Segment 8.2.1**: Create Play Store plugin
+    - Implement `PlayStorePlugin`
+    - Add DSL extensions
+    - Integrate with Google Play API
     - Write tests
 
-- [ ] **Task 8.2.3**: Implement authentication
-    - Service account JSON
-    - API client initialization
-    - Write tests
+- [ ] **Segment 8.2.2**: Document plugin
+    - Write plugin usage guide
+    - Create example project
+    - Publish to separate repo
 
-- [ ] **Task 8.2.4**: Document plugin
-    - Usage examples
-    - Configuration guide
-    - API reference
+**Deliverables**:
+
+- Working Play Store plugin
+- Plugin documentation
+
+---
 
 ### Epic 8.3: Plugin Testing
 
 **Story Points**: 5 | **Duration**: 2 days
 
-- [ ] **Task 8.3.1**: Test plugin loading
-    - Verify discovery
-    - Verify initialization
-    - Write tests
-
-- [ ] **Task 8.3.2**: Integration test plugin usage
-    - Use plugin in real pipeline
-    - Verify DSL works
-    - Write tests
+- [ ] **Segment 8.3.1**: Test plugin system
+    - Test plugin loading
+    - Test plugin isolation
+    - Test plugin errors
 
 **Deliverables**:
 
-- Plugin system functional
-- One working example plugin (Play Store)
+- Tested plugin system
 - Plugin development guide
 
 ---
 
 ## Success Criteria
 
-### MVP (Phases 1-7)
+### MVP (Phase 1-7)
 
-- [ ] Can define tasks in `.tasks.kts` files
-- [ ] Can define configs in `.config.kts` files
-- [ ] CLI can run pipelines
-- [ ] Sequential execution works
-- [ ] Parallel execution works with proper resource limits
+- [ ] Can define segments in `.kite.kts` files
+- [ ] Can define rides with sequential and parallel flows
+- [ ] Can execute rides locally and in CI
 - [ ] GitLab CI and GitHub Actions integration works
-- [ ] Local execution works
-- [ ] Timeout and retry work
-- [ ] Artifact management works
-- [ ] Logging is clear and helpful
-- [ ] Documentation is complete
-- [ ] At least one example project works end-to-end
-- [ ] Startup time < 1 second
-- [ ] Execution overhead < 5%
+- [ ] Built-in helpers (exec, file ops) functional
+- [ ] Artifact passing between segments works
+- [ ] Documentation complete and published
+- [ ] 3 example projects available
+- [ ] Performance: <1s startup, <100ms overhead per segment
+- [ ] Test coverage: >80%
 
-### Phase 8 (Plugin System)
+### With Plugins (Phase 8)
 
-- [ ] Plugin interface defined
-- [ ] Plugin discovery works
-- [ ] At least one plugin works (Play Store)
+- [ ] Plugin system functional
+- [ ] At least one official plugin (Play Store) available
 - [ ] Plugin development guide published
 
 ---
@@ -774,77 +778,85 @@ upon the previous, delivering incremental value.
 
 ### Technical Risks
 
-1. **Kotlin Scripting Complexity**
-    - **Risk**: Script compilation/execution may be slow or unstable
-    - **Mitigation**: Cache compiled scripts, implement timeout fallbacks
+1. **Kotlin Scripting Performance**:
+    - *Mitigation*: Implement aggressive caching, lazy loading
 
-2. **Parallel Execution Edge Cases**
-    - **Risk**: Race conditions, resource exhaustion
-    - **Mitigation**: Extensive testing, conservative defaults, user controls
+2. **Parallel Execution Complexity**:
+    - *Mitigation*: Use well-tested coroutines library, extensive testing
 
-3. **Platform Detection Reliability**
-    - **Risk**: CI platforms change environment variables
-    - **Mitigation**: Fallback detection, explicit configuration option
+3. **Platform Detection Reliability**:
+    - *Mitigation*: Fallback to generic adapter, allow manual override
 
 ### Schedule Risks
 
-1. **Scope Creep**
-    - **Risk**: Adding too many features delays MVP
-    - **Mitigation**: Strict adherence to MVP scope, Phase 2 for extras
+1. **Scope Creep**:
+    - *Mitigation*: Stick to MVP features, defer Phase 8 if needed
 
-2. **Testing Time**
-    - **Risk**: Bugs found late in development
-    - **Mitigation**: Write tests alongside features, continuous integration
-
----
-
-## Dependencies Between Epics
-
-```
-Phase 1 (Foundation)
-  └── Phase 2 (Execution Engine)
-      ├── Phase 3 (CLI)
-      │   └── Phase 4 (Platform Adapters)
-      │       └── Phase 5 (Helpers)
-      │           └── Phase 6 (Documentation)
-      │               └── Phase 7 (Testing)
-      │                   └── Phase 8 (Plugins - Optional)
-      └── Phase 5 (Helpers - parallel track)
-```
-
----
-
-## Resource Requirements
-
-- **Developers**: 1-2 developers
-- **Time**: 10-12 weeks (MVP), 14-16 weeks (with plugins)
-- **Infrastructure**:
-    - GitHub repository
-    - CI/CD (GitHub Actions)
-    - Documentation hosting (GitHub Pages)
+2. **Integration Issues**:
+    - *Mitigation*: Early integration testing, modular architecture
 
 ---
 
 ## Definition of Done
 
-### Per Task
+### For Segments
 
 - [ ] Code written and reviewed
-- [ ] Unit tests written (>80% coverage)
+- [ ] Unit tests written with >80% coverage
 - [ ] Documentation updated
-- [ ] Integration tests written (if applicable)
-- [ ] Code merged to main branch
+- [ ] No linter errors
 
-### Per Epic
+### For Epics
 
-- [ ] All tasks completed
-- [ ] Epic tested end-to-end
-- [ ] Demo prepared
-- [ ] Documented in user guide
+- [ ] All segments complete
+- [ ] Integration tests pass
+- [ ] Epic deliverables met
 
-### Per Phase
+### For Phases
 
-- [ ] All epics completed
-- [ ] Phase deliverables achieved
-- [ ] Integration testing passed
-- [ ] Demo to stakeholders
+- [ ] All epics complete
+- [ ] Phase deliverables met
+- [ ] Demo/presentation prepared
+
+---
+
+## Timeline Summary
+
+| Phase    | Duration | Cumulative | Status      |
+|----------|----------|------------|-------------|
+| Phase 1  | 2 weeks  | 2 weeks    | (Epic 1.1 ) |
+| Phase 2  | 2 weeks  | 4 weeks    |
+| Phase 3  | 2 weeks  | 6 weeks    |
+| Phase 4  | 1 week   | 7 weeks    |
+| Phase 5  | 1 week   | 8 weeks    |
+| Phase 6  | 1 week   | 9 weeks    |
+| Phase 7  | 1 week   | 10 weeks   |
+| Phase 8* | 2 weeks  | 12 weeks   | Optional    |
+
+\* Phase 8 (Plugin System) is optional for MVP
+
+**Target MVP**: 10 weeks (2.5 months)  
+**With Plugins**: 12 weeks (3 months)
+
+---
+
+## Next Steps
+
+**Current Status**: Epic 1.1 complete, ready to start Epic 1.2
+
+**Immediate Actions**:
+
+1. Begin Epic 1.2: Core Domain Models
+2. Define Segment, ExecutionContext, Ride models
+3. Set up unit testing infrastructure
+
+**This Week**:
+
+- Complete Epic 1.2 (Core Domain Models)
+- Start Epic 1.3 (Kotlin Scripting Integration)
+
+**This Month**:
+
+- Complete Phase 1 (Foundation & Core DSL)
+- Start Phase 2 (Segment Graph & Execution Engine)
+
