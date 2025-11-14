@@ -1,0 +1,36 @@
+build:
+  maxIssues: 0
+
+config:
+  validation: true
+  warningsAsErrors: false
+
+complexity:
+  LongParameterList:
+    functionThreshold: 8
+    constructorThreshold: 10
+  LongMethod:
+    threshold: 60
+  LargeClass:
+    threshold: 600
+  TooManyFunctions:
+    thresholdInFiles: 15
+    thresholdInClasses: 15
+    thresholdInInterfaces: 15
+    thresholdInObjects: 15
+    thresholdInEnums: 15
+
+naming:
+  FunctionNaming:
+    functionPattern: '[a-z][a-zA-Z0-9]*'
+  ClassNaming:
+    classPattern: '[A-Z][a-zA-Z0-9]*'
+  PackageNaming:
+    packagePattern: '[a-z]+(\.[a-z][A-Za-z0-9]*)*'
+
+style:
+  MagicNumber:
+    active: true
+    ignoreNumbers: [ '-1', '0', '1', '2' ]
+  MaxLineLength:
+    maxLineLength: 120
