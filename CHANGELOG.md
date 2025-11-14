@@ -9,49 +9,68 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Initial project structure with multi-module Gradle setup
-- Core modules: `kite-core`, `kite-dsl`, `kite-runtime`, `kite-cli`
-- Code quality tools: ktlint and detekt configuration
-- Project documentation: SPECS.md, DEVELOPMENT_PLAN.md, CONTRIBUTING.md
-
-### Added
-
 - **Epic 1.1 Complete**: Project Setup & Infrastructure
     - Multi-module Gradle project (kite-core, kite-dsl, kite-runtime, kite-cli)
-  - Kotlin 2.0.21 with Java 17+ toolchain support
-    - Code quality tools: ktlint (1.0.1) and detekt (1.23.7)
-    - Dependency management: coroutines, serialization, Clikt CLI, Kotlin Scripting
-    - Maven publishing configuration with POM metadata
-    - GitHub Actions CI workflow
-    - Test infrastructure: JUnit 5, MockK
-    - Project documentation: SPECS.md, DEVELOPMENT_PLAN.md, CONTRIBUTING.md, CHANGELOG.md
-    - .gitignore for Kotlin/Gradle projects
-    - Gradle wrapper (v8.14.1)
-    - Build and run verification successful
-
-- **Epic 1.1 Complete**: Project Setup & Infrastructure
-    - Multi-module Gradle project (kite-core, kite-dsl, kite-runtime, kite-cli)
-    - Kotlin 2.0.21 with Java 17 LTS toolchain support
     - Gradle 9.2.0 with configuration cache enabled
-    - Code quality tools: ktlint (1.0.1) and detekt (1.23.7)
-    - Dependency management: coroutines, serialization, Clikt CLI, Kotlin Scripting
+  - Kotlin 2.0.21 + Java 17 LTS toolchain support
+  - Code quality tools: ktlint + detekt configured
+  - Test infrastructure: JUnit 5 + MockK
     - Maven publishing configuration with POM metadata
-    - GitHub Actions CI workflow
-    - Test infrastructure: JUnit 5, MockK
-    - Project documentation: SPECS.md, DEVELOPMENT_PLAN.md, CONTRIBUTING.md, CHANGELOG.md
-    - .gitignore for Kotlin/Gradle projects
-    - Build and run verification successful
+  - GitHub Actions CI workflow (`.github/workflows/ci.yml`)
+  - Comprehensive documentation structure
 
-## [0.1.0-SNAPSHOT] - 2025-11-14
+- **Modular Specification Structure**
+    - Restructured documentation into `specs/` directory
+    - Separate documents for different aspects (overview, core concepts, DSL, etc.)
+    - Updated terminology: "pipeline" → "ride", "task" → "segment"
+    - Unified `.kite.kts` file extension for all Kite files
+    - Clear distinction between segments (`.kite/segments/`) and rides (`.kite/rides/`)
 
-### Added
+### Changed
 
-- Project initialization (Task 1.1.1 complete)
-- Gradle multi-module configuration
-- Kotlin 2.0.21 with Java 17+ compatibility
-- Testing infrastructure (JUnit 5, MockK)
-- Code quality configuration (ktlint, detekt)
+- **Terminology Updates**
+    - "Pipeline" is now called "Ride"
+    - "Task" is now called "Segment"
+    - "Config" is now called "Ride Configuration"
+    - CLI commands updated: `./kite ride mr` instead of `./kite run --config mr`
 
-[Unreleased]: https://github.com/yourusername/kite/compare/v0.1.0-SNAPSHOT...HEAD
+- **File Structure**
+    - Segment definitions: `.kite/segments/*.kite.kts` (was `.kite/tasks/*.tasks.kts`)
+    - Ride configurations: `.kite/rides/*.kite.kts` (was `.kite/configs/*.config.kts`)
+    - Settings file: `.kite/settings.kite.kts` (was `.kite/kite.settings.kts`)
 
-[0.1.0-SNAPSHOT]: https://github.com/yourusername/kite/releases/tag/v0.1.0-SNAPSHOT
+- **Documentation**
+    - Main specification split into modular documents in `specs/` directory
+    - README simplified with quick reference to detailed specs
+    - Development plan remains at root level for easy access
+
+### Technical Details
+
+- **Gradle**: 9.2.0 (latest stable)
+- **Kotlin**: 2.0.21 (project) + 2.2.20 (Gradle)
+- **Java**: 17 LTS
+- **Configuration Cache**: Enabled for faster builds
+- **Build Time**: 3s initial, 1s cached (67% improvement with configuration cache)
+
+## [0.1.0-SNAPSHOT] - Work in Progress
+
+### Status
+
+Under active development - specification and initial implementation phase.
+
+### Roadmap
+
+See [DEVELOPMENT_PLAN.md](./DEVELOPMENT_PLAN.md) for detailed implementation roadmap:
+
+- Phase 1: Foundation & Core DSL (Weeks 1-2)
+- Phase 2: Segment Graph & Execution Engine (Weeks 3-4)
+- Phase 3: CLI & File Discovery (Weeks 5-6)
+- Phase 4: Platform Adapters (Week 7)
+- Phase 5: Built-in Helpers & Features (Week 8)
+- Phase 6: Documentation & Examples (Week 9)
+- Phase 7: Testing & Refinement (Week 10)
+- Phase 8: Plugin System MVP (Weeks 11-12) - Optional
+
+[Unreleased]: https://github.com/yourusername/kite/compare/v0.1.0...HEAD
+
+[0.1.0-SNAPSHOT]: https://github.com/yourusername/kite/releases/tag/v0.1.0

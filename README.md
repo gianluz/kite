@@ -1,75 +1,87 @@
 # kite
-A Kotlin-based CI task runner for GitHub Actions, GitLab CI, and beyond.
+
+A Kotlin-based CI ride runner for GitHub Actions, GitLab CI, and beyond.
 
 ## Overview
 
-Kite is a modern, type-safe CI/CD task runner that replaces bash scripting and tools like Fastlane with Kotlin. Define
-your build pipeline as modular, testable, and reusable tasks with full IDE support.
+Kite replaces Fastlane and bash scripting in CI/CD with a type-safe, testable Kotlin DSL. Define **segments** (units of
+work) once, compose them into different **rides** (workflows) for different scenarios.
 
-### Key Features
+## Key Terminology
 
-- **Modular Task Definitions**: Define tasks once, reuse across multiple pipeline configurations
-- **Configuration Composition**: Different configs for different scenarios (MR, release, nightly, local)
-- **Internal Parallelization**: Run independent tasks in parallel within a single CI stage/container
-- **Type-Safe DSL**: Full Kotlin with IDE autocomplete, refactoring, and type checking
-- **Local Execution**: Test your CI pipeline locally before pushing
-- **Cross-Platform**: GitLab CI, GitHub Actions, and local development
+- **Ride**: A pipeline/workflow (e.g., "MR Ride", "Release Ride")
+- **Segment**: A single unit of work (e.g., "build", "test", "deploy")
+- **Flow**: Execution order and dependencies of segments
 
-### Quick Example
+## Quick Example
 
 ```kotlin
-// .kite/tasks/build.tasks.kts
-tasks {
-    task("build") {
+// .kite/segments/build.kite.kts
+segments {
+    segment("build") {
         execute { exec("./gradlew", "assembleRelease") }
     }
 }
 
-// .kite/configs/mr.config.kts
-config {
-    pipeline {
-        task("build")
+// .kite/rides/mr.kite.kts
+ride {
+    name = "MR Ride"
+    
+    flow {
+        segment("build")
+        
         parallel {
-            task("unitTest")
-            task("roborazzi")
+            segment("unitTest")
+            segment("lint")
         }
     }
 }
 ```
 
 ```bash
-# Run your pipeline
-./kite run --config mr
+# Run a ride
+./kite ride mr
+
+# Run specific segments
+./kite run build test
+
+# List available rides
+./kite rides
 ```
 
 ## Documentation
 
-**See [SPECS.md](./SPECS.md) for the complete specification**, including:
+**See [specs/](./specs/) for the complete specification**, including:
 
-- Problem statement and design principles
-- Core features and DSL examples (modular tasks, configurations, dependencies)
-- Architecture and components
-- **In-depth parallelization guide**: How Kite works with Gradle, resource management, decision trees, real-world
-  performance examples
-- CI integration for GitLab CI and GitHub Actions
-- Use cases and best practices
-- Testing strategy and timeline
+- [Overview & Problem Statement](./specs/01-overview.md) - What Kite is and why
+- [Core Concepts](./specs/02-core-concepts.md) - Rides, segments, and flows
+- [DSL & Configuration](./specs/03-dsl-configuration.md) - Kotlin DSL syntax
+- Full specifications for execution model, parallelization, plugins, and more
+
+**See [DEVELOPMENT_PLAN.md](./DEVELOPMENT_PLAN.md)** for the implementation roadmap.
 
 ## Development
 
-**See [DEVELOPMENT_PLAN.md](./DEVELOPMENT_PLAN.md) for the detailed development roadmap**, including:
+This project is under active development. Contributions will be welcomed after the initial release.
 
-- 8 phases with epics and individual tasks
-- Story point estimates and durations
-- Dependencies between phases
-- Success criteria and deliverables
-- Risk mitigation strategies
-- Timeline: 10-12 weeks for MVP
+### Prerequisites
 
-## Status
+- JDK 17 or higher (LTS)
+- Kotlin 2.0+
+- Gradle 9.2+ (wrapper included)
 
-🚧 **Work in Progress** - Currently in specification and design phase.
+### Building
+
+```bash
+./gradlew build
+```
+
+### Running
+
+```bash
+./gradlew :kite-cli:run
+```
 
 ## License
 
-See [LICENSE](./LICENSE) for details.
+Apache License 2.0 - see [LICENSE](LICENSE)
