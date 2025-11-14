@@ -60,6 +60,80 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
         - Helper maps for quick lookups
     - Comprehensive tests (59 tests across 4 test files)
 
+- **Epic 2.1 Complete**: Segment Graph Construction
+    - **Task 2.1.1**: DAG Builder
+        - `SegmentGraph` class with adjacency list representation
+        - Dependency resolution algorithm
+        - DFS-based cycle detection
+        - Graph validation (missing dependencies, unreachable segments)
+        - Comprehensive unit tests (24 tests)
+    - **Task 2.1.2**: Topological Sort
+        - `TopologicalSort` class using Kahn's algorithm
+        - Execution level calculation for parallelization
+        - Critical path analysis
+        - Parallelization efficiency metrics
+        - Unit tests (21 tests)
+
+- **Epic 2.2 Complete**: Segment Scheduler
+    - **Task 2.2.1**: Sequential Scheduler
+        - `SegmentScheduler` interface
+        - `SequentialScheduler` implementation
+        - Topological order execution
+        - Dependency checking with cascading skips
+        - Conditional execution support
+        - Duration tracking and exception handling
+        - Unit tests (16 tests)
+    - **Task 2.2.2**: Parallel Scheduler
+        - `ParallelScheduler` using Kotlin coroutines
+        - Semaphore-based concurrency control (configurable maxConcurrency)
+        - Level-by-level parallel execution
+        - ConcurrentHashMap for thread-safe result tracking
+        - Independent segments execute concurrently
+        - Comprehensive concurrency tests (17 tests)
+    - **Results & Tracking**:
+        - `SegmentResult` data class with status, duration, error details
+        - `SchedulerResult` with aggregated statistics
+        - Helper methods: `failedSegments()`, `successfulSegments()`
+        - Beautiful `toString()` formatting with emoji
+
+- **Epic 2.3 Complete**: Basic Execution Runtime
+    - **Task 2.3.1**: Process Executor
+        - `ProcessExecutor` class for external command execution
+        - Timeout support with graceful/forceful termination
+        - Async output capture using coroutines
+        - Working directory and environment variable support
+        - Shell command execution (`sh -c` / `cmd /c`)
+        - Cross-platform (Windows/Unix)
+        - Methods: `execute()`, `executeOrNull()`, `shell()`
+        - Comprehensive tests (19 tests)
+    - **Task 2.3.2**: Execution Context Extensions
+        - `ProcessExecutionProvider` interface for runtime integration
+        - Thread-local context for segment execution
+        - Extension functions on `ExecutionContext`:
+            - `exec()` - execute command, throw on failure
+            - `execOrNull()` - execute command, return null on failure
+            - `shell()` - execute shell commands
+        - `ProcessExecutionResult` data class
+        - `ExecutionContextExtensions.kt` (116 lines)
+
+- **Task 3.1.1 Complete**: CLI Framework Setup
+    - Beautiful CLI interface with Clikt framework
+    - Mordant library for terminal colors and emoji support
+    - ASCII art logo with cyan styling
+    - Global options: `--debug`, `--verbose`, `--quiet`, `--version`
+    - Command structure:
+        - `kite ride <name>` - Execute a ride
+        - `kite run <segments...>` - Run specific segments
+        - `kite segments` - List available segments
+        - `kite rides` - List available rides
+        - `kite graph <name>` - Visualize dependency graph
+    - `Output` utility object with colorful functions:
+        - `success()` (✓ green), `error()` (✗ red), `warning()` (⚠ yellow)
+        - `info()` (ℹ cyan), `header()`, `section()`, `progress()`
+        - `result()` for segment results, `summary()` for execution summary
+    - Help system with Mordant formatting
+    - 7 files created (295 lines)
+
 - **Modular Specification Structure**
     - Restructured documentation into `specs/` directory
     - Separate documents for different aspects (overview, core concepts, DSL, etc.)
@@ -90,8 +164,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Gradle**: 9.2.0 (latest stable)
 - **Kotlin**: 2.0.21 (project) + 2.2.20 (Gradle)
 - **Java**: 17 LTS
+- **Dependencies**:
+    - Clikt 4.2.1 (CLI framework)
+    - Mordant 2.2.0 (terminal colors and styling)
+    - kotlinx.coroutines (async execution)
+    - kotlin-scripting-jvm (script compilation)
 - **Configuration Cache**: Enabled for faster builds
 - **Build Time**: 3s initial, 1s cached (67% improvement with configuration cache)
+
+### Statistics
+
+**Production Code**: 3,866 lines
+
+- kite-core: 784 lines
+- kite-dsl: 1,155 lines
+- kite-runtime: 1,632 lines
+- kite-cli: 295 lines
+
+**Test Code**: 4,670 lines (1.21:1 test-to-code ratio)
+
+- 175+ tests, all passing
+
+**Phases Complete**: 2 of 8 (25%)
+
+- Phase 1: Foundation & Core DSL
+- Phase 2: Segment Graph & Execution Engine
+- Phase 3: CLI & File Discovery (Task 3.1.1 complete)
 
 ## [0.1.0-SNAPSHOT] - Work in Progress
 
