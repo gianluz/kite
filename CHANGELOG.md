@@ -19,6 +19,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - GitHub Actions CI workflow (`.github/workflows/ci.yml`)
   - Comprehensive documentation structure
 
+- **Epic 1.2 Complete**: Core Domain Models
+    - `Segment` model with execution state and properties
+    - `SegmentStatus` enum (PENDING, RUNNING, SUCCESS, FAILURE, SKIPPED, TIMEOUT)
+    - `ExecutionContext` model with CI platform detection
+    - `CIPlatform` enum (GITLAB, GITHUB, LOCAL, GENERIC)
+    - `ArtifactManager` interface with `InMemoryArtifactManager` implementation
+    - `Ride` configuration model with validation
+    - `FlowNode` sealed class hierarchy (Sequential, Parallel, SegmentRef)
+    - `SegmentOverrides` for ride-specific customization
+    - `PlatformAdapter` interface with 4 implementations:
+        - `GitLabCIPlatformAdapter` - GitLab CI support
+        - `GitHubActionsPlatformAdapter` - GitHub Actions support
+        - `LocalPlatformAdapter` - Local execution support
+        - `GenericPlatformAdapter` - Generic CI platform support
+    - `PlatformDetector` for automatic platform detection
+    - Comprehensive unit tests (100+ tests, >90% coverage)
+
 - **Modular Specification Structure**
     - Restructured documentation into `specs/` directory
     - Separate documents for different aspects (overview, core concepts, DSL, etc.)

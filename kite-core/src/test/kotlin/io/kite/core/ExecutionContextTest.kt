@@ -1,0 +1,169 @@
+package io.kite.core
+
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import java.nio.file.Paths
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+
+class ExecutionContextTest {
+
+    @Test
+    fun `context with minimal properties`() {
+        val context = ExecutionContext(
+            branch = "main",
+            commitSha = "abc123"
+        )
+
+        assertEquals("main", context.branch)
+        assertEquals("abc123", context.commitSha)
+        assertNull(context.mrNumber)
+        assertFalse(context.isRelease)
+        assertFalse(context.isLocal)
+        assertEquals(CIPlatform.LOCAL, context.ciPlatform)
+        assertEquals(emptyMap(), context.environment)
+    }
+
+    @Test
+    fun `context with all properties`() {
+        val env = mapOf("CI" to "true", "KEY" to "value")
+        val artifacts = InMemoryArtifactManager()
+        val workspace = Paths.get("/workspace")
+
+        val context = ExecutionContext(
+            branch = "feature/test",
+            commitSha = "def456",
+            mrNumber = "123",
+            isRelease = true,
+            isLocal = false,
+            ciPlatform = CIPlatform.GITLAB,
+            environment = env,
+            workspace = workspace,
+            artifacts = artifacts
+        )
+
+        assertEquals("feature/test", context.branch)
+        assertEquals("def456", context.commitSha)
+        assertEquals("123", context.mrNumber)
+        assertTrue(context.isRelease)
+        assertFalse(context.isLocal)
+        assertEquals(CIPlatform.GITLAB, context.ciPlatform)
+        assertEquals(env, context.environment)
+        assertEquals(workspace, context.workspace)
+        assertEquals(artifacts, context.artifacts)
+    }
+
+    @Test
+    fun `env returns environment variable`() {
+        val context = ExecutionContext(
+            branch = "main",
+            commitSha = "abc123",
+            environment = mapOf("KEY" to "value", "NUM" to "42")
+        )
+
+        assertEquals("value", context.env("KEY"))
+        assertEquals("42", context.env("NUM"))
+        assertNull(context.env("MISSING"))
+    }
+
+    @Test
+    fun `requireEnv returns value or throws`() {
+        val context = ExecutionContext(
+            branch = "main",
+            commitSha = "abc123",
+            environment = mapOf("KEY" to "value")
+        )
+
+        assertEquals("value", context.requireEnv("KEY"))
+
+        assertThrows<IllegalStateException> {
+            context.requireEnv("MISSING")
+        }
+    }
+
+    @Test
+    fun `envOrDefault returns value or default`() {
+        val context = ExecutionContext(
+            branch = "main",
+            commitSha = "abc123",
+            environment = mapOf("KEY" to "value")
+        )
+
+        assertEquals("value", context.envOrDefault("KEY", "default"))
+        assertEquals("default", context.envOrDefault("MISSING", "default"))
+    }
+
+    @Test
+    fun `isMergeRequest is true when mrNumber is set`() {
+        val withMR = ExecutionContext(
+            branch = "main",
+            commitSha = "abc123",
+            mrNumber = "42"
+        )
+        assertTrue(withMR.isMergeRequest)
+
+        val withoutMR = ExecutionContext(
+            branch = "main",
+            commitSha = "abc123",
+            mrNumber = null
+        )
+        assertFalse(withoutMR.isMergeRequest)
+    }
+
+    @Test
+    fun `isCI is opposite of isLocal`() {
+        val local = ExecutionContext(
+            branch = "main",
+            commitSha = "abc123",
+            isLocal = true
+        )
+        assertFalse(local.isCI)
+
+        val ci = ExecutionContext(
+            branch = "main",
+            commitSha = "abc123",
+            isLocal = false
+        )
+        assertTrue(ci.isCI)
+    }
+
+    @Test
+    fun `toString includes key information`() {
+        val context = ExecutionContext(
+            branch = "feature/test",
+            commitSha = "abc123def456",
+            mrNumber = "42",
+            isRelease = true,
+            isLocal = false,
+            ciPlatform = CIPlatform.GITLAB
+        )
+
+        val str = context.toString()
+        assertTrue(str.contains("feature/test"))
+        assertTrue(str.contains("abc123de")) // First 8 chars
+        assertTrue(str.contains("42"))
+        assertTrue(str.contains("true"))
+        assertTrue(str.contains("false"))
+        assertTrue(str.contains("GITLAB"))
+    }
+}
+
+class CIPlatformTest {
+
+    @Test
+    fun `displayName returns readable names`() {
+        assertEquals("GitLab CI", CIPlatform.GITLAB.displayName)
+        assertEquals("GitHub Actions", CIPlatform.GITHUB.displayName)
+        assertEquals("Local", CIPlatform.LOCAL.displayName)
+        assertEquals("Generic CI", CIPlatform.GENERIC.displayName)
+    }
+
+    @Test
+    fun `all platforms have display names`() {
+        CIPlatform.values().forEach { platform ->
+            assertTrue(platform.displayName.isNotBlank())
+        }
+    }
+}
