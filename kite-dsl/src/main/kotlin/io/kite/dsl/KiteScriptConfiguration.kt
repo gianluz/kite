@@ -11,6 +11,50 @@ import kotlin.script.experimental.jvm.jvm
  * - Dependencies available to scripts
  * - Implicit imports
  * - IDE support configuration
+ * - Maven dependency resolution via @DependsOn and @Repository
+ *
+ * ## Features:
+ *
+ * ### 1. Implicit Imports
+ * All Kite DSL classes are automatically imported, so you can write:
+ * ```kotlin
+ * segments {
+ *     segment("build") { ... }
+ * }
+ * ```
+ *
+ * ### 2. Maven Dependencies (Experimental)
+ * Use @DependsOn to add external dependencies:
+ * ```kotlin
+ * @file:DependsOn("com.google.code.gson:gson:2.10.1")
+ *
+ * import com.google.gson.Gson
+ *
+ * segments {
+ *     segment("parse-json") {
+ *         execute {
+ *             val gson = Gson()
+ *             // ...
+ *         }
+ *     }
+ * }
+ * ```
+ *
+ * **Note**: Maven dependency resolution requires the Kotlin scripting host to be configured
+ * with dependency resolvers. Currently, dependencies are resolved from the classpath.
+ *
+ * ### 3. Helper Functions
+ * Define reusable functions in your scripts:
+ * ```kotlin
+ * // Helper function
+ * fun buildGradle(task: String) = exec("./gradlew", task)
+ *
+ * segments {
+ *     segment("build") {
+ *         execute { buildGradle("build") }
+ *     }
+ * }
+ * ```
  */
 object KiteScriptCompilationConfiguration : ScriptCompilationConfiguration({
     // Implicit imports available in all Kite scripts
@@ -20,7 +64,14 @@ object KiteScriptCompilationConfiguration : ScriptCompilationConfiguration({
         "kotlin.time.Duration",
         "kotlin.time.Duration.Companion.seconds",
         "kotlin.time.Duration.Companion.minutes",
-        "kotlin.time.Duration.Companion.hours"
+        "kotlin.time.Duration.Companion.hours",
+        // Common Kotlin stdlib imports
+        "kotlin.io.*",
+        "java.io.File",
+        "java.nio.file.*",
+        // Scripting annotations for dependency resolution
+        "kotlin.script.experimental.dependencies.DependsOn",
+        "kotlin.script.experimental.dependencies.Repository"
     )
 
     // Make current context dependencies available to scripts
@@ -32,6 +83,10 @@ object KiteScriptCompilationConfiguration : ScriptCompilationConfiguration({
     ide {
         acceptedLocations(ScriptAcceptedLocation.Everywhere)
     }
+
+    // Note: Advanced dependency resolution via @DependsOn would require additional
+    // configuration in the scripting host. For now, scripts can use any dependencies
+    // already on the classpath from kite-core and kite-dsl modules.
 })
 
 /**

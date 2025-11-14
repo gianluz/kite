@@ -1,171 +1,149 @@
-# IntelliJ IDEA Setup for Kite
+# IntelliJ IDEA Setup for Kite Development
 
-This guide explains how to get full IDE support (autocomplete, syntax highlighting, type checking) for `.kite.kts` files
-in IntelliJ IDEA.
+This guide explains how to get full IDE support (autocomplete, syntax highlighting) when **developing Kite itself**.
 
-## Automatic Setup (Recommended)
+**Looking to use Kite in your own project?** See **[docs/EXTERNAL_PROJECT_SETUP.md](docs/EXTERNAL_PROJECT_SETUP.md)**
+for comprehensive instructions.
 
-Kite includes script definitions that IntelliJ IDEA should recognize automatically. After importing the project:
+---
 
-1. **Import the project as a Gradle project**
-    - File → Open → Select the `kite` directory
-    - Let Gradle sync complete
+## For Kite Development
 
-2. **Build the project**
+If you're working on the Kite codebase itself, IntelliJ IDEA should automatically recognize `.kite.kts` files once you
+open the project, thanks to the script definition in the `kite-dsl` module.
+
+### Setup Steps
+
+1. **Open Project**:
+   ```bash
+   File → Open → select the kite directory
+   ```
+
+2. **Wait for Gradle Sync**:
+    - IntelliJ will automatically sync Gradle dependencies
+    - This can take 1-2 minutes on the first load
+
+3. **Verify Script Support**:
+    - Open `.kite/segments/example.kite.kts`
+    - You should see full autocomplete for `segments { }`
+
+### If Autocomplete Doesn't Work
+
+1. **Reimport Gradle Project**:
+    - View → Tool Windows → Gradle
+    - Click "Reload All Gradle Projects" (circular arrows icon)
+
+2. **Build the project**:
    ```bash
    ./gradlew build
    ```
 
-3. **Invalidate caches and restart** (if needed)
-    - File → Invalidate Caches → Invalidate and Restart
+3. **Invalidate Caches**:
+    - File → Invalidate Caches...
+    - Select "Invalidate and Restart"
 
-4. **Test it works**
-    - Open a `.kite.kts` file (e.g., `.kite/segments/example.kite.kts`)
-    - You should see:
-        - ✅ Syntax highlighting
-        - ✅ Autocomplete for `segments`, `segment`, `ride`, etc.
-        - ✅ Type checking for DSL functions
-        - ✅ Navigation to source (Ctrl+Click / Cmd+Click)
+4. **Check Script Configuration**:
+    - Open any `.kite.kts` file
+    - Right-click → Kotlin → "Configure Kotlin Script"
+    - Verify `io.kite.dsl.KiteScript` is listed
 
-## Manual Setup (If Automatic Doesn't Work)
+## How It Works
 
-If IntelliJ doesn't automatically recognize `.kite.kts` files:
+Kite uses Kotlin's [scripting support](https://github.com/Kotlin/KEEP/blob/master/proposals/scripting-support.md) to
+provide full IDE integration:
 
-### Option 1: Associate with Kotlin Script
+1. **Script Definition**: `kite-dsl/src/main/kotlin/io/kite/dsl/KiteScript.kt` defines the script type with
+   `@KotlinScript` annotation
 
-1. Right-click a `.kite.kts` file
-2. Select **Associate with File Type...**
-3. Choose **Kotlin Script**
+2. **Compilation Configuration**: `KiteScriptCompilationConfiguration` specifies:
+    - Implicit imports (Kite DSL classes, Kotlin stdlib)
+    - Dependencies (from current classpath)
+    - IDE support settings
 
-### Option 2: Configure Kotlin Script Definition
+3. **Template Registration**: `kite-dsl/src/main/resources/META-INF/kotlin/script/templates/io.kite.dsl.KiteScript`
+   registers the script template with IntelliJ
 
-1. Go to **Settings/Preferences** → **Languages & Frameworks** → **Kotlin** → **Scripting**
-2. Check if `io.kite.dsl.KiteScript` is listed
-3. If not, click **+** and add:
-    - **Script template:** `io.kite.dsl.KiteScript`
-    - **File extension pattern:** `*.kite.kts`
+4. **Evaluation Configuration**: `KiteScriptEvaluationConfiguration` defines how scripts are executed
 
-### Option 3: Rebuild and Reimport
+## What You Get
 
-1. Close IntelliJ
-2. Delete `.idea` directory
-3. Delete `.gradle` directory
-4. Reopen project and reimport
+In `.kite.kts` files, IntelliJ provides:
 
-## What Should Work
+✅ **Autocomplete** for all Kite APIs  
+✅ **Syntax highlighting** with Kotlin syntax  
+✅ **Error checking** and inline warnings  
+✅ **Refactoring support** (rename, extract, etc.)  
+✅ **Navigation** (go to definition, find usages)  
+✅ **Documentation** on hover
 
-Once configured, you should have full IDE support in `.kite.kts` files:
+## Testing Autocomplete
 
-### ✅ Autocomplete
-
-```kotlin
-segments {
-    segment("build") {  // ← Autocomplete here
-        description = ""  // ← And here
-        timeout = 5.minutes  // ← And here
-        execute {
-            exec("./gradlew", "build")  // ← And here
-        }
-    }
-}
-```
-
-### ✅ Type Checking
+Try this in any `.kite.kts` file:
 
 ```kotlin
 segments {
     segment("test") {
-        timeout = "invalid"  // ← Should show error
-        maxRetries = -1      // ← Should show error
+        // Type "exec" and press Ctrl+Space
+        // You should see: exec(command: String, vararg args: String)
+        
+        // Type "shell" and press Ctrl+Space  
+        // You should see: shell(command: String)
+        
+        // Type "timeout" and press Ctrl+Space
+        // You should see: timeout: Duration
     }
 }
 ```
-
-### ✅ Navigation
-
-- **Ctrl+Click** (Cmd+Click on Mac) on any DSL function to jump to its definition
-- **Ctrl+Space** to trigger autocomplete
-- **Ctrl+Q** (Cmd+J on Mac) to view quick documentation
-
-### ✅ Implicit Imports
-
-These are automatically available (no import needed):
-
-- `io.kite.core.*` - Segment, Ride, ExecutionContext, etc.
-- `io.kite.dsl.*` - segments, ride, segment, etc.
-- `kotlin.time.Duration` - For timeouts
-- `.seconds`, `.minutes`, `.hours` - Duration extensions
 
 ## Troubleshooting
 
-### Problem: No autocomplete in .kite.kts files
+### "Unresolved reference: segments"
 
-**Solution:**
+**Cause**: Script definition not loaded.
 
-1. Make sure you've run `./gradlew build` at least once
-2. Try **File → Invalidate Caches → Invalidate and Restart**
-3. Check **Settings → Kotlin → Scripting** for script definitions
+**Fix**:
 
-### Problem: "Unresolved reference" errors
+1. Build the `kite-dsl` module: `./gradlew :kite-dsl:build`
+2. Reimport Gradle project
+3. Invalidate caches if needed
 
-**Solution:**
+### No autocomplete for ExecutionContext methods
 
-1. Make sure the `kite-dsl` module is built
-2. Check that `kotlin-scripting-jvm` is in your dependencies
-3. Reimport Gradle project
+**Cause**: Type inference issue in execute block.
 
-### Problem: IntelliJ treats .kite.kts as plain text
-
-**Solution:**
-
-1. Right-click the file → **Associate with File Type** → **Kotlin Script**
-2. Or add `*.kite.kts` pattern in **Settings → Editor → File Types → Kotlin Script**
-
-## Testing Your Setup
-
-Create a test file `.kite/test.kite.kts`:
-
+**Fix**: The IDE should automatically infer the receiver type. If not, try:
 ```kotlin
-segments {
-    segment("test") {
-        description = "Test segment"
-        timeout = 5.minutes
-        dependsOn("other")
-        
-        execute {
-            println("Hello from Kite!")
-            exec("echo", "test")
-        }
-    }
+execute {
+    this.exec("command") // explicit 'this' helps IDE
 }
 ```
 
-You should see:
+### "Script definition is not found"
 
-- ✅ `segments` is highlighted and autocompletes
-- ✅ `segment()` has parameter hints
-- ✅ `description`, `timeout`, `dependsOn`, `execute` autocomplete
-- ✅ `println` and `exec` are recognized
-- ✅ No red underlines (errors)
+**Cause**: META-INF template file missing.
 
-## Technical Details
+**Fix**:
 
-Kite uses Kotlin's scripting API to provide IDE support:
-
-- **Script Definition:** `io.kite.dsl.KiteScript` (annotated with `@KotlinScript`)
-- **File Extension:** `*.kite.kts`
-- **Configuration:** `kite-dsl/src/main/kotlin/io/kite/dsl/KiteScriptConfiguration.kt`
-- **Template File:** `kite-dsl/src/main/resources/META-INF/kotlin/script/templates/io.kite.dsl.KiteScript`
-
-## Need Help?
-
-If you're still having issues:
-
-1. Check the Kotlin plugin version (should be 2.0.21 or newer)
-2. Check the Gradle JVM version (should be Java 17)
-3. Try the manual setup steps above
-4. Open an issue on GitHub with your IntelliJ version and error details
+1. Verify `kite-dsl/src/main/resources/META-INF/kotlin/script/templates/io.kite.dsl.KiteScript` exists
+2. Rebuild `kite-dsl` module
+3. Invalidate caches
 
 ---
 
-**Enjoy coding with full IDE support! 🚀**
+## For External Projects
+
+If you want to use Kite in your own projects (not developing Kite itself), see the comprehensive guide:
+
+**[docs/EXTERNAL_PROJECT_SETUP.md](docs/EXTERNAL_PROJECT_SETUP.md)**
+
+This guide covers:
+
+- Adding Kite as a dependency
+- Multiple segment files
+- External dependencies and @DependsOn
+- Helper functions
+- Complete working examples
+
+---
+
+**Happy coding with Kite!** 
