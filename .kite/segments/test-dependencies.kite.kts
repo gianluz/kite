@@ -1,12 +1,12 @@
-// Test using external dependency (Gson) that's available on the classpath
-// Note: @file:DependsOn annotation is not yet implemented
-// Currently, dependencies must be added to kite-dsl/build.gradle.kts
+// Test using external dependency (Gson) with @file:DependsOn annotation
+@file:DependsOn("com.google.code.gson:gson:2.10.1")
 
 import com.google.gson.Gson
+import kotlin.script.experimental.dependencies.DependsOn
 
 segments {
     segment("test-json") {
-        description = "Test external dependency with Gson"
+        description = "Test external dependency with Gson via @DependsOn"
         execute {
             val gson = Gson()
 
@@ -17,18 +17,19 @@ segments {
                 "features" to listOf(
                     "Type-safe DSL",
                     "Parallel execution",
-                    "Dependency resolution"
+                    "Dependency resolution",
+                    "@DependsOn annotation support!"
                 )
             )
 
             val json = gson.toJson(data)
-            println("✅ JSON serialization successful!")
+            println("✅ JSON serialization with @DependsOn successful!")
             println(json)
         }
     }
 
     segment("test-json-parse") {
-        description = "Test parsing JSON with Gson"
+        description = "Test parsing JSON with Gson via @DependsOn"
         dependsOn("test-json")
         execute {
             val gson = Gson()
@@ -43,7 +44,7 @@ segments {
 
             @Suppress("UNCHECKED_CAST")
             val parsed = gson.fromJson(jsonString, Map::class.java) as Map<String, Any>
-            println("✅ JSON parsing successful!")
+            println("✅ JSON parsing with @DependsOn successful!")
             println("Parsed data: $parsed")
         }
     }

@@ -1,8 +1,12 @@
 package io.kite.dsl
 
 import kotlin.script.experimental.api.*
+import kotlin.script.experimental.dependencies.*
+import kotlin.script.experimental.dependencies.maven.MavenDependenciesResolver
+import kotlin.script.experimental.jvm.JvmDependency
 import kotlin.script.experimental.jvm.dependenciesFromCurrentContext
 import kotlin.script.experimental.jvm.jvm
+import kotlinx.coroutines.runBlocking
 
 /**
  * Compilation configuration for Kite scripts.
@@ -23,10 +27,11 @@ import kotlin.script.experimental.jvm.jvm
  * }
  * ```
  *
- * ### 2. Maven Dependencies (Experimental)
- * Use @DependsOn to add external dependencies:
+ * ### 2. Maven Dependencies via @DependsOn ✅
+ * Use @DependsOn to add external dependencies dynamically:
  * ```kotlin
  * @file:DependsOn("com.google.code.gson:gson:2.10.1")
+ * @file:Repository("https://repo.maven.apache.org/maven2/")
  *
  * import com.google.gson.Gson
  *
@@ -34,14 +39,12 @@ import kotlin.script.experimental.jvm.jvm
  *     segment("parse-json") {
  *         execute {
  *             val gson = Gson()
- *             // ...
+ *             val json = gson.toJson(mapOf("status" to "works!"))
+ *             println(json)
  *         }
  *     }
  * }
  * ```
- *
- * **Note**: Maven dependency resolution requires the Kotlin scripting host to be configured
- * with dependency resolvers. Currently, dependencies are resolved from the classpath.
  *
  * ### 3. Helper Functions
  * Define reusable functions in your scripts:
@@ -84,9 +87,10 @@ object KiteScriptCompilationConfiguration : ScriptCompilationConfiguration({
         acceptedLocations(ScriptAcceptedLocation.Everywhere)
     }
 
-    // Note: Advanced dependency resolution via @DependsOn would require additional
-    // configuration in the scripting host. For now, scripts can use any dependencies
-    // already on the classpath from kite-core and kite-dsl modules.
+    // Enable Maven dependency resolution via @DependsOn and @Repository
+    refineConfiguration {
+        onAnnotations(DependsOn::class, Repository::class, handler = ::configureMavenDepsOnAnnotations)
+    }
 })
 
 /**
@@ -100,3 +104,34 @@ object KiteScriptEvaluationConfiguration : ScriptEvaluationConfiguration({
         // No special JVM options needed for now
     }
 })
+
+/**
+ * Maven dependency resolver for @DependsOn and @Repository annotations.
+ * Combines file system and Maven repository resolution.
+ */
+private val resolver = CompoundDependenciesResolver(
+    FileSystemDependenciesResolver(),
+    MavenDependenciesResolver()
+)
+
+/**
+ * Handler for @DependsOn and @Repository annotations.
+ * Resolves Maven dependencies dynamically and makes them available to the script.
+ *
+ * This follows the official Kotlin scripting pattern from:
+ * https://kotlinlang.org/docs/custom-script-deps-tutorial.html
+ */
+private fun configureMavenDepsOnAnnotations(
+    context: ScriptConfigurationRefinementContext
+): ResultWithDiagnostics<ScriptCompilationConfiguration> {
+    val annotations = context.collectedData?.get(ScriptCollectedData.collectedAnnotations)?.takeIf { it.isNotEmpty() }
+        ?: return context.compilationConfiguration.asSuccess()
+
+    return runBlocking {
+        resolver.resolveFromScriptSourceAnnotations(annotations)
+    }.onSuccess {
+        context.compilationConfiguration.with {
+            dependencies.append(JvmDependency(it))
+        }.asSuccess()
+    }
+}
