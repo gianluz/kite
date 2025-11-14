@@ -45,26 +45,26 @@ kite/
 
 **Story Points**: 5 | **Duration**: 2 days
 
-- [x] **Segment 1.1.1**: Initialize Kotlin project structure
+- [x] **Task 1.1.1**: Initialize Kotlin project structure
     - Create multi-module Gradle project
     - Configure Kotlin 2.0.21 with Java 17 LTS compatibility
     - Set up modules: `kite-core`, `kite-dsl`, `kite-runtime`, `kite-cli`
     - Configure ktlint and detekt for code quality
     - Set up Gradle wrapper (v9.2.0) with configuration cache
 
-- [x] **Segment 1.1.2**: Set up dependency management
+- [x] **Task 1.1.2**: Set up dependency management
     - Add kotlinx.coroutines to `kite-core` and `kite-runtime`
     - Add kotlinx.serialization to `kite-core`
     - Add Clikt CLI framework to `kite-cli`
     - Add Kotlin Scripting dependencies to `kite-dsl`
 
-- [x] **Segment 1.1.3**: Configure build and publishing
+- [x] **Task 1.1.3**: Configure build and publishing
     - Set up version management (0.1.0-SNAPSHOT)
     - Configure Maven publishing with POM metadata
     - Set up GitHub Actions CI workflow
     - Configure test infrastructure (JUnit 5, MockK)
 
-- [x] **Segment 1.1.4**: Create project documentation structure
+- [x] **Task 1.1.4**: Create project documentation structure
     - Create comprehensive specification (9 modular documents in `specs/`)
     - Update README.md with project overview
     - Create CONTRIBUTING.md
@@ -83,27 +83,27 @@ kite/
 
 **Story Points**: 8 | **Duration**: 3 days
 
-- [ ] **Segment 1.2.1**: Define Segment model
+- [ ] **Task 1.2.1**: Define Segment model
     - Create `Segment` data class in `kite-core`
     - Add properties: `name`, `description`, `dependsOn`, `condition`, `timeout`, `retries`
     - Create `SegmentStatus` enum (PENDING, RUNNING, SUCCESS, FAILURE, SKIPPED, TIMEOUT)
     - Add execution lambda with `ExecutionContext` receiver
     - Write unit tests
 
-- [ ] **Segment 1.2.2**: Define ExecutionContext model
+- [ ] **Task 1.2.2**: Define ExecutionContext model
     - Create `ExecutionContext` data class
     - Add properties: `branch`, `commitSha`, `mrNumber`, `isRelease`, `isLocal`, `ciPlatform`
     - Add `environment`, `workspace`, `artifacts` accessors
     - Write unit tests
 
-- [ ] **Segment 1.2.3**: Define Ride Configuration model
+- [ ] **Task 1.2.3**: Define Ride Configuration model
     - Create `Ride` data class in `kite-core`
     - Add properties: `name`, `segments`, `environment`, `parallel settings`
     - Create `FlowNode` sealed class (Sequential, Parallel, Segment Reference)
     - Implement ride validation logic
     - Write unit tests
 
-- [ ] **Segment 1.2.4**: Define Platform Adapters interface
+- [ ] **Task 1.2.4**: Define Platform Adapters interface
     - Create `PlatformAdapter` interface
     - Define detection and context population methods
     - Create stub implementations (GitLabCI, GitHub Actions, Local)
@@ -121,28 +121,28 @@ kite/
 
 **Story Points**: 13 | **Duration**: 5 days
 
-- [ ] **Segment 1.3.1**: Set up Kotlin scripting engine
+- [ ] **Task 1.3.1**: Set up Kotlin scripting engine
     - Configure `kotlin-scripting-jvm` dependencies
     - Create `ScriptCompiler` class
     - Implement `.kite.kts` compilation
     - Add script caching mechanism
     - Write unit tests
 
-- [ ] **Segment 1.3.2**: Implement segment definition DSL
+- [ ] **Task 1.3.2**: Implement segment definition DSL
     - Create `SegmentBuilder` class with DSL markers
     - Implement `segment("name") { }` builder
     - Add support for `execute { }`, `outputs { }`, `inputs { }` blocks
     - Implement property delegates for `dependsOn`, `timeout`, `condition`
     - Write DSL tests
 
-- [ ] **Segment 1.3.3**: Implement ride configuration DSL
+- [ ] **Task 1.3.3**: Implement ride configuration DSL
     - Create `RideBuilder` class
     - Implement `ride { }` builder
     - Support `segment()` references and `parallel { }` blocks
     - Add `environment { }` and `onFailure { }` blocks
     - Write DSL tests
 
-- [ ] **Segment 1.3.4**: Implement file discovery
+- [ ] **Task 1.3.4**: Implement file discovery
     - Create `FileDiscovery` class in `kite-dsl`
     - Implement `.kite/segments/*.kite.kts` scanner
     - Implement `.kite/rides/*.kite.kts` scanner
@@ -165,20 +165,20 @@ kite/
 
 **Story Points**: 8 | **Duration**: 3 days
 
-- [ ] **Segment 2.1.1**: Implement DAG builder
+- [ ] **Task 2.1.1**: Implement DAG builder
     - Create `SegmentGraph` class
     - Implement dependency resolution algorithm
     - Detect and report circular dependencies
     - Build adjacency list representation
     - Write unit tests with various graph topologies
 
-- [ ] **Segment 2.1.2**: Implement topological sort
+- [ ] **Task 2.1.2**: Implement topological sort
     - Implement Kahn's algorithm for topological sorting
     - Handle parallel execution groups
     - Calculate execution levels (for visualization)
     - Write unit tests
 
-- [ ] **Segment 2.1.3**: Implement graph validation
+- [ ] **Task 2.1.3**: Implement graph validation
     - Validate all segment references exist
     - Check for unreachable segments
     - Verify no self-dependencies
@@ -197,21 +197,21 @@ kite/
 
 **Story Points**: 10 | **Duration**: 4 days
 
-- [ ] **Segment 2.2.1**: Implement sequential scheduler
+- [ ] **Task 2.2.1**: Implement sequential scheduler
     - Create `SegmentScheduler` interface
     - Implement `SequentialScheduler`
     - Execute segments in topological order
     - Handle segment skipping (conditions)
     - Write tests
 
-- [ ] **Segment 2.2.2**: Implement parallel scheduler
+- [ ] **Task 2.2.2**: Implement parallel scheduler
     - Implement `ParallelScheduler` using coroutines
     - Add `maxConcurrency` support with Semaphore
     - Implement parallel block execution
     - Handle failure modes (fail-fast vs continue)
     - Write concurrency tests
 
-- [ ] **Segment 2.2.3**: Implement execution tracking
+- [ ] **Task 2.2.3**: Implement execution tracking
     - Create `ExecutionTracker` for monitoring progress
     - Track segment states (pending, running, complete, failed)
     - Implement execution time measurement
@@ -230,20 +230,20 @@ kite/
 
 **Story Points**: 8 | **Duration**: 3 days
 
-- [ ] **Segment 2.3.1**: Implement process executor
+- [ ] **Task 2.3.1**: Implement process executor
     - Create `ProcessExecutor` class in `kite-runtime`
     - Implement `exec()` function with command execution
     - Add timeout support using `ProcessHandle`
     - Capture stdout/stderr
   - Write tests with mock processes
 
-- [ ] **Segment 2.3.2**: Implement segment execution context
+- [ ] **Task 2.3.2**: Implement segment execution context
     - Populate `ExecutionContext` from environment
     - Add Git information detection (branch, SHA)
     - Implement context isolation per segment
     - Write tests
 
-- [ ] **Segment 2.3.3**: Implement basic error handling
+- [ ] **Task 2.3.3**: Implement basic error handling
     - Add try-catch around segment execution
     - Implement retry logic with exponential backoff
     - Add `onFailure` callback support
@@ -265,27 +265,27 @@ kite/
 
 **Story Points**: 8 | **Duration**: 3 days
 
-- [ ] **Segment 3.1.1**: Set up Clikt CLI structure
+- [ ] **Task 3.1.1**: Set up Clikt CLI structure
     - Create main CLI class with Clikt
     - Define command hierarchy: `ride`, `run`, `segments`, `rides`, `graph`
     - Add global options: `--debug`, `--dry-run`, `--verbose`
     - Implement help text and usage examples
     - Write CLI tests
 
-- [ ] **Segment 3.1.2**: Implement `ride` command
+- [ ] **Task 3.1.2**: Implement `ride` command
     - `kite ride <name>` - Execute named ride
     - Load ride configuration from `.kite/rides/<name>.kite.kts`
     - Display progress during execution
     - Show summary at completion
     - Write integration tests
 
-- [ ] **Segment 3.1.3**: Implement `run` command
+- [ ] **Task 3.1.3**: Implement `run` command
     - `kite run <segment1> <segment2>...` - Execute specific segments
     - Build minimal graph from specified segments
     - Support direct segment execution without ride
     - Write tests
 
-- [ ] **Segment 3.1.4**: Implement listing commands
+- [ ] **Task 3.1.4**: Implement listing commands
     - `kite segments` - List all available segments
     - `kite rides` - List all available rides
     - Format output nicely (table format)
@@ -304,20 +304,20 @@ kite/
 
 **Story Points**: 5 | **Duration**: 2 days
 
-- [ ] **Segment 3.2.1**: Implement segment discovery
+- [ ] **Task 3.2.1**: Implement segment discovery
     - Scan `.kite/segments/` directory
     - Compile all `*.kite.kts` files
     - Build segment registry (name -> Segment)
     - Cache compiled scripts
     - Write discovery tests
 
-- [ ] **Segment 3.2.2**: Implement ride discovery
+- [ ] **Task 3.2.2**: Implement ride discovery
     - Scan `.kite/rides/` directory
     - Load ride configurations
     - Validate segment references
     - Write tests
 
-- [ ] **Segment 3.2.3**: Implement settings loading
+- [ ] **Task 3.2.3**: Implement settings loading
     - Load `.kite/settings.kite.kts` if present
     - Apply global configuration
     - Merge with ride-specific settings
@@ -335,19 +335,19 @@ kite/
 
 **Story Points**: 8 | **Duration**: 3 days
 
-- [ ] **Segment 3.3.1**: Implement process-level parallelism
+- [ ] **Task 3.3.1**: Implement process-level parallelism
     - Spawn separate OS processes for parallel segments
     - Manage process lifecycle (start, monitor, terminate)
     - Implement process pool with `maxConcurrency`
     - Write tests
 
-- [ ] **Segment 3.3.2**: Implement log multiplexing
+- [ ] **Task 3.3.2**: Implement log multiplexing
     - Capture per-segment stdout/stderr
     - Write separate log files: `logs/<segment-name>.log`
     - Implement console output modes (interleaved, sequential, summary)
     - Write tests
 
-- [ ] **Segment 3.3.3**: Add dry-run mode
+- [ ] **Task 3.3.3**: Add dry-run mode
     - Implement `--dry-run` flag
     - Display execution plan without running
     - Show estimated times and resource usage
@@ -369,13 +369,13 @@ kite/
 
 **Story Points**: 5 | **Duration**: 2 days
 
-- [ ] **Segment 4.1.1**: Create platform detection system
+- [ ] **Task 4.1.1**: Create platform detection system
     - Implement `PlatformDetector` class
     - Check environment variables to detect platform
     - Return appropriate adapter
     - Write tests
 
-- [ ] **Segment 4.1.2**: Implement adapter registry
+- [ ] **Task 4.1.2**: Implement adapter registry
     - Register all platform adapters
     - Support custom/plugin adapters
     - Priority-based detection
@@ -392,25 +392,25 @@ kite/
 
 **Story Points**: 10 | **Duration**: 4 days
 
-- [ ] **Segment 4.2.1**: Implement GitLab CI adapter
+- [ ] **Task 4.2.1**: Implement GitLab CI adapter
     - Read GitLab CI environment variables
     - Populate context: branch, commit SHA, MR number, job ID
     - Detect release MRs from labels
     - Write tests
 
-- [ ] **Segment 4.2.2**: Implement GitHub Actions adapter
+- [ ] **Task 4.2.2**: Implement GitHub Actions adapter
     - Read GitHub Actions environment variables
     - Populate context: branch, commit SHA, PR number, workflow
     - Detect release PRs from labels
     - Write tests
 
-- [ ] **Segment 4.2.3**: Implement Local adapter
+- [ ] **Task 4.2.3**: Implement Local adapter
     - Use Git commands to get branch/SHA
     - Set `isLocal = true`
     - Use current working directory as workspace
     - Write tests
 
-- [ ] **Segment 4.2.4**: Implement Generic adapter
+- [ ] **Task 4.2.4**: Implement Generic adapter
     - Fallback for unknown CI platforms
     - Read standard environment variables (CI, BUILD_ID, etc.)
     - Write tests
@@ -431,14 +431,14 @@ kite/
 
 **Story Points**: 5 | **Duration**: 2 days
 
-- [ ] **Segment 5.1.1**: Implement exec functions
+- [ ] **Task 5.1.1**: Implement exec functions
     - `exec(command, args...)` - throw on failure
     - `execOrNull(command, args...)` - return null on failure
     - `shell(command)` - execute shell command
     - `execAndCapture()` - capture output
     - Write tests
 
-- [ ] **Segment 5.1.2**: Add advanced exec options
+- [ ] **Task 5.1.2**: Add advanced exec options
     - Support working directory
     - Support environment variables
     - Support timeout per command
@@ -455,13 +455,13 @@ kite/
 
 **Story Points**: 5 | **Duration**: 2 days
 
-- [ ] **Segment 5.2.1**: Implement basic file operations
+- [ ] **Task 5.2.1**: Implement basic file operations
     - `copy()`, `move()`, `delete()`
     - `createDirectory()`
   - `zipFiles()`, `unzipFiles()`
     - Write tests
 
-- [ ] **Segment 5.2.2**: Implement file I/O
+- [ ] **Task 5.2.2**: Implement file I/O
     - File reading: `file.readText()`, `file.readLines()`
     - File writing: `file.writeText()`, `file.appendText()`
     - Write tests
@@ -477,18 +477,18 @@ kite/
 
 **Story Points**: 8 | **Duration**: 3 days
 
-- [ ] **Segment 5.3.1**: Implement ArtifactManager
+- [ ] **Task 5.3.1**: Implement ArtifactManager
     - Create `ArtifactManager` class
     - Store artifacts in `.kite/artifacts/`
     - `put(name, file)`, `get(name)`, `has(name)`, `list()`
     - Write tests
 
-- [ ] **Segment 5.3.2**: Integrate with segment execution
+- [ ] **Task 5.3.2**: Integrate with segment execution
     - Call `outputs { }` block after segment execution
     - Make artifacts available to dependent segments
     - Write integration tests
 
-- [ ] **Segment 5.3.3**: Implement artifact cleanup
+- [ ] **Task 5.3.3**: Implement artifact cleanup
     - Clean up artifacts after ride completion
     - Add `--keep-artifacts` flag to preserve them
     - Write tests
@@ -505,13 +505,13 @@ kite/
 
 **Story Points**: 5 | **Duration**: 2 days
 
-- [ ] **Segment 5.4.1**: Implement structured logging
+- [ ] **Task 5.4.1**: Implement structured logging
     - Create `Logger` interface
     - Implement console logger with levels (info, debug, warn, error)
     - Implement JSON logger for machine parsing
     - Write tests
 
-- [ ] **Segment 5.4.2**: Integrate logging throughout
+- [ ] **Task 5.4.2**: Integrate logging throughout
     - Add logging to execution engine
     - Add logging to all helpers
     - Add `--verbose` and `--quiet` flags
@@ -532,18 +532,18 @@ kite/
 
 **Story Points**: 8 | **Duration**: 3 days
 
-- [ ] **Segment 6.1.1**: Write Getting Started guide
+- [ ] **Task 6.1.1**: Write Getting Started guide
     - Installation instructions
   - First ride tutorial
   - Basic concepts explanation
   - Publish to `docs/getting-started.md`
 
-- [ ] **Segment 6.1.2**: Write CLI reference
+- [ ] **Task 6.1.2**: Write CLI reference
     - Document all commands with examples
     - Document all flags and options
     - Publish to `docs/cli-reference.md`
 
-- [ ] **Segment 6.1.3**: Write DSL reference
+- [ ] **Task 6.1.3**: Write DSL reference
     - Document all DSL functions
     - Show examples for each feature
     - Publish to `docs/dsl-reference.md`
@@ -559,18 +559,18 @@ kite/
 
 **Story Points**: 8 | **Duration**: 3 days
 
-- [ ] **Segment 6.2.1**: Create Android example
+- [ ] **Task 6.2.1**: Create Android example
     - Sample Android project with Kite
     - MR ride: build + parallel tests
     - Release ride: build + integration tests + deploy
     - Publish to `examples/android/`
 
-- [ ] **Segment 6.2.2**: Create backend example
+- [ ] **Task 6.2.2**: Create backend example
     - Sample Kotlin backend project
     - Build, test, Docker build, deploy ride
     - Publish to `examples/backend/`
 
-- [ ] **Segment 6.2.3**: Create monorepo example
+- [ ] **Task 6.2.3**: Create monorepo example
     - Multi-module project example
     - Per-module segments
     - Full ride orchestration
@@ -587,7 +587,7 @@ kite/
 
 **Story Points**: 3 | **Duration**: 1 day
 
-- [ ] **Segment 6.3.1**: Generate KDoc
+- [ ] **Task 6.3.1**: Generate KDoc
     - Add KDoc comments to all public APIs
     - Generate HTML documentation with Dokka
     - Publish to `docs/api/`
@@ -607,18 +607,18 @@ kite/
 
 **Story Points**: 10 | **Duration**: 4 days
 
-- [ ] **Segment 7.1.1**: Write end-to-end tests
+- [ ] **Task 7.1.1**: Write end-to-end tests
     - Test complete ride execution
     - Test error scenarios
   - Test parallel execution
   - Test artifact passing
 
-- [ ] **Segment 7.1.2**: Write CLI integration tests
+- [ ] **Task 7.1.2**: Write CLI integration tests
     - Test all CLI commands
     - Test flag combinations
     - Test error handling
 
-- [ ] **Segment 7.1.3**: Write platform adapter tests
+- [ ] **Task 7.1.3**: Write platform adapter tests
     - Test in Docker with simulated CI env vars
     - Test local execution
     - Test context population
@@ -634,16 +634,16 @@ kite/
 
 **Story Points**: 8 | **Duration**: 3 days
 
-- [ ] **Segment 7.2.1**: Fix identified bugs
+- [ ] **Task 7.2.1**: Fix identified bugs
     - Review and fix reported issues
     - Add regression tests
 
-- [ ] **Segment 7.2.2**: Performance optimization
+- [ ] **Task 7.2.2**: Performance optimization
     - Profile startup time
     - Optimize script compilation
     - Reduce memory footprint
 
-- [ ] **Segment 7.2.3**: UX improvements
+- [ ] **Task 7.2.3**: UX improvements
     - Improve error messages
     - Better progress indicators
   - Colored output
@@ -660,18 +660,18 @@ kite/
 
 **Story Points**: 5 | **Duration**: 2 days
 
-- [ ] **Segment 7.3.1**: Version bump to 1.0.0
+- [ ] **Task 7.3.1**: Version bump to 1.0.0
     - Update version in build files
     - Update CHANGELOG
     - Create release notes
 
-- [ ] **Segment 7.3.2**: Build distribution artifacts
+- [ ] **Task 7.3.2**: Build distribution artifacts
     - Build executable JAR
   - Create Homebrew formula
   - Create Docker image
   - Test installations
 
-- [ ] **Segment 7.3.3**: Tag release
+- [ ] **Task 7.3.3**: Tag release
     - Create v1.0.0 tag
     - Push to GitHub
     - Create GitHub release
@@ -691,17 +691,17 @@ kite/
 
 **Story Points**: 10 | **Duration**: 4 days
 
-- [ ] **Segment 8.1.1**: Define plugin API
+- [ ] **Task 8.1.1**: Define plugin API
     - Create `KitePlugin` interface
     - Define `PluginContext` with registration methods
     - Write plugin API documentation
 
-- [ ] **Segment 8.1.2**: Implement plugin loading
+- [ ] **Task 8.1.2**: Implement plugin loading
     - ServiceLoader-based discovery
     - Plugin initialization
     - Plugin configuration
 
-- [ ] **Segment 8.1.3**: Enable plugin DSL extensions
+- [ ] **Task 8.1.3**: Enable plugin DSL extensions
     - Allow plugins to register helpers
     - Allow plugins to extend DSL
     - Write tests
@@ -717,13 +717,13 @@ kite/
 
 **Story Points**: 8 | **Duration**: 3 days
 
-- [ ] **Segment 8.2.1**: Create Play Store plugin
+- [ ] **Task 8.2.1**: Create Play Store plugin
     - Implement `PlayStorePlugin`
     - Add DSL extensions
     - Integrate with Google Play API
     - Write tests
 
-- [ ] **Segment 8.2.2**: Document plugin
+- [ ] **Task 8.2.2**: Document plugin
     - Write plugin usage guide
     - Create example project
     - Publish to separate repo
@@ -739,7 +739,7 @@ kite/
 
 **Story Points**: 5 | **Duration**: 2 days
 
-- [ ] **Segment 8.3.1**: Test plugin system
+- [ ] **Task 8.3.1**: Test plugin system
     - Test plugin loading
     - Test plugin isolation
     - Test plugin errors
@@ -799,7 +799,7 @@ kite/
 
 ## Definition of Done
 
-### For Segments
+### For Tasks
 
 - [ ] Code written and reviewed
 - [ ] Unit tests written with >80% coverage
@@ -808,7 +808,7 @@ kite/
 
 ### For Epics
 
-- [ ] All segments complete
+- [ ] All tasks complete
 - [ ] Integration tests pass
 - [ ] Epic deliverables met
 
@@ -859,4 +859,3 @@ kite/
 
 - Complete Phase 1 (Foundation & Core DSL)
 - Start Phase 2 (Segment Graph & Execution Engine)
-
