@@ -14,12 +14,15 @@ This directory contains the complete specification for Kite, a Kotlin-based CI r
 2. **[Core Concepts](02-core-concepts.md)** - Fundamental concepts: rides, segments, configurations
 3. **[DSL & Configuration](03-dsl-configuration.md)** - Kotlin DSL syntax and configuration files
 4. **[Execution Model](04-execution-model.md)** - How segments are scheduled and executed
-5. **[Parallelization](05-parallelization.md)** - Deep dive into parallel execution
-6. **[Built-in Features](06-builtin-features.md)** - Helpers, artifacts, error handling
-7. **[Plugin System](07-plugin-system.md)** - Extending Kite with plugins
-8. **[Platform Integration](08-platform-integration.md)** - GitLab CI, GitHub Actions, local execution
-9. **[Architecture](09-architecture.md)** - Technical architecture and components
-10. **[Development Plan](10-development-plan.md)** - Implementation roadmap
+5. **Parallelization** - Deep dive into parallel execution *(to be extracted from SPECS.md)*
+6. **Built-in Features** - Helpers, artifacts, error handling *(to be extracted from SPECS.md)*
+7. **Plugin System** - Extending Kite with plugins *(to be extracted from SPECS.md)*
+8. **Platform Integration** - GitLab CI, GitHub Actions, local execution *(to be extracted from SPECS.md)*
+9. **Architecture** - Technical architecture and components *(to be extracted from SPECS.md)*
+10. **Development Plan** - Implementation roadmap *(to be extracted from SPECS.md)*
+
+**Note:** Documents 5-10 will be extracted from the existing [SPECS.md](../SPECS.md) in the root directory. The large
+SPECS.md file will be archived once migration is complete.
 
 ## Quick Reference
 
