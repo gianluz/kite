@@ -10,6 +10,9 @@ dependencies {
 
     // CLI framework
     implementation("com.github.ajalt.clikt:clikt:4.2.1")
+
+    // Terminal colors and styling (includes emoji support)
+    implementation("com.github.ajalt.mordant:mordant:2.2.0")
 }
 
 application {

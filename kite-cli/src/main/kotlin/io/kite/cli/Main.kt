@@ -5,6 +5,11 @@ package io.kite.cli
  * This is a placeholder that will be fully implemented in Epic 3.1.
  */
 fun main(args: Array<String>) {
-    println("Kite v0.1.0-SNAPSHOT")
-    println("CLI implementation coming soon...")
+    // Show logo if not in quiet mode and no arguments
+    if (args.isEmpty() || (args.isNotEmpty() && !args.contains("--quiet") && !args.contains("-q"))) {
+        Output.logo()
+    }
+
+    // Run CLI
+    KiteCli().main(args)
 }
