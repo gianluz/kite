@@ -36,6 +36,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `PlatformDetector` for automatic platform detection
     - Comprehensive unit tests (100+ tests, >90% coverage)
 
+- **Epic 1.3 Complete**: Kotlin Scripting Integration
+    - **Task 1.3.1**: Kotlin Scripting Engine
+        - `KiteScript` base class for all `.kite.kts` files
+        - `KiteScriptCompilationConfiguration` with implicit imports
+        - `ScriptCompiler` with caching and error reporting
+        - Coroutines support (kotlinx.coroutines-core and -test)
+    - **Task 1.3.2**: Segment Definition DSL
+        - `SegmentsBuilder` and `SegmentBuilder` for fluent segment definition
+        - Support for all segment properties (description, timeout, dependencies, conditions, retries)
+        - Type-safe DSL with `@SegmentDslMarker`
+        - `segments{}` top-level function
+    - **Task 1.3.3**: Ride Configuration DSL
+        - `RideBuilder`, `FlowBuilder`, `ParallelFlowBuilder` for ride definition
+        - `SegmentOverridesBuilder` for segment customization in rides
+        - Sequential and parallel execution blocks
+        - `ride{}` top-level function
+    - **Task 1.3.4**: File Discovery
+        - `FileDiscovery` class for scanning `.kite/segments/` and `.kite/rides/`
+        - Parallel file loading with coroutines
+        - Error collection and reporting (`FileLoadError`)
+        - Result types: `SegmentLoadResult`, `RideLoadResult`, `KiteLoadResult`
+        - Helper maps for quick lookups
+    - Comprehensive tests (59 tests across 4 test files)
+
 - **Modular Specification Structure**
     - Restructured documentation into `specs/` directory
     - Separate documents for different aspects (overview, core concepts, DSL, etc.)
