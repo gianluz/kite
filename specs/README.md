@@ -14,7 +14,7 @@ This directory contains the complete specification for Kite, a Kotlin-based CI r
 2. **[Core Concepts](02-core-concepts.md)** - Fundamental concepts: rides, segments, configurations
 3. **[DSL & Configuration](03-dsl-configuration.md)** - Kotlin DSL syntax and configuration files
 4. **[Execution Model](04-execution-model.md)** - How segments are scheduled and executed
-5. **Parallelization** - Deep dive into parallel execution *(to be extracted from SPECS.md)*
+5. **[Parallelization](05-parallelization.md)** - Deep dive into parallel execution
 6. **Built-in Features** - Helpers, artifacts, error handling *(to be extracted from SPECS.md)*
 7. **Plugin System** - Extending Kite with plugins *(to be extracted from SPECS.md)*
 8. **Platform Integration** - GitLab CI, GitHub Actions, local execution *(to be extracted from SPECS.md)*
