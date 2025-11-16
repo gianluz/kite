@@ -92,6 +92,13 @@ class ProcessExecutor {
         throwOnError: Boolean
     ): ProcessResult = withContext(Dispatchers.IO) {
         val fullCommand = listOf(command) + args
+        val commandString = fullCommand.joinToString(" ")
+
+        // Get current logger (if available)
+        val logger = io.kite.runtime.logging.LogManager.getCurrentLogger()
+
+        // Log command start
+        logger?.logCommandStart(commandString)
 
         // Build process
         val processBuilder = ProcessBuilder(fullCommand)
@@ -107,12 +114,15 @@ class ProcessExecutor {
         val process = try {
             processBuilder.start()
         } catch (e: IOException) {
+            val duration = System.currentTimeMillis() - startTime
+            logger?.logCommandComplete(commandString, -1, duration)
+
             throw ProcessExecutionException(
-                command = fullCommand.joinToString(" "),
+                command = commandString,
                 exitCode = -1,
                 stdout = "",
                 stderr = e.message ?: "Failed to start process",
-                duration = 0,
+                duration = duration,
                 cause = e
             )
         }
@@ -142,8 +152,13 @@ class ProcessExecutor {
             val duration = System.currentTimeMillis() - startTime
             val output = outputJob.getCompleted()
 
+            // Log timeout
+            logger?.logCommandOutput(output)
+            logger?.logCommandComplete(commandString, -1, duration)
+            logger?.error("Process timed out after $timeout")
+
             throw ProcessExecutionException(
-                command = fullCommand.joinToString(" "),
+                command = commandString,
                 exitCode = -1,
                 stdout = output,
                 stderr = "Process timed out after $timeout",
@@ -155,16 +170,22 @@ class ProcessExecutor {
         val duration = System.currentTimeMillis() - startTime
         val output = outputJob.await()
 
+        // Log command output
+        logger?.logCommandOutput(output)
+
+        // Log command completion
+        logger?.logCommandComplete(commandString, exitCode, duration)
+
         return@withContext when {
             exitCode == 0 -> ProcessResult.Success(
-                command = fullCommand.joinToString(" "),
+                command = commandString,
                 exitCode = exitCode,
                 stdout = output,
                 duration = duration
             )
 
             throwOnError -> throw ProcessExecutionException(
-                command = fullCommand.joinToString(" "),
+                command = commandString,
                 exitCode = exitCode,
                 stdout = output,
                 stderr = "",
@@ -172,7 +193,7 @@ class ProcessExecutor {
             )
 
             else -> ProcessResult.Failure(
-                command = fullCommand.joinToString(" "),
+                command = commandString,
                 exitCode = exitCode,
                 stdout = output,
                 duration = duration

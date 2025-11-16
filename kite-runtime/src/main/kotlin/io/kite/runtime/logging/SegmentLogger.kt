@@ -112,14 +112,46 @@ class SegmentLogger(
     }
 
     /**
-     * Logs command execution.
+     * Logs command execution start.
      */
-    fun logCommand(command: String, output: String? = null) {
-        debug("Executing: $command")
-        if (output != null && output.isNotBlank()) {
-            buffer.appendLine(output)
-            logFile.appendText(output + "\n")
+    fun logCommandStart(command: String) {
+        val timestamp = LocalDateTime.now().format(timeFormat)
+        val logEntry = "[$timestamp] [EXEC] $ $command"
+
+        buffer.appendLine(logEntry)
+        logFile.appendText(logEntry + "\n")
+
+        // Also show in console for visibility
+        originalOut.println("[$segmentName] [EXEC] $ $command")
+    }
+
+    /**
+     * Logs command output line by line with timestamps.
+     */
+    fun logCommandOutput(output: String) {
+        if (output.isBlank()) return
+
+        output.lines().forEach { line ->
+            if (line.isNotEmpty()) {
+                val timestamp = LocalDateTime.now().format(timeFormat)
+                val logEntry = "[$timestamp] [OUT] $line"
+
+                buffer.appendLine(logEntry)
+                logFile.appendText(logEntry + "\n")
+            }
         }
+    }
+
+    /**
+     * Logs command completion.
+     */
+    fun logCommandComplete(command: String, exitCode: Int, durationMs: Long) {
+        val timestamp = LocalDateTime.now().format(timeFormat)
+        val status = if (exitCode == 0) "SUCCESS" else "FAILED"
+        val logEntry = "[$timestamp] [EXEC] Command $status (exit code: $exitCode, duration: ${durationMs}ms)"
+
+        buffer.appendLine(logEntry)
+        logFile.appendText(logEntry + "\n")
     }
 
     /**
@@ -134,7 +166,7 @@ class SegmentLogger(
 }
 
 /**
- * PrintStream that prefixes each line with segment name.
+ * PrintStream that prefixes each line with segment name and timestamp.
  */
 private class PrefixingPrintStream(
     private val originalOut: PrintStream,
@@ -146,6 +178,7 @@ private class PrefixingPrintStream(
 ) : PrintStream(ByteArrayOutputStream()) {
 
     private val lineBuffer = StringBuilder()
+    private val timeFormat = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
 
     override fun write(b: Int) {
         val char = b.toChar()
@@ -180,13 +213,17 @@ private class PrefixingPrintStream(
         val line = lineBuffer.toString()
         lineBuffer.clear()
 
+        // Add timestamp to log file
+        val timestamp = LocalDateTime.now().format(timeFormat)
+        val logEntry = "[$timestamp] [LOG] $line"
+
         // Write to buffer (for getOutput())
         buffer.appendLine(line)
 
-        // Write to log file
-        logFile.appendText(line + "\n")
+        // Write to log file with timestamp
+        logFile.appendText(logEntry + "\n")
 
-        // Write to console with prefix
+        // Write to console with prefix (no timestamp for console)
         originalOut.println("[$segmentName] $line")
     }
 
@@ -223,6 +260,9 @@ object LogManager {
     private val activeLoggers = mutableMapOf<String, SegmentLogger>()
     private var config = LogConfig()
 
+    // Thread-local current logger for command execution
+    private val currentLogger = ThreadLocal<SegmentLogger>()
+
     /**
      * Configures the log manager.
      */
@@ -231,7 +271,7 @@ object LogManager {
     }
 
     /**
-     * Creates a logger for a segment.
+     * Creates a logger for a segment and sets it as current for this thread.
      */
     fun startSegmentLogging(segmentName: String): SegmentLogger {
         val logger = SegmentLogger(
@@ -239,14 +279,16 @@ object LogManager {
             logDir = config.logDir
         )
         activeLoggers[segmentName] = logger
+        currentLogger.set(logger)
         return logger
     }
 
     /**
-     * Stops logging for a segment.
+     * Stops logging for a segment and clears thread-local.
      */
     fun stopSegmentLogging(segmentName: String) {
         activeLoggers.remove(segmentName)
+        currentLogger.remove()
     }
 
     /**
@@ -254,6 +296,13 @@ object LogManager {
      */
     fun getLogger(segmentName: String): SegmentLogger? {
         return activeLoggers[segmentName]
+    }
+
+    /**
+     * Gets the current logger for the current thread.
+     */
+    fun getCurrentLogger(): SegmentLogger? {
+        return currentLogger.get()
     }
 
     /**
