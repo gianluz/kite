@@ -172,15 +172,21 @@ class RideCommand : CliktCommand(
                 }
             }
 
-            // Show summary
+            // Calculate parallel execution stats
             val totalDuration = System.currentTimeMillis() - startTime
+            val sequentialDuration = result.segmentResults.values.sumOf { it.durationMs }
+            val parallelDuration = totalDuration
+
+            // Show summary
             if (!opts.quiet) {
                 Output.summary(
                     total = result.totalSegments,
                     success = result.successCount,
                     failed = result.failureCount,
                     skipped = result.skippedCount,
-                    duration = totalDuration
+                    duration = totalDuration,
+                    parallelDuration = parallelDuration,
+                    sequentialDuration = sequentialDuration
                 )
             }
 
