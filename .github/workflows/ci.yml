@@ -27,8 +27,11 @@ jobs:
       - name: Build Kite CLI
         run: ./gradlew :kite-cli:installDist --no-daemon
 
-      - name: Run CI with Kite 🪁
+      - name: Run CI with Kite 🪁 (Parallel)
         run: kite-cli/build/install/kite-cli/bin/kite-cli ride CI
+
+      - name: Run CI with Kite 🪁 (Sequential)
+        run: kite-cli/build/install/kite-cli/bin/kite-cli ride CI --sequential
 
       - name: Upload build artifacts
         if: always()
