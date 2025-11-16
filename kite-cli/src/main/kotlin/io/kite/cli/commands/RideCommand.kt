@@ -161,6 +161,14 @@ class RideCommand : CliktCommand(
                         status = segResult.status.name,
                         duration = segResult.durationMs
                     )
+
+                    // Show error details if segment failed
+                    if (segResult.isFailed && segResult.error != null) {
+                        Output.error("    Error: ${segResult.error}")
+                    }
+                    if (opts.verbose && segResult.exception != null) {
+                        Output.info("    Exception: ${segResult.exception!!.message}")
+                    }
                 }
             }
 
@@ -178,6 +186,16 @@ class RideCommand : CliktCommand(
 
             // Exit with error code if any failures
             if (result.failureCount > 0) {
+                // Show failed segments details
+                if (!opts.quiet) {
+                    Output.error("Failed Segments:")
+                    result.failedSegments().forEach { segResult ->
+                        Output.error("  • ${segResult.segment.name}")
+                        if (segResult.error != null) {
+                            Output.error("    ${segResult.error}")
+                        }
+                    }
+                }
                 throw Exception("Ride failed with ${result.failureCount} failed segments")
             }
 
