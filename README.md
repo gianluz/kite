@@ -51,14 +51,21 @@ ride {
 
 ## Documentation
 
-**See [specs/](./specs/) for the complete specification**, including:
+**📚 See [docs/](./docs/)** for comprehensive guides:
+
+- **[Getting Started](./docs/EXTERNAL_PROJECT_SETUP.md)** - Using Kite in your projects
+- **[External Dependencies](./docs/EXTERNAL_DEPENDENCIES.md)** - Using `@DependsOn` for libraries
+- **[IDE Setup](./docs/IDE_SETUP.md)** - Setting up IntelliJ IDEA
+- **[Troubleshooting](./docs/IDE_AUTOCOMPLETE_TROUBLESHOOTING.md)** - Fixing common IDE issues
+
+**📋 See [specs/](./specs/)** for detailed specifications:
 
 - [Overview & Problem Statement](./specs/01-overview.md) - What Kite is and why
 - [Core Concepts](./specs/02-core-concepts.md) - Rides, segments, and flows
 - [DSL & Configuration](./specs/03-dsl-configuration.md) - Kotlin DSL syntax
-- Full specifications for execution model, parallelization, plugins, and more
+- [Full specifications](./specs/) for execution model, parallelization, plugins, and more
 
-**See [DEVELOPMENT_PLAN.md](./DEVELOPMENT_PLAN.md)** for the implementation roadmap.
+**🗺️ See [DEVELOPMENT_PLAN.md](./DEVELOPMENT_PLAN.md)** for the implementation roadmap.
 
 ## Development
 
@@ -81,6 +88,11 @@ This project is under active development. Contributions will be welcomed after t
 ```bash
 ./gradlew :kite-cli:run
 ```
+
+### For Contributors
+
+See **[docs/IDE_SETUP.md](./docs/IDE_SETUP.md)** to set up your development environment with full IDE autocomplete
+support.
 
 ## License
 
