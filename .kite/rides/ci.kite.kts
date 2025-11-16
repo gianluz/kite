@@ -1,21 +1,21 @@
 ride {
-    name = "MR Validation"
+    name = "CI"
     maxConcurrency = 4
-    
+
     flow {
-        // First: Clean and compile
+        // Build Kite first
         segment("clean")
         segment("compile")
-        
-        // Then: Run all tests in parallel (this is the real validation)
+
+        // Run all tests in parallel
         parallel {
             segment("test-core")
             segment("test-dsl")
             segment("test-runtime")
             segment("test-cli")
         }
-        
-        // Finally: Full build to ensure everything compiles
+
+        // Final build step
         segment("build")
     }
 }

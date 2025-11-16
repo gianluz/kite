@@ -24,17 +24,11 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build with Gradle
-        run: ./gradlew build --no-daemon --stacktrace
+      - name: Build Kite CLI
+        run: ./gradlew :kite-cli:installDist --no-daemon
 
-      - name: Run tests
-        run: ./gradlew test --no-daemon
-
-      - name: Run ktlint
-        run: ./gradlew ktlintCheck --no-daemon
-
-      - name: Run detekt
-        run: ./gradlew detekt --no-daemon
+      - name: Run CI with Kite 🪁
+        run: kite-cli/build/install/kite-cli/bin/kite-cli ride CI
 
       - name: Upload build artifacts
         if: always()
