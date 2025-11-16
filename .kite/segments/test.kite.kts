@@ -3,7 +3,9 @@ segments {
         description = "Run kite-core unit tests"
         dependsOn("compile")
         execute {
+            println("Starting test-core tests...")
             exec("./gradlew", ":kite-core:test")
+            println("test-core completed ✓")
         }
     }
 
@@ -11,7 +13,9 @@ segments {
         description = "Run kite-dsl unit tests"
         dependsOn("compile")
         execute {
+            println("Starting test-dsl tests...")
             exec("./gradlew", ":kite-dsl:test")
+            println("test-dsl completed ✓")
         }
     }
 
@@ -19,7 +23,9 @@ segments {
         description = "Run kite-runtime unit tests"
         dependsOn("compile")
         execute {
+            println("Starting test-runtime tests...")
             exec("./gradlew", ":kite-runtime:test")
+            println("test-runtime completed ✓")
         }
     }
 
@@ -27,7 +33,9 @@ segments {
         description = "Run kite-cli unit tests"
         dependsOn("compile")
         execute {
+            println("Starting test-cli tests...")
             exec("./gradlew", ":kite-cli:test")
+            println("test-cli completed ✓")
         }
     }
 
