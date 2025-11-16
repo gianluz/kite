@@ -1,10 +1,12 @@
 package io.kite.runtime.scheduler
 
 import io.kite.core.ExecutionContext
+import io.kite.core.ProcessExecutionContext
 import io.kite.core.Segment
 import io.kite.core.SegmentStatus
 import io.kite.runtime.graph.SegmentGraph
 import io.kite.runtime.graph.TopologicalSort
+import io.kite.runtime.process.ProcessExecutionProviderImpl
 
 /**
  * Interface for segment schedulers.
@@ -121,17 +123,26 @@ class SequentialScheduler : SegmentScheduler {
         val startTime = System.currentTimeMillis()
 
         return try {
-            // Execute the segment
-            segment.execute.invoke(context)
+            // Set up process execution provider for this segment
+            val provider = ProcessExecutionProviderImpl()
+            ProcessExecutionContext.setProvider(provider)
 
-            val endTime = System.currentTimeMillis()
-            val duration = endTime - startTime
+            try {
+                // Execute the segment
+                segment.execute.invoke(context)
 
-            SegmentResult(
-                segment = segment,
-                status = SegmentStatus.SUCCESS,
-                durationMs = duration
-            )
+                val endTime = System.currentTimeMillis()
+                val duration = endTime - startTime
+
+                SegmentResult(
+                    segment = segment,
+                    status = SegmentStatus.SUCCESS,
+                    durationMs = duration
+                )
+            } finally {
+                // Clean up provider
+                ProcessExecutionContext.clear()
+            }
         } catch (e: Exception) {
             val endTime = System.currentTimeMillis()
             val duration = endTime - startTime
