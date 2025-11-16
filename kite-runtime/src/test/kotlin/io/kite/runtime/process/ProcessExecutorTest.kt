@@ -81,11 +81,12 @@ class ProcessExecutorTest {
     fun `execute command with timeout failure`() = runTest {
         try {
             // Sleep command should timeout
-            // Use 500ms timeout to be more reliable in CI environments
+            // Use 1 second timeout to be reliable in slower CI environments
+            // The sleep is 5 seconds, so it will definitely timeout
             if (System.getProperty("os.name").lowercase().contains("windows")) {
-                executor.execute("timeout", "5", timeout = 500.milliseconds)
+                executor.execute("timeout", "5", timeout = 1.seconds)
             } else {
-                executor.execute("sleep", "5", timeout = 500.milliseconds)
+                executor.execute("sleep", "5", timeout = 1.seconds)
             }
             throw AssertionError("Should have thrown ProcessExecutionException")
         } catch (e: ProcessExecutionException) {
