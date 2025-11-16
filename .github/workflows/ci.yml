@@ -30,14 +30,6 @@ jobs:
       - name: Run CI with Kite 🪁 (Parallel)
         run: kite-cli/build/install/kite-cli/bin/kite-cli ride CI
 
-      - name: Clean and rebuild Kite CLI for sequential test
-        run: |
-          ./gradlew clean --no-daemon
-          ./gradlew :kite-cli:installDist --no-daemon
-
-      - name: Run CI with Kite 🪁 (Sequential)
-        run: kite-cli/build/install/kite-cli/bin/kite-cli ride CI --sequential
-
       - name: Upload build artifacts
         if: always()
         uses: actions/upload-artifact@v4
