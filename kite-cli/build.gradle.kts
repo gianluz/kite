@@ -16,6 +16,9 @@ dependencies {
 
     // Coroutines for async operations
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+
+    // SLF4J implementation - suppress warnings and provide basic logging
+    runtimeOnly("org.slf4j:slf4j-simple:2.0.9")
 }
 
 application {
