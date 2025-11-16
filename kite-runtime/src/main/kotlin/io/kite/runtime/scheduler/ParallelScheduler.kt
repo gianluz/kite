@@ -68,6 +68,9 @@ class ParallelScheduler(
         // Get execution levels for parallel execution
         val levels = sorter.sortByLevels()
 
+        // Track execution time
+        val executionStartTime = System.currentTimeMillis()
+
         // Execute segments level by level
         val results = ConcurrentHashMap<String, SegmentResult>()
         val semaphore = Semaphore(maxConcurrency)
@@ -88,7 +91,10 @@ class ParallelScheduler(
             }
         }
 
-        return SchedulerResult(results)
+        val executionEndTime = System.currentTimeMillis()
+        val executionTimeMs = executionEndTime - executionStartTime
+
+        return SchedulerResult(results, executionTimeMs)
     }
 
     /**

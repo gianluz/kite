@@ -75,6 +75,9 @@ class SequentialScheduler : SegmentScheduler {
             )
         }
 
+        // Track execution time
+        val executionStartTime = System.currentTimeMillis()
+
         // Execute segments sequentially
         val results = mutableMapOf<String, SegmentResult>()
 
@@ -110,7 +113,10 @@ class SequentialScheduler : SegmentScheduler {
             results[segment.name] = result
         }
 
-        return SchedulerResult(results)
+        val executionEndTime = System.currentTimeMillis()
+        val executionTimeMs = executionEndTime - executionStartTime
+
+        return SchedulerResult(results, executionTimeMs)
     }
 
     /**
@@ -188,7 +194,8 @@ data class SegmentResult(
  * Result of executing multiple segments.
  */
 data class SchedulerResult(
-    val segmentResults: Map<String, SegmentResult>
+    val segmentResults: Map<String, SegmentResult>,
+    val executionTimeMs: Long = 0 // Actual wall-clock time for execution
 ) {
     val totalSegments: Int get() = segmentResults.size
     val successCount: Int get() = segmentResults.values.count { it.isSuccess }
@@ -196,6 +203,8 @@ data class SchedulerResult(
     val skippedCount: Int get() = segmentResults.values.count { it.status == SegmentStatus.SKIPPED }
 
     val isSuccess: Boolean get() = failureCount == 0 && successCount > 0
+
+    /** Sum of all segment durations (sequential time if run sequentially) */
     val totalDurationMs: Long get() = segmentResults.values.sumOf { it.durationMs }
 
     /**
@@ -217,6 +226,6 @@ data class SchedulerResult(
 
     override fun toString(): String {
         return "SchedulerResult(total=$totalSegments, success=$successCount, " +
-                "failed=$failureCount, skipped=$skippedCount, duration=${totalDurationMs}ms)"
+                "failed=$failureCount, skipped=$skippedCount, duration=${totalDurationMs}ms, executionTime=${executionTimeMs}ms)"
     }
 }
