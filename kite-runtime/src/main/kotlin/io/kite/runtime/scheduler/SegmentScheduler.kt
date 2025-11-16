@@ -133,6 +133,9 @@ class SequentialScheduler : SegmentScheduler {
             val provider = ProcessExecutionProviderImpl()
             ProcessExecutionContext.setProvider(provider)
 
+            // Set up logging for this segment
+            val logger = io.kite.runtime.logging.LogManager.startSegmentLogging(segment.name)
+
             try {
                 // Execute the segment
                 segment.execute.invoke(context)
@@ -143,15 +146,22 @@ class SequentialScheduler : SegmentScheduler {
                 SegmentResult(
                     segment = segment,
                     status = SegmentStatus.SUCCESS,
-                    durationMs = duration
+                    durationMs = duration,
+                    logOutput = logger.getOutput()
                 )
             } finally {
+                // Clean up logging
+                io.kite.runtime.logging.LogManager.stopSegmentLogging(segment.name)
+
                 // Clean up provider
                 ProcessExecutionContext.clear()
             }
         } catch (e: Exception) {
             val endTime = System.currentTimeMillis()
             val duration = endTime - startTime
+
+            // Stop logging to capture any error output
+            io.kite.runtime.logging.LogManager.stopSegmentLogging(segment.name)
 
             SegmentResult(
                 segment = segment,
@@ -173,7 +183,8 @@ data class SegmentResult(
     val message: String? = null,
     val error: String? = null,
     val exception: Throwable? = null,
-    val durationMs: Long = 0
+    val durationMs: Long = 0,
+    val logOutput: String? = null
 ) {
     val isSuccess: Boolean get() = status.isSuccessful
     val isFailed: Boolean get() = status.isFailed
