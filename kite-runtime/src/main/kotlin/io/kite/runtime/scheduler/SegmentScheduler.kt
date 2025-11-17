@@ -138,8 +138,9 @@ class SequentialScheduler : SegmentScheduler {
             val logger = io.kite.runtime.logging.LogManager.startSegmentLogging(segment.name, showInConsole = false)
 
             try {
-                // Execute the segment
-                segment.execute.invoke(context)
+                // Execute the segment with logger in context
+                val contextWithLogger = context.copy(logger = logger)
+                segment.execute.invoke(contextWithLogger)
 
                 val endTime = System.currentTimeMillis()
                 val duration = endTime - startTime

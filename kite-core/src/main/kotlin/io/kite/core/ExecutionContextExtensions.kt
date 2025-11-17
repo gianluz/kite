@@ -82,7 +82,24 @@ suspend fun ExecutionContext.exec(
     val provider = ProcessExecutionContext.getProvider()
         ?: throw IllegalStateException("Process execution not available. Are you running outside a segment?")
 
-    return provider.execute(command, *args, workingDir = workingDir, timeout = timeout)
+    // Log command execution
+    logger.logCommandStart("$command ${args.joinToString(" ")}")
+
+    val startTime = System.currentTimeMillis()
+    val result = try {
+        provider.execute(command, *args, workingDir = workingDir, timeout = timeout)
+    } catch (e: Exception) {
+        val duration = System.currentTimeMillis() - startTime
+        logger.logCommandComplete("$command ${args.joinToString(" ")}", -1, duration)
+        logger.error("Command failed: ${e.message}")
+        throw e
+    }
+
+    // Log command output and completion
+    logger.logCommandOutput(result.output, isError = result.exitCode != 0)
+    logger.logCommandComplete("$command ${args.joinToString(" ")}", result.exitCode, result.duration)
+
+    return result
 }
 
 /**
@@ -97,7 +114,21 @@ suspend fun ExecutionContext.execOrNull(
     val provider = ProcessExecutionContext.getProvider()
         ?: throw IllegalStateException("Process execution not available. Are you running outside a segment?")
 
-    return provider.executeOrNull(command, *args, workingDir = workingDir, timeout = timeout)
+    // Log command execution
+    logger.logCommandStart("$command ${args.joinToString(" ")}")
+
+    val startTime = System.currentTimeMillis()
+    val result = provider.executeOrNull(command, *args, workingDir = workingDir, timeout = timeout)
+
+    if (result != null) {
+        logger.logCommandOutput(result.output, isError = result.exitCode != 0)
+        logger.logCommandComplete("$command ${args.joinToString(" ")}", result.exitCode, result.duration)
+    } else {
+        val duration = System.currentTimeMillis() - startTime
+        logger.logCommandComplete("$command ${args.joinToString(" ")}", -1, duration)
+    }
+
+    return result
 }
 
 /**
@@ -111,5 +142,22 @@ suspend fun ExecutionContext.shell(
     val provider = ProcessExecutionContext.getProvider()
         ?: throw IllegalStateException("Process execution not available. Are you running outside a segment?")
 
-    return provider.shell(command, workingDir = workingDir, timeout = timeout)
+    // Log command execution
+    logger.logCommandStart(command)
+
+    val startTime = System.currentTimeMillis()
+    val result = try {
+        provider.shell(command, workingDir = workingDir, timeout = timeout)
+    } catch (e: Exception) {
+        val duration = System.currentTimeMillis() - startTime
+        logger.logCommandComplete(command, -1, duration)
+        logger.error("Shell command failed: ${e.message}")
+        throw e
+    }
+
+    // Log command output and completion
+    logger.logCommandOutput(result.output, isError = result.exitCode != 0)
+    logger.logCommandComplete(command, result.exitCode, result.duration)
+
+    return result
 }

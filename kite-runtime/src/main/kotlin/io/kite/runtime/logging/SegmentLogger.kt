@@ -31,7 +31,7 @@ class SegmentLogger(
     private val segmentName: String,
     private val logDir: File = File(".kite/logs"),
     private val showInConsole: Boolean = false
-) {
+) : io.kite.core.SegmentLoggerInterface {
 
     private val logFile: File = logDir.resolve("$segmentName.log")
     private val buffer = StringBuilder()
@@ -73,35 +73,35 @@ class SegmentLogger(
     /**
      * Logs an info message.
      */
-    fun info(message: String) {
+    override fun info(message: String) {
         logToFile(message, "INFO")
     }
 
     /**
      * Logs a debug message.
      */
-    fun debug(message: String) {
+    override fun debug(message: String) {
         logToFile(message, "DEBUG")
     }
 
     /**
      * Logs a warning message.
      */
-    fun warn(message: String) {
+    override fun warn(message: String) {
         logToFile(message, "WARN")
     }
 
     /**
      * Logs an error message.
      */
-    fun error(message: String) {
+    override fun error(message: String) {
         logToFile(message, "ERROR")
     }
 
     /**
      * Logs command execution start.
      */
-    fun logCommandStart(command: String) {
+    override fun logCommandStart(command: String) {
         val timestamp = LocalDateTime.now().format(timeFormat)
         val logEntry = "[$timestamp] [$segmentName] $ $command"
 
@@ -119,7 +119,7 @@ class SegmentLogger(
     /**
      * Logs command output line by line with timestamps.
      */
-    fun logCommandOutput(output: String, isError: Boolean = false) {
+    override fun logCommandOutput(output: String, isError: Boolean) {
         if (output.isBlank()) return
 
         output.lines().forEach { line ->
@@ -144,7 +144,7 @@ class SegmentLogger(
     /**
      * Logs command completion.
      */
-    fun logCommandComplete(command: String, exitCode: Int, durationMs: Long) {
+    override fun logCommandComplete(command: String, exitCode: Int, durationMs: Long) {
         val timestamp = LocalDateTime.now().format(timeFormat)
         val status = if (exitCode == 0) "✓" else "✗"
         val message = "Command $status (exit: $exitCode, ${durationMs}ms)"

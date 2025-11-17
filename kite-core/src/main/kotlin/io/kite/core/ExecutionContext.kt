@@ -18,6 +18,7 @@ import java.nio.file.Paths
  * @property environment Environment variables as a map
  * @property workspace The workspace root directory
  * @property artifacts Artifact manager for sharing data between segments
+ * @property logger Logger for this segment execution
  */
 data class ExecutionContext(
     val branch: String,
@@ -28,7 +29,8 @@ data class ExecutionContext(
     val ciPlatform: CIPlatform = CIPlatform.LOCAL,
     val environment: Map<String, String> = emptyMap(),
     val workspace: Path = Paths.get("."),
-    val artifacts: ArtifactManager = InMemoryArtifactManager()
+    val artifacts: ArtifactManager = InMemoryArtifactManager(),
+    val logger: SegmentLoggerInterface = NoOpLogger
 ) {
     /**
      * Gets an environment variable value.

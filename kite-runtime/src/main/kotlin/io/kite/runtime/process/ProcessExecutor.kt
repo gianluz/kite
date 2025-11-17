@@ -94,12 +94,6 @@ class ProcessExecutor {
         val fullCommand = listOf(command) + args
         val commandString = fullCommand.joinToString(" ")
 
-        // Get current logger (if available)
-        val logger = io.kite.runtime.logging.LogManager.getCurrentLogger()
-
-        // Log command start
-        logger?.logCommandStart(commandString)
-
         // Build process
         val processBuilder = ProcessBuilder(fullCommand)
             .directory(workingDir)
@@ -115,8 +109,7 @@ class ProcessExecutor {
             processBuilder.start()
         } catch (e: IOException) {
             val duration = System.currentTimeMillis() - startTime
-            logger?.logCommandComplete(commandString, -1, duration)
-
+            
             throw ProcessExecutionException(
                 command = commandString,
                 exitCode = -1,
@@ -152,11 +145,6 @@ class ProcessExecutor {
             val duration = System.currentTimeMillis() - startTime
             val output = outputJob.getCompleted()
 
-            // Log timeout
-            logger?.logCommandOutput(output)
-            logger?.logCommandComplete(commandString, -1, duration)
-            logger?.error("Process timed out after $timeout")
-
             throw ProcessExecutionException(
                 command = commandString,
                 exitCode = -1,
@@ -169,12 +157,6 @@ class ProcessExecutor {
 
         val duration = System.currentTimeMillis() - startTime
         val output = outputJob.await()
-
-        // Log command output
-        logger?.logCommandOutput(output)
-
-        // Log command completion
-        logger?.logCommandComplete(commandString, exitCode, duration)
 
         return@withContext when {
             exitCode == 0 -> ProcessResult.Success(
