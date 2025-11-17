@@ -46,3 +46,7 @@ test-output/
 
 # Local configuration
 local.properties
+
+# Presentations (sensitive)
+KITE_PRESENTATION.md
+*_PRESENTATION.md
