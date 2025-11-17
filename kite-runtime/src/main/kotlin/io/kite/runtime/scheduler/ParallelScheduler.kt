@@ -153,8 +153,8 @@ class ParallelScheduler(
             ProcessExecutionContext.setProvider(provider)
 
             // Set up logging for this segment
-            val logger = io.kite.runtime.logging.LogManager.startSegmentLogging(segment.name)
-            logger.startCapture()
+            // TODO: Get showInConsole flag from global options
+            val logger = io.kite.runtime.logging.LogManager.startSegmentLogging(segment.name, showInConsole = false)
 
             try {
                 // Execute the segment
@@ -171,7 +171,6 @@ class ParallelScheduler(
                 )
             } finally {
                 // Clean up logging
-                logger.stopCapture()
                 io.kite.runtime.logging.LogManager.stopSegmentLogging(segment.name)
 
                 // Clean up provider
@@ -181,9 +180,8 @@ class ParallelScheduler(
             val endTime = System.currentTimeMillis()
             val duration = endTime - startTime
 
-            // Stop logging to capture any error output
+            // Stop logging and capture output
             val logger = io.kite.runtime.logging.LogManager.getLogger(segment.name)
-            logger?.stopCapture()
             io.kite.runtime.logging.LogManager.stopSegmentLogging(segment.name)
 
             SegmentResult(

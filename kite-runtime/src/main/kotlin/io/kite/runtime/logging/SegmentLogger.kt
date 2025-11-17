@@ -2,32 +2,40 @@ package io.kite.runtime.logging
 
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.OutputStream
 import java.io.PrintStream
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 /**
+ * ANSI color codes for terminal output.
+ */
+object AnsiColors {
+    const val RESET = "\u001B[0m"
+    const val BLUE = "\u001B[34m"
+    const val RED = "\u001B[31m"
+    const val YELLOW = "\u001B[33m"
+    const val WHITE = "\u001B[37m"
+    const val BRIGHT_RED = "\u001B[91m"
+}
+
+/**
  * Logger for segment execution.
  *
  * Provides segment-specific logging that:
- * - Writes to a segment-specific log file
- * - Prefixes output with segment name for parallel execution visibility
- * - Stores logs in .kite/logs/ directory
- * - Captures stdout/stderr during segment execution
+ * - Writes to a segment-specific log file with timestamps
+ * - Can optionally show output in console with colors
+ * - Only captures output from THIS segment (no cross-contamination)
+ * - Logs command output, stdout, stderr separately
  */
 class SegmentLogger(
     private val segmentName: String,
-    private val logDir: File = File(".kite/logs")
+    private val logDir: File = File(".kite/logs"),
+    private val showInConsole: Boolean = false
 ) {
 
     private val logFile: File = logDir.resolve("$segmentName.log")
     private val buffer = StringBuilder()
     private val timeFormat = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
-
-    private val originalOut = System.out
-    private val originalErr = System.err
-    private var capturing = false
 
     init {
         // Create log directory if it doesn't exist
@@ -37,39 +45,11 @@ class SegmentLogger(
     }
 
     /**
-     * Starts capturing stdout and stderr for this segment.
-     */
-    fun startCapture() {
-        if (capturing) return
-        capturing = true
-
-        // Create prefixing streams
-        val prefixedOut = PrefixingPrintStream(originalOut, originalErr, segmentName, logFile, buffer)
-        val prefixedErr = PrefixingPrintStream(originalErr, originalErr, segmentName, logFile, buffer, isError = true)
-
-        // Replace system streams
-        System.setOut(prefixedOut)
-        System.setErr(prefixedErr)
-    }
-
-    /**
-     * Stops capturing and restores original streams.
-     */
-    fun stopCapture() {
-        if (!capturing) return
-        capturing = false
-
-        // Restore original streams
-        System.setOut(originalOut)
-        System.setErr(originalErr)
-    }
-
-    /**
      * Logs a message to the segment log file.
      */
-    fun log(message: String, level: LogLevel = LogLevel.INFO, showInConsole: Boolean = true) {
+    private fun logToFile(message: String, level: String) {
         val timestamp = LocalDateTime.now().format(timeFormat)
-        val logEntry = "[$timestamp] [${level.name}] $message"
+        val logEntry = "[$timestamp] [$segmentName] $message"
 
         // Write to buffer
         buffer.appendLine(logEntry)
@@ -77,38 +57,45 @@ class SegmentLogger(
         // Write to log file
         logFile.appendText(logEntry + "\n")
 
-        // Optionally show in console with segment prefix
+        // Optionally show in console with colors
         if (showInConsole) {
-            originalOut.println("[$segmentName] $message")
+            val timestampColored = "${AnsiColors.BLUE}[$timestamp]${AnsiColors.RESET}"
+            val segmentColored = "${AnsiColors.RED}[$segmentName]${AnsiColors.RESET}"
+            val coloredMessage = when (level) {
+                "ERROR" -> "${AnsiColors.BRIGHT_RED}$message${AnsiColors.RESET}"
+                "WARN" -> "${AnsiColors.YELLOW}$message${AnsiColors.RESET}"
+                else -> "${AnsiColors.WHITE}$message${AnsiColors.RESET}"
+            }
+            println("$timestampColored $segmentColored $coloredMessage")
         }
     }
 
     /**
      * Logs an info message.
      */
-    fun info(message: String, showInConsole: Boolean = true) {
-        log(message, LogLevel.INFO, showInConsole)
+    fun info(message: String) {
+        logToFile(message, "INFO")
     }
 
     /**
      * Logs a debug message.
      */
-    fun debug(message: String, showInConsole: Boolean = false) {
-        log(message, LogLevel.DEBUG, showInConsole)
+    fun debug(message: String) {
+        logToFile(message, "DEBUG")
     }
 
     /**
      * Logs a warning message.
      */
-    fun warn(message: String, showInConsole: Boolean = true) {
-        log(message, LogLevel.WARN, showInConsole)
+    fun warn(message: String) {
+        logToFile(message, "WARN")
     }
 
     /**
      * Logs an error message.
      */
-    fun error(message: String, showInConsole: Boolean = true) {
-        log(message, LogLevel.ERROR, showInConsole)
+    fun error(message: String) {
+        logToFile(message, "ERROR")
     }
 
     /**
@@ -116,28 +103,40 @@ class SegmentLogger(
      */
     fun logCommandStart(command: String) {
         val timestamp = LocalDateTime.now().format(timeFormat)
-        val logEntry = "[$timestamp] [EXEC] $ $command"
+        val logEntry = "[$timestamp] [$segmentName] $ $command"
 
         buffer.appendLine(logEntry)
         logFile.appendText(logEntry + "\n")
 
-        // Also show in console for visibility
-        originalOut.println("[$segmentName] [EXEC] $ $command")
+        // Show in console if enabled
+        if (showInConsole) {
+            val timestampColored = "${AnsiColors.BLUE}[$timestamp]${AnsiColors.RESET}"
+            val segmentColored = "${AnsiColors.RED}[$segmentName]${AnsiColors.RESET}"
+            println("$timestampColored $segmentColored ${AnsiColors.WHITE}$ $command${AnsiColors.RESET}")
+        }
     }
 
     /**
      * Logs command output line by line with timestamps.
      */
-    fun logCommandOutput(output: String) {
+    fun logCommandOutput(output: String, isError: Boolean = false) {
         if (output.isBlank()) return
 
         output.lines().forEach { line ->
             if (line.isNotEmpty()) {
                 val timestamp = LocalDateTime.now().format(timeFormat)
-                val logEntry = "[$timestamp] [OUT] $line"
+                val logEntry = "[$timestamp] [$segmentName] $line"
 
                 buffer.appendLine(logEntry)
                 logFile.appendText(logEntry + "\n")
+
+                // Show in console if enabled
+                if (showInConsole) {
+                    val timestampColored = "${AnsiColors.BLUE}[$timestamp]${AnsiColors.RESET}"
+                    val segmentColored = "${AnsiColors.RED}[$segmentName]${AnsiColors.RESET}"
+                    val color = if (isError) AnsiColors.BRIGHT_RED else AnsiColors.WHITE
+                    println("$timestampColored $segmentColored $color$line${AnsiColors.RESET}")
+                }
             }
         }
     }
@@ -147,11 +146,20 @@ class SegmentLogger(
      */
     fun logCommandComplete(command: String, exitCode: Int, durationMs: Long) {
         val timestamp = LocalDateTime.now().format(timeFormat)
-        val status = if (exitCode == 0) "SUCCESS" else "FAILED"
-        val logEntry = "[$timestamp] [EXEC] Command $status (exit code: $exitCode, duration: ${durationMs}ms)"
+        val status = if (exitCode == 0) "✓" else "✗"
+        val message = "Command $status (exit: $exitCode, ${durationMs}ms)"
+        val logEntry = "[$timestamp] [$segmentName] $message"
 
         buffer.appendLine(logEntry)
         logFile.appendText(logEntry + "\n")
+
+        // Show in console if enabled
+        if (showInConsole) {
+            val timestampColored = "${AnsiColors.BLUE}[$timestamp]${AnsiColors.RESET}"
+            val segmentColored = "${AnsiColors.RED}[$segmentName]${AnsiColors.RESET}"
+            val color = if (exitCode == 0) AnsiColors.WHITE else AnsiColors.BRIGHT_RED
+            println("$timestampColored $segmentColored $color$message${AnsiColors.RESET}")
+        }
     }
 
     /**
@@ -163,76 +171,6 @@ class SegmentLogger(
      * Gets the log file path.
      */
     fun getLogFilePath(): String = logFile.absolutePath
-}
-
-/**
- * PrintStream that prefixes each line with segment name and timestamp.
- */
-private class PrefixingPrintStream(
-    private val originalOut: PrintStream,
-    private val originalErr: PrintStream,
-    private val segmentName: String,
-    private val logFile: File,
-    private val buffer: StringBuilder,
-    private val isError: Boolean = false
-) : PrintStream(ByteArrayOutputStream()) {
-
-    private val lineBuffer = StringBuilder()
-    private val timeFormat = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
-
-    override fun write(b: Int) {
-        val char = b.toChar()
-
-        if (char == '\n') {
-            flushLine()
-        } else {
-            lineBuffer.append(char)
-        }
-    }
-
-    override fun write(buf: ByteArray, off: Int, len: Int) {
-        val text = String(buf, off, len)
-
-        for (char in text) {
-            if (char == '\n') {
-                flushLine()
-            } else {
-                lineBuffer.append(char)
-            }
-        }
-    }
-
-    private fun flushLine() {
-        if (lineBuffer.isEmpty()) {
-            // Just output newline
-            originalOut.println()
-            logFile.appendText("\n")
-            return
-        }
-
-        val line = lineBuffer.toString()
-        lineBuffer.clear()
-
-        // Add timestamp to log file
-        val timestamp = LocalDateTime.now().format(timeFormat)
-        val logEntry = "[$timestamp] [LOG] $line"
-
-        // Write to buffer (for getOutput())
-        buffer.appendLine(line)
-
-        // Write to log file with timestamp
-        logFile.appendText(logEntry + "\n")
-
-        // Write to console with prefix (no timestamp for console)
-        originalOut.println("[$segmentName] $line")
-    }
-
-    override fun flush() {
-        if (lineBuffer.isNotEmpty()) {
-            flushLine()
-        }
-        super.flush()
-    }
 }
 
 /**
@@ -273,10 +211,11 @@ object LogManager {
     /**
      * Creates a logger for a segment and sets it as current for this thread.
      */
-    fun startSegmentLogging(segmentName: String): SegmentLogger {
+    fun startSegmentLogging(segmentName: String, showInConsole: Boolean = false): SegmentLogger {
         val logger = SegmentLogger(
             segmentName = segmentName,
-            logDir = config.logDir
+            logDir = config.logDir,
+            showInConsole = showInConsole
         )
         activeLoggers[segmentName] = logger
         currentLogger.set(logger)
