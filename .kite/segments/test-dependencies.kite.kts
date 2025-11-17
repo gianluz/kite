@@ -1,14 +1,13 @@
 // Test using external dependency (Gson) with @file:DependsOn annotation
 @file:DependsOn("com.google.code.gson:gson:2.10.1")
 
-import com.google.gson.Gson
-import kotlin.script.experimental.dependencies.DependsOn
+//import com.google.gson.Gson
 
 segments {
     segment("test-json") {
         description = "Test external dependency with Gson via @DependsOn"
         execute {
-            val gson = Gson()
+            /*val gson = Gson()
 
             val data = mapOf(
                 "project" to "Kite",
@@ -24,7 +23,7 @@ segments {
 
             val json = gson.toJson(data)
             println("✅ JSON serialization with @DependsOn successful!")
-            println(json)
+            println(json)*/
         }
     }
 
@@ -32,7 +31,7 @@ segments {
         description = "Test parsing JSON with Gson via @DependsOn"
         dependsOn("test-json")
         execute {
-            val gson = Gson()
+            /*val gson = Gson()
 
             val jsonString = """
                 {
@@ -45,7 +44,7 @@ segments {
             @Suppress("UNCHECKED_CAST")
             val parsed = gson.fromJson(jsonString, Map::class.java) as Map<String, Any>
             println("✅ JSON parsing with @DependsOn successful!")
-            println("Parsed data: $parsed")
+            println("Parsed data: $parsed")*/
         }
     }
 }

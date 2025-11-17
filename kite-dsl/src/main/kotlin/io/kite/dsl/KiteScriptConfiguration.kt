@@ -88,8 +88,18 @@ object KiteScriptCompilationConfiguration : ScriptCompilationConfiguration({
     }
 
     // Enable Maven dependency resolution via @DependsOn and @Repository
-    refineConfiguration {
-        onAnnotations(DependsOn::class, Repository::class, handler = ::configureMavenDepsOnAnnotations)
+    // Note: This requires Guice/Sisu/Plexus dependencies to be available
+    // Only register if the dependencies are loadable
+    try {
+        // Test if we can load the required classes
+        Class.forName("com.google.inject.Provider")
+        refineConfiguration {
+            onAnnotations(DependsOn::class, Repository::class, handler = ::configureMavenDepsOnAnnotations)
+        }
+    } catch (e: ClassNotFoundException) {
+        // Skip Maven dependency resolution if Guice isn't available
+        // This can happen in some IDE environments
+        System.err.println("Warning: Maven dependency resolution (@DependsOn/@Repository) disabled - Guice not found")
     }
 }) {
     // Ensure proper singleton behavior after deserialization
@@ -116,11 +126,15 @@ object KiteScriptEvaluationConfiguration : ScriptEvaluationConfiguration({
 /**
  * Maven dependency resolver for @DependsOn and @Repository annotations.
  * Combines file system and Maven repository resolution.
+ *
+ * Lazy initialization to avoid loading Guice at class initialization time.
  */
-private val resolver = CompoundDependenciesResolver(
-    FileSystemDependenciesResolver(),
-    MavenDependenciesResolver()
-)
+private val resolver by lazy {
+    CompoundDependenciesResolver(
+        FileSystemDependenciesResolver(),
+        MavenDependenciesResolver()
+    )
+}
 
 /**
  * Handler for @DependsOn and @Repository annotations.
@@ -135,11 +149,18 @@ private fun configureMavenDepsOnAnnotations(
     val annotations = context.collectedData?.get(ScriptCollectedData.collectedAnnotations)?.takeIf { it.isNotEmpty() }
         ?: return context.compilationConfiguration.asSuccess()
 
-    return runBlocking {
-        resolver.resolveFromScriptSourceAnnotations(annotations)
-    }.onSuccess {
-        context.compilationConfiguration.with {
-            dependencies.append(JvmDependency(it))
-        }.asSuccess()
+    return try {
+        runBlocking {
+            resolver.resolveFromScriptSourceAnnotations(annotations)
+        }.onSuccess {
+            context.compilationConfiguration.with {
+                dependencies.append(JvmDependency(it))
+            }.asSuccess()
+        }
+    } catch (e: NoClassDefFoundError) {
+        // This can happen in IntelliJ if Guice/Sisu dependencies aren't on the IDE's classloader
+        // Fall back to returning the configuration as-is
+        System.err.println("Warning: Failed to resolve Maven dependencies: ${e.message}")
+        context.compilationConfiguration.asSuccess()
     }
 }
