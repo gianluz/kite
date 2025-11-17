@@ -11,10 +11,11 @@ dependencies {
 
     // IDE Support: These dependencies are needed for IntelliJ to properly support
     // @DependsOn and @Repository annotations in .kite.kts files
-    // They must be 'implementation' (not compileOnly) so they're available for script loading
-    implementation("com.google.inject:guice:4.2.2")
-    implementation("org.eclipse.sisu:org.eclipse.sisu.inject:0.3.5")
-    implementation("javax.inject:javax.inject:1")
+    // They are already included transitively at runtime via kotlin-scripting-dependencies-maven
+    // but need to be explicitly declared for IDE script definition loading
+    compileOnly("com.google.inject:guice:4.2.2")
+    compileOnly("org.eclipse.sisu:org.eclipse.sisu.inject:0.3.5")
+    compileOnly("javax.inject:javax.inject:1")
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
