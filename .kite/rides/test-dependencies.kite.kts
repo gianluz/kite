@@ -1,5 +1,5 @@
 ride {
-    name = "Test Dependencies"
+    name = "TestDependencies"
 
     flow {
         segment("test-json")
