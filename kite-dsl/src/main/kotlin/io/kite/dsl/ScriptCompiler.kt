@@ -36,9 +36,8 @@ class ScriptCompiler(
             return ResultWithDiagnostics.Success(compilationCache[cacheKey]!!)
         }
 
-        // Compile the script
-        val compilationConfiguration = createJvmCompilationConfigurationFromTemplate<KiteScript>()
-        val result = scriptingHost.compiler(file.toScriptSource(), compilationConfiguration)
+        // Compile the script using our custom configuration
+        val result = scriptingHost.compiler(file.toScriptSource(), KiteScriptCompilationConfiguration)
 
         // Cache successful compilation
         if (result is ResultWithDiagnostics.Success && enableCache) {
