@@ -91,7 +91,11 @@ object KiteScriptCompilationConfiguration : ScriptCompilationConfiguration({
     refineConfiguration {
         onAnnotations(DependsOn::class, Repository::class, handler = ::configureMavenDepsOnAnnotations)
     }
-})
+}) {
+    // Ensure proper singleton behavior after deserialization
+    @Suppress("unused")
+    private fun readResolve(): Any = KiteScriptCompilationConfiguration
+}
 
 /**
  * Evaluation configuration for Kite scripts.
@@ -103,7 +107,11 @@ object KiteScriptEvaluationConfiguration : ScriptEvaluationConfiguration({
     jvm {
         // No special JVM options needed for now
     }
-})
+}) {
+    // Ensure proper singleton behavior after deserialization
+    @Suppress("unused")
+    private fun readResolve(): Any = KiteScriptEvaluationConfiguration
+}
 
 /**
  * Maven dependency resolver for @DependsOn and @Repository annotations.
