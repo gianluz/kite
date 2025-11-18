@@ -1,5 +1,5 @@
 ride {
-    name = "MR Validation"
+    name = "MR"
     maxConcurrency = 4
     
     flow {
@@ -13,6 +13,7 @@ ride {
             segment("test-dsl")
             segment("test-runtime")
             segment("test-cli")
+            segment("test-integration")
         }
         
         // Finally: Full build to ensure everything compiles
