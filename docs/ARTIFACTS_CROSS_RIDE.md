@@ -1,268 +1,231 @@
 # Cross-Ride Artifact Usage
 
-How to use artifacts from a previous ride/CI job in a new ride.
+**✅ SOLVED**: As of the latest version, Kite automatically handles cross-ride artifact sharing using a manifest file!
 
-## The Problem
+## The Solution: Automatic Manifest
 
-When you download artifacts from CI to `.kite/artifacts/`, they're just files. The new ride doesn't know about them:
+Kite now automatically saves and restores artifact metadata in `.kite/artifacts/.manifest.json`:
 
-```yaml
-# Job 1: Build
-- run: kite ride BUILD  # Creates artifacts
-- uses: actions/upload-artifact@v4  # Uploads .kite/artifacts/
-
-# Job 2: Test (clean machine)
-- uses: actions/download-artifact@v4  # Downloads to .kite/artifacts/
-- run: kite ride TEST  # ❌ artifacts.get("apk") returns null!
-```
-
-**Why?** Because `artifacts.get("apk")` only knows about artifacts created **in the current ride execution**.
-
-## Solution 1: Use File Paths Directly (Simplest)
-
-Instead of using `artifacts.get()`, just reference the files directly:
-
-```kotlin
-// In TEST ride (uses artifacts from BUILD ride)
-segment("test-apk") {
-    execute {
-        // Don't use artifacts.get() - just use the file path!
-        val apk = File(".kite/artifacts/apk")
-        
-        if (!apk.exists()) {
-            error("APK not found at ${apk.absolutePath}")
-        }
-        
-        println("Testing APK: ${apk.absolutePath}")
-        exec("adb", "install", apk.absolutePath)
-        exec("adb", "shell", "am", "instrument", "-w", "com.example.test")
-    }
+```json
+{
+  "artifacts": {
+    "apk": {
+      "name": "apk",
+      "relativePath": "apk",
+      "type": "file",
+      "sizeBytes": 5242880,
+      "createdAt": 1763482090374
+    },
+    ...
+  },
+  "rideName": "BUILD",
+  "timestamp": 1763482090374,
+  "version": 1
 }
 ```
 
-**Pros:**
+**How it works:**
 
-- ✅ Simple and direct
-- ✅ Works across rides/jobs
-- ✅ No complexity
-
-**Cons:**
-
-- ❌ Loses the artifact dependency tracking
-- ❌ No automatic validation that artifact exists
+1. After ride completes: Kite saves manifest with all artifact metadata
+2. CI uploads `.kite/artifacts/` (including `.manifest.json`)
+3. CI downloads to new job/machine
+4. Before ride starts: Kite restores artifacts from manifest
+5. `artifacts.get()` now works! ✅
 
 ---
 
-## Solution 2: Recreate Artifact Registrations
+## Usage in Multi-Job CI
 
-If you want to keep using `artifacts.get()`, you need to "re-register" the artifacts in the new ride:
-
-```kotlin
-// In TEST ride
-segment("register-artifacts") {
-    description = "Registers artifacts from previous ride"
-    
-    execute {
-        // Manually register artifacts that were downloaded from CI
-        val apkPath = workspace.resolve(".kite/artifacts/apk")
-        if (apkPath.toFile().exists()) {
-            artifacts.put("apk", apkPath)
-            println("✅ Registered artifact: apk")
-        } else {
-            error("Artifact 'apk' not found in .kite/artifacts/")
-        }
-        
-        val mappingPath = workspace.resolve(".kite/artifacts/mapping")
-        if (mappingPath.toFile().exists()) {
-            artifacts.put("mapping", mappingPath)
-            println("✅ Registered artifact: mapping")
-        }
-    }
-}
-
-segment("test-apk") {
-    dependsOn("register-artifacts")
-    
-    execute {
-        // Now artifacts.get() works!
-        val apk = artifacts.get("apk")?.toFile()
-        if (apk == null) error("APK artifact not found")
-        
-        exec("adb", "install", apk.absolutePath)
-    }
-}
-
-ride {
-    name = "TEST"
-    flow {
-        segment("register-artifacts")  // First!
-        segment("test-apk")
-    }
-}
-```
-
-**Pros:**
-
-- ✅ Keeps using `artifacts.get()`
-- ✅ Can validate artifacts exist
-- ✅ Clear dependency tracking
-
-**Cons:**
-
-- ❌ Extra boilerplate segment
-- ❌ Need to know artifact names
-
----
-
-## Solution 3: Smart Helper Function
-
-Create a helper that tries both:
-
-```kotlin
-segment("test-apk") {
-    execute {
-        // Helper function that checks both artifact manager and file system
-        fun getArtifactOrFile(name: String): File? {
-            // Try artifact manager first (same-ride artifacts)
-            val fromArtifacts = artifacts.get(name)?.toFile()
-            if (fromArtifacts?.exists() == true) return fromArtifacts
-            
-            // Try .kite/artifacts/ directly (cross-ride artifacts)
-            val fromFS = File(".kite/artifacts/$name")
-            if (fromFS.exists()) return fromFS
-            
-            return null
-        }
-        
-        val apk = getArtifactOrFile("apk")
-        if (apk == null) error("APK not found")
-        
-        exec("adb", "install", apk.absolutePath)
-    }
-}
-```
-
-**Pros:**
-
-- ✅ Works for both same-ride and cross-ride artifacts
-- ✅ No need to register artifacts
-- ✅ Clean API
-
-**Cons:**
-
-- ❌ Need to copy helper to each segment
-
----
-
-## Recommended Patterns
-
-### Pattern A: Single-Job CI (No Cross-Ride Issues)
-
-**Best for:** All work in one CI job
-
-```yaml
-# GitHub Actions
-- run: kite ride FULL-CI  # Build + Test + Deploy all in one ride
-```
-
-```kotlin
-ride {
-    name = "FULL-CI"
-    flow {
-        segment("build")     // Creates artifacts
-        segment("test")      // Uses artifacts via artifacts.get()
-        segment("deploy")    // Uses artifacts via artifacts.get()
-    }
-}
-```
-
-**✅ No issues** - everything in one ride execution.
-
----
-
-### Pattern B: Multi-Job CI with File Paths (Simplest)
-
-**Best for:** Build/test/deploy in separate jobs
+### GitHub Actions Example
 
 ```yaml
 jobs:
   build:
+    runs-on: ubuntu-latest
     steps:
-      - run: kite ride BUILD
-      - uses: actions/upload-artifact@v4
+      - uses: actions/checkout@v4
+      
+      - name: Build APK
+        run: kite ride BUILD
+        # Automatically saves .kite/artifacts/.manifest.json
+      
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
-          path: .kite/artifacts/
+          path: .kite/artifacts/  # Includes manifest!
   
   test:
     needs: build
+    runs-on: macos-latest  # Different machine!
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v4
+      
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
         with:
           name: build-artifacts
-          path: .kite/artifacts/
-      - run: kite ride TEST
+          path: .kite/artifacts/  # Includes manifest!
+      
+      - name: Run Tests
+        run: kite ride TEST
+        # Automatically restores artifacts from manifest
+        # artifacts.get("apk") works! ✅
 ```
 
+### Kite Rides
+
 ```kotlin
-// BUILD ride
-segment("build") {
+// BUILD ride (Job 1)
+segment("build-apk") {
     outputs {
         artifact("apk", "app/build/outputs/apk/release/app.apk")
+        artifact("mapping", "app/build/outputs/mapping/release/mapping.txt")
     }
     execute {
         exec("./gradlew", "assembleRelease")
     }
 }
 
-// TEST ride (different job/machine)
+// TEST ride (Job 2 - different machine)
+segment("test-apk") {
+    inputs {
+        artifact("apk")  // Declares dependency
+    }
+    
+    execute {
+        // artifacts.get() now works across jobs! ✅
+        val apk = artifacts.get("apk")?.toFile()
+        if (apk == null) error("APK artifact not found")
+        
+        exec("adb", "install", "-r", apk.absolutePath)
+        exec("adb", "shell", "am", "instrument", "-w", "com.example.test")
+    }
+}
+```
+
+---
+
+## How It Works
+
+### 1. Artifact Creation (Build Job)
+
+```kotlin
+segment("build") {
+    outputs {
+        artifact("apk", "app.apk")
+    }
+    execute {
+        exec("./gradlew", "assembleRelease")
+        // After segment succeeds:
+        // - APK copied to .kite/artifacts/apk
+        // - Tracked in ArtifactManager
+    }
+}
+
+// After ride completes:
+// - Manifest saved to .kite/artifacts/.manifest.json
+// - Contains metadata for all artifacts
+```
+
+**Manifest:**
+
+```json
+{
+  "artifacts": {
+    "apk": {
+      "name": "apk",
+      "relativePath": "apk",
+      "type": "file",
+      "sizeBytes": 5242880,
+      "createdAt": 1763482090374
+    }
+  },
+  "rideName": "BUILD",
+  "timestamp": 1763482090374
+}
+```
+
+### 2. CI Upload
+
+```yaml
+- uses: actions/upload-artifact@v4
+  with:
+    path: .kite/artifacts/  # Uploads both apk AND .manifest.json
+```
+
+### 3. CI Download (New Job)
+
+```yaml
+- uses: actions/download-artifact@v4
+  with:
+    path: .kite/artifacts/  # Downloads both apk AND .manifest.json
+```
+
+### 4. Artifact Restoration (Test Job)
+
+```kotlin
+// Before ride starts, Kite automatically:
+// 1. Reads .kite/artifacts/.manifest.json
+// 2. Finds: apk -> .kite/artifacts/apk
+// 3. Registers in ArtifactManager: artifacts["apk"] = Path(".kite/artifacts/apk")
+
 segment("test") {
     execute {
-        // Use file path directly - simpler!
-        val apk = File(".kite/artifacts/apk")
-        if (!apk.exists()) error("APK not found")
-        
+        val apk = artifacts.get("apk")?.toFile()  // ✅ Works!
         exec("adb", "install", apk.absolutePath)
     }
 }
 ```
 
-**✅ Recommended** - simple and works everywhere.
-
 ---
 
-### Pattern C: Multi-Job CI with Registration
+## Technical Details
 
-**Best for:** Want to keep artifact tracking
+### Thread-Safe Implementation
+
+The manifest uses:
+
+- **kotlinx.serialization** for JSON persistence
+- **ReentrantReadWriteLock** for thread-safe reads/writes
+- **Atomic file operations** (write to temp, atomic rename)
+- **ConcurrentHashMap** in ArtifactManager for tracking
+
+### Manifest Schema
 
 ```kotlin
-// TEST ride
-segment("register-build-artifacts") {
-    execute {
-        // Register artifacts downloaded from previous job
-        val artifactsDir = File(".kite/artifacts")
-        artifactsDir.listFiles()?.forEach { file ->
-            artifacts.put(file.name, file.toPath())
-            println("Registered: ${file.name}")
-        }
-    }
-}
+@Serializable
+data class ArtifactManifestData(
+    val artifacts: Map<String, ArtifactEntry> = emptyMap(),
+    val rideName: String? = null,
+    val timestamp: Long = System.currentTimeMillis(),
+    val version: Int = 1
+)
 
-segment("test") {
-    dependsOn("register-build-artifacts")
-    execute {
-        val apk = artifacts.get("apk")?.toFile()!!
-        exec("adb", "install", apk.absolutePath)
-    }
-}
+@Serializable
+data class ArtifactEntry(
+    val name: String,
+    val relativePath: String,  // Relative to .kite/artifacts/
+    val type: String,           // "file" or "directory"
+    val sizeBytes: Long,
+    val createdAt: Long
+)
+```
 
-ride {
-    name = "TEST"
-    flow {
-        segment("register-build-artifacts")  // First!
-        segment("test")
-    }
-}
+### Automatic Operations
+
+**On Ride Start:**
+
+```kotlin
+artifactManager.restoreFromManifest(File(".kite/artifacts"))
+// Reads manifest, registers all artifacts
+```
+
+**On Ride Complete:**
+
+```kotlin
+artifactManager.saveManifest(File(".kite/artifacts"), rideName)
+// Saves manifest with all current artifacts
 ```
 
 ---
@@ -277,38 +240,41 @@ name: Android CI/CD
 on: [push]
 
 jobs:
-  # Job 1: Build on Linux
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       
-      - name: Build APK
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
+      - name: Build with Kite
         run: kite ride BUILD-ANDROID
       
-      - name: Upload Build Artifacts
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: android-artifacts
           path: .kite/artifacts/
   
-  # Job 2: Test on different machine
   test:
     needs: build
     runs-on: macos-latest  # Different OS!
     steps:
       - uses: actions/checkout@v4
       
-      - name: Download Build Artifacts
+      - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
           name: android-artifacts
           path: .kite/artifacts/
       
-      - name: Run Tests
+      - name: Test with Kite
         run: kite ride TEST-ANDROID
   
-  # Job 3: Deploy
   deploy:
     needs: [build, test]
     runs-on: ubuntu-latest
@@ -316,13 +282,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Download Build Artifacts
+      - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
           name: android-artifacts
           path: .kite/artifacts/
       
-      - name: Deploy to Play Store
+      - name: Deploy with Kite
         run: kite ride DEPLOY-ANDROID
         env:
           PLAY_STORE_KEY: ${{ secrets.PLAY_STORE_KEY }}
@@ -331,59 +297,50 @@ jobs:
 ### Kite Rides
 
 ```kotlin
-// BUILD-ANDROID ride (Job 1)
+// BUILD-ANDROID ride
 segment("build-apk") {
     outputs {
-        artifact("apk", "app/build/outputs/apk/release/app-release.apk")
+        artifact("debug-apk", "app/build/outputs/apk/debug/app-debug.apk")
+        artifact("release-apk", "app/build/outputs/apk/release/app-release.apk")
         artifact("mapping", "app/build/outputs/mapping/release/mapping.txt")
     }
     execute {
-        exec("./gradlew", "assembleRelease")
+        exec("./gradlew", "assembleDebug", "assembleRelease")
     }
 }
 
 ride {
     name = "BUILD-ANDROID"
-    flow {
-        segment("build-apk")
-    }
+    flow { segment("build-apk") }
 }
 
-// TEST-ANDROID ride (Job 2 - different machine)
-segment("test-apk") {
+// TEST-ANDROID ride (different job)
+segment("test-debug") {
+    inputs {
+        artifact("debug-apk")  // From BUILD-ANDROID
+    }
     execute {
-        // Use file path directly - works across jobs!
-        val apk = File(".kite/artifacts/apk")
-        if (!apk.exists()) {
-            error("APK not found. Make sure artifacts were downloaded from previous job.")
-        }
-        
-        println("Installing APK: ${apk.absolutePath}")
+        val apk = artifacts.get("debug-apk")?.toFile()!!
         exec("adb", "install", "-r", apk.absolutePath)
-        
-        println("Running instrumentation tests...")
         exec("adb", "shell", "am", "instrument", "-w", "com.example.test")
     }
 }
 
 ride {
     name = "TEST-ANDROID"
-    flow {
-        segment("test-apk")
-    }
+    flow { segment("test-debug") }
 }
 
-// DEPLOY-ANDROID ride (Job 3 - different machine)
-segment("deploy-to-playstore") {
+// DEPLOY-ANDROID ride (different job)
+segment("deploy-release") {
+    inputs {
+        artifact("release-apk")  // From BUILD-ANDROID
+        artifact("mapping")      // From BUILD-ANDROID
+    }
     execute {
-        // Use file paths directly
-        val apk = File(".kite/artifacts/apk")
-        val mapping = File(".kite/artifacts/mapping")
+        val apk = artifacts.get("release-apk")?.toFile()!!
+        val mapping = artifacts.get("mapping")?.toFile()!!
         
-        if (!apk.exists()) error("APK not found")
-        if (!mapping.exists()) error("Mapping file not found")
-        
-        println("Deploying APK: ${apk.absolutePath}")
         exec("fastlane", "supply",
             "--apk", apk.absolutePath,
             "--mapping", mapping.absolutePath,
@@ -394,51 +351,60 @@ segment("deploy-to-playstore") {
 
 ride {
     name = "DEPLOY-ANDROID"
-    flow {
-        segment("deploy-to-playstore")
-    }
+    flow { segment("deploy-release") }
 }
 ```
 
 ---
 
-## Comparison
+## Benefits
 
-| Approach | Same-Ride | Cross-Ride | Complexity |
-|----------|-----------|------------|------------|
-| **artifacts.get()** | ✅ Yes | ❌ No | Simple |
-| **File paths** | ✅ Yes | ✅ Yes | Simple |
-| **Register artifacts** | ✅ Yes | ✅ Yes | Medium |
-| **Helper function** | ✅ Yes | ✅ Yes | Medium |
+### ✅ No Manual Work
+
+- Manifest automatically saved/restored
+- No need to manually register artifacts
+- Just use `artifacts.get()` everywhere
+
+### ✅ Type-Safe
+
+- artifacts.get() returns `Path?`
+- Compile-time checking
+- No string-based file path errors
+
+### ✅ Dependency Tracking
+
+- `inputs {}` declares dependencies
+- `outputs {}` declares productions
+- Clear artifact flow
+
+### ✅ Thread-Safe
+
+- ConcurrentHashMap for tracking
+- ReentrantReadWriteLock for manifest
+- Atomic file operations
+
+### ✅ CI-Friendly
+
+- Standard directory: `.kite/artifacts/`
+- Just upload/download the directory
+- Manifest travels with artifacts
 
 ---
 
-## Recommendations
+## Fallback: Direct File Access
 
-### ✅ For Single-Ride Workflows
-
-```kotlin
-// Use artifacts.get() - clean and tracked
-val apk = artifacts.get("apk")?.toFile()!!
-```
-
-### ✅ For Multi-Job CI Workflows
+If you need to access artifacts without using `artifacts.get()`, you can still use file paths directly:
 
 ```kotlin
-// Use file paths - simple and works everywhere
-val apk = File(".kite/artifacts/apk")
-if (!apk.exists()) error("APK not found")
-```
-
-### ✅ For Complex Workflows
-
-```kotlin
-// Add registration segment if you want artifact tracking
-segment("register-artifacts") {
+segment("test") {
     execute {
-        File(".kite/artifacts").listFiles()?.forEach { file ->
-            artifacts.put(file.name, file.toPath())
-        }
+        // Option 1: Use artifacts.get() (recommended)
+        val apk = artifacts.get("apk")?.toFile()
+        
+        // Option 2: Direct file access (fallback)
+        val apkDirect = File(".kite/artifacts/apk")
+        
+        // Both work!
     }
 }
 ```
@@ -447,23 +413,11 @@ segment("register-artifacts") {
 
 ## Summary
 
-**The core issue:** `artifacts.get()` only knows about artifacts from the **current ride execution**.
+**The manifest solves the cross-ride problem automatically!**
 
-**The solution:** Use file paths directly when working across rides/jobs:
+1. **Build job**: Create artifacts → Manifest saved
+2. **CI**: Upload `.kite/artifacts/` (includes manifest)
+3. **Test job**: Download artifacts → Manifest restored
+4. **Use**: `artifacts.get()` works everywhere! ✅
 
-```kotlin
-// Instead of:
-val apk = artifacts.get("apk")?.toFile()!!  // ❌ null in new ride
-
-// Use:
-val apk = File(".kite/artifacts/apk")       // ✅ works everywhere
-```
-
-**Why this is good:**
-
-- ✅ Simple and explicit
-- ✅ Works across rides, jobs, machines
-- ✅ Standard directory structure
-- ✅ No hidden magic
-
-**The `.kite/artifacts/` directory is the contract!** As long as files are there, segments can use them. 🎯
+**No configuration needed. It just works.** 🎯
