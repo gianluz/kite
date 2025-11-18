@@ -31,6 +31,9 @@ Thumbs.db
 *.log
 .kite/logs/
 
+# Artifacts (build outputs - regenerated on each run)
+.kite/artifacts/
+
 # Temporary files
 *.tmp
 *.temp
