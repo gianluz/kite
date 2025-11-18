@@ -53,7 +53,12 @@ class RideCommand : CliktCommand(
                 Output.progress("Detecting platform...")
             }
             val platform = PlatformDetector.detect()
-            val context = platform.createContext(emptyMap())
+
+            // Create artifact manager with .kite/artifacts/ directory
+            val artifactsDir = File(".kite/artifacts").toPath()
+            val artifactManager = io.kite.core.FileSystemArtifactManager(artifactsDir)
+
+            val context = platform.createContext(emptyMap(), artifactManager)
 
             if (opts.verbose) {
                 Output.info("Platform: ${context.ciPlatform}")

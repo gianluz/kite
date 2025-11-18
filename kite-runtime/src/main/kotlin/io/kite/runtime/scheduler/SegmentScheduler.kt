@@ -142,6 +142,17 @@ class SequentialScheduler : SegmentScheduler {
                 val contextWithLogger = context.copy(logger = logger)
                 segment.execute.invoke(contextWithLogger)
 
+                // Store output artifacts if segment succeeded
+                segment.outputs.forEach { (artifactName, artifactPath) ->
+                    try {
+                        val fullPath = context.workspace.resolve(artifactPath)
+                        context.artifacts.put(artifactName, fullPath)
+                        logger.info("Stored artifact '$artifactName' from '$artifactPath'")
+                    } catch (e: Exception) {
+                        logger.warn("Failed to store artifact '$artifactName': ${e.message}")
+                    }
+                }
+
                 val endTime = System.currentTimeMillis()
                 val duration = endTime - startTime
 

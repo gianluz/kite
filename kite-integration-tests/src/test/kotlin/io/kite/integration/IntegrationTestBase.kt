@@ -80,7 +80,12 @@ abstract class IntegrationTestBase {
 
         // Create execution context with workspace as working directory
         val platform = PlatformDetector.detect()
-        val context = platform.createContext(emptyMap())
+
+        // Create artifact manager with test workspace artifacts directory
+        val artifactsDir = workspaceRoot.toPath().resolve(".kite/artifacts")
+        val artifactManager = io.kite.core.FileSystemArtifactManager(artifactsDir)
+
+        val context = platform.createContext(emptyMap(), artifactManager)
 
         // Change to workspace directory for execution
         val originalDir = System.getProperty("user.dir")

@@ -16,6 +16,8 @@ import kotlin.time.Duration
  * @property maxRetries Number of times to retry on failure (0 = no retries)
  * @property retryDelay Delay between retry attempts
  * @property retryOn List of exception types that should trigger a retry
+ * @property inputs List of artifact names this segment requires as inputs
+ * @property outputs Map of artifact names to file paths this segment produces
  * @property execute Lambda that performs the actual work of this segment
  */
 data class Segment(
@@ -27,6 +29,8 @@ data class Segment(
     val maxRetries: Int = 0,
     val retryDelay: Duration = Duration.ZERO,
     val retryOn: List<String> = emptyList(), // Exception class names
+    val inputs: List<String> = emptyList(), // Input artifact names
+    val outputs: Map<String, String> = emptyMap(), // Output artifact name -> path
     val execute: suspend ExecutionContext.() -> Unit
 ) {
     init {
