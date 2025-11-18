@@ -134,8 +134,11 @@ class SequentialScheduler : SegmentScheduler {
         context: ExecutionContext,
     ): SegmentResult {
         val startTime = System.currentTimeMillis()
+        var finalStatus = SegmentStatus.FAILURE
+        var finalError: String? = null
+        var finalException: Throwable? = null
 
-        return try {
+        try {
             // Set up process execution provider for this segment
             val provider = ProcessExecutionProviderImpl()
             ProcessExecutionContext.setProvider(provider)
@@ -160,23 +163,53 @@ class SequentialScheduler : SegmentScheduler {
                     }
                 }
 
-                val endTime = System.currentTimeMillis()
-                val duration = endTime - startTime
+                finalStatus = SegmentStatus.SUCCESS
 
-                SegmentResult(
-                    segment = segment,
-                    status = SegmentStatus.SUCCESS,
-                    durationMs = duration,
-                    logOutput = logger.getOutput(),
-                )
+                // Call onSuccess hook
+                segment.onSuccess?.invoke(contextWithLogger)
+
+            } catch (e: Exception) {
+                finalStatus = SegmentStatus.FAILURE
+                finalError = e.message
+                finalException = e
+
+                // Call onFailure hook
+                try {
+                    val contextWithLogger = context.copy(logger = logger)
+                    segment.onFailure?.invoke(contextWithLogger, e)
+                } catch (hookError: Exception) {
+                    logger.error("onFailure hook failed: ${hookError.message}")
+                }
             } finally {
+                // Call onComplete hook (always runs)
+                try {
+                    val contextWithLogger = context.copy(logger = logger)
+                    segment.onComplete?.invoke(contextWithLogger, finalStatus)
+                } catch (hookError: Exception) {
+                    logger.error("onComplete hook failed: ${hookError.message}")
+                }
+
                 // Clean up logging
                 io.kite.runtime.logging.LogManager.stopSegmentLogging(segment.name)
 
                 // Clean up provider
                 ProcessExecutionContext.clear()
             }
+
+            val endTime = System.currentTimeMillis()
+            val duration = endTime - startTime
+            val finalLogger = io.kite.runtime.logging.LogManager.getLogger(segment.name)
+
+            return SegmentResult(
+                segment = segment,
+                status = finalStatus,
+                error = finalError,
+                exception = finalException,
+                durationMs = duration,
+                logOutput = finalLogger?.getOutput(),
+            )
         } catch (e: Exception) {
+            // This catches setup/teardown errors
             val endTime = System.currentTimeMillis()
             val duration = endTime - startTime
 
@@ -184,7 +217,7 @@ class SequentialScheduler : SegmentScheduler {
             val logger = io.kite.runtime.logging.LogManager.getLogger(segment.name)
             io.kite.runtime.logging.LogManager.stopSegmentLogging(segment.name)
 
-            SegmentResult(
+            return SegmentResult(
                 segment = segment,
                 status = SegmentStatus.FAILURE,
                 error = e.message,

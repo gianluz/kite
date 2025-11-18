@@ -166,6 +166,23 @@ class RideCommand : CliktCommand(
                     scheduler.execute(segmentsToExecute, context)
                 }
 
+            // Call ride lifecycle hooks
+            kotlinx.coroutines.runBlocking {
+                if (result.isSuccess) {
+                    // Call onSuccess hook
+                    ride.onSuccess?.invoke()
+                } else {
+                    // Call onFailure hook with first error
+                    val firstError = result.failedSegments().firstOrNull()?.exception
+                    if (firstError != null) {
+                        ride.onFailure?.invoke(firstError)
+                    }
+                }
+
+                // Always call onComplete hook
+                ride.onComplete?.invoke(result.isSuccess)
+            }
+
             // Save artifact manifest for cross-ride/CI sharing
             artifactManager.saveManifest(artifactsDir.toFile())
             if (opts.verbose && artifactManager.list().isNotEmpty()) {
