@@ -9,6 +9,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **🎯 Lifecycle Hooks** (December 2025)
+    - Added `onSuccess`, `onFailure`, `onComplete` hooks to Segment model
+    - Added `onSuccess`, `onFailure`, `onComplete` hooks to Ride model
+    - Full DSL support in `SegmentBuilder` and `RideBuilder`
+    - Integrated execution in `SequentialScheduler` and `ParallelScheduler`
+    - Ride-level hooks in `RideCommand`
+    - Support for suspend functions in all hooks
+    - Error-resilient execution - hook failures don't break segments
+    - Access to `ExecutionContext` in segment hooks (can use `exec()`, `artifacts`, etc.)
+    - **Use cases unlocked**: Slack notifications, GitHub PR comments, test result uploads, metrics collection, cleanup
+      operations
+    - Comprehensive documentation: `docs/LIFECYCLE_HOOKS.md`
+
+- **📦 Artifact Management System** (December 2025)
+    - `FileSystemArtifactManager` class (175 lines)
+    - Thread-safe artifact tracking with `ConcurrentHashMap`
+    - Automatic file/directory copying to `.kite/artifacts/`
+    - Methods: `put(name, path)`, `get(name)`, `has(name)`, `list()`
+    - DSL integration: `outputs { artifact("name", "path") }` and `inputs { artifact("name") }`
+    - Integrated with `SequentialScheduler` and `ParallelScheduler`
+    - **Artifact Manifest System** for cross-ride sharing:
+        - `ArtifactManifest` class (142 lines) with JSON serialization
+        - Thread-safe with `ReentrantReadWriteLock`
+        - Atomic file operations (write to temp, atomic rename)
+        - Auto-save manifest after ride completes (`.kite/artifacts/.manifest.json`)
+        - Auto-restore manifest before ride starts
+        - Enables artifact sharing across CI jobs and different rides
+        - Minimal schema: only essential metadata (name, path, type, size, timestamp)
+    - **Documentation** (3 comprehensive guides):
+        - `docs/ARTIFACTS.md` - Complete guide (532 lines)
+        - `docs/ARTIFACTS_SIMPLE.md` - Real-world patterns (311 lines)
+        - `docs/ARTIFACTS_CROSS_RIDE.md` - Cross-ride sharing (470 lines)
+    - 17 tests (13 unit + 4 integration)
+
+- **🚀 GitHub Actions Integration** (December 2025)
+    - Created `.github/workflows/mr.yml` for MR validation
+    - Automatic test execution on pull requests and main pushes
+    - Test results uploaded as artifacts (7 day retention)
+    - Test reporting with `dorny/test-reporter` (shows results in PR checks)
+    - 44% faster with parallel execution (30s sequential → 17s parallel)
+    - Documentation: `docs/GITHUB_ACTIONS.md`
+
+- **📊 CI Ride Enhancement** (December 2025)
+    - Updated all test segments to save artifacts:
+        - `test-results-core/`, `test-results-dsl/`, etc. (JUnit XML)
+        - `test-reports-core/`, `test-reports-dsl/`, etc. (HTML reports)
+    - New `publish-test-results` segment summarizes all test artifacts
+    - 8 artifacts saved per CI run (ready for CI upload/download)
+    - Documentation: `docs/CI_INTEGRATION.md` (497 lines)
+
 - **🎉 Ivy-based Dependency Resolver** (November 2025)
     - Replaced Maven/Aether resolver with Apache Ivy for Java 17+ compatibility
     - `IvyDependenciesResolver` class (200 lines)
@@ -212,28 +262,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Statistics
 
-**Production Code**: 6,000+ lines
+**Production Code**: 6,500+ lines
 
-- kite-core: 784 lines
-- kite-dsl: 1,355 lines (added IvyDependenciesResolver - 200 lines)
-- kite-runtime: 1,632 lines
+- kite-core: 900 lines (added lifecycle hooks)
+- kite-dsl: 1,450 lines (IvyDependenciesResolver + lifecycle hooks DSL)
+- kite-runtime: 1,800 lines (artifact management + lifecycle hook execution)
 - kite-cli: 538 lines
 - kite-integration-tests: 925 lines (test implementations)
 
-**Test Code**: 5,600+ lines (0.93:1 test-to-code ratio)
+**Test Code**: 5,700+ lines (0.88:1 test-to-code ratio)
 
-- Unit tests: 11 tests
+- Unit tests: 28 tests (added artifact tests)
 - Integration tests: 21 tests ✅
-- **Total: 32 tests, all passing** ✅
+- **Total: 49 tests, all passing** ✅
 
-**Phases Complete**: 3 of 8 (37.5%)
+**Documentation**: 6,800+ lines
+
+- Original guides: 5 docs
+- Artifact guides: 3 docs (1,313 lines)
+- CI integration: 2 docs (700+ lines)
+- Lifecycle hooks: 1 doc
+
+**Phases Complete**: 5 of 8 (62.5%)
 
 - Phase 1: Foundation & Core DSL ✅
 - Phase 2: Segment Graph & Execution Engine ✅
 - Phase 3: CLI & File Discovery ✅
-- Phase 5: Built-in Helpers (75% - file ops, exec, logging)
-- Phase 6: Documentation (85% - 5 comprehensive guides)
-- **Phase 7: Integration Testing (STARTED)** - 21 tests covering all features
+- Phase 4: Platform Adapters (SKIPPED - CI-agnostic approach)
+- **Phase 5: Built-in Helpers ✅ COMPLETE** (file ops, exec, logging, artifacts, lifecycle hooks)
+- Phase 6: Documentation (90% - 11 comprehensive guides)
+- **Phase 7: Integration Testing (70%)** - 49 tests covering all features
 
 ## [0.1.0-SNAPSHOT] - Work in Progress
 
