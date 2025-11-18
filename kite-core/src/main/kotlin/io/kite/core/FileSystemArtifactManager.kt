@@ -13,9 +13,14 @@ import kotlin.io.path.isDirectory
  * This implementation stores artifacts in a dedicated directory (typically `.kite/artifacts/`).
  * Artifacts are copied to this directory when stored and can be retrieved by name.
  *
+ * Thread-safe: Uses ConcurrentHashMap for artifact tracking.
+ *
  * @param artifactsDir The directory where artifacts will be stored
  */
 class FileSystemArtifactManager(private val artifactsDir: Path) : ArtifactManager {
+
+    // Track artifacts in memory for fast lookups
+    private val artifacts = java.util.concurrent.ConcurrentHashMap<String, Path>()
 
     init {
         // Ensure artifacts directory exists
@@ -34,27 +39,26 @@ class FileSystemArtifactManager(private val artifactsDir: Path) : ArtifactManage
         } else {
             Files.copy(path, destination, StandardCopyOption.REPLACE_EXISTING)
         }
+
+        // Track the artifact
+        artifacts[name] = destination
     }
 
     override fun get(name: String): Path? {
-        val artifactPath = artifactsDir.resolve(name)
-        return if (artifactPath.exists()) artifactPath else null
+        return artifacts[name]
     }
 
     override fun has(name: String): Boolean {
-        return artifactsDir.resolve(name).exists()
+        return artifacts.containsKey(name)
     }
 
     override fun list(): Set<String> {
-        val dir = artifactsDir.toFile()
-        if (!dir.exists() || !dir.isDirectory) {
-            return emptySet()
-        }
-        return dir.listFiles()?.map { it.name }?.toSet() ?: emptySet()
+        return artifacts.keys.toSet()
     }
 
     override fun remove(name: String) {
-        val artifactPath = artifactsDir.resolve(name)
+        val artifactPath = artifacts.remove(name) ?: return
+
         if (artifactPath.exists()) {
             if (artifactPath.isDirectory()) {
                 deleteDirectory(artifactPath.toFile())
@@ -65,16 +69,17 @@ class FileSystemArtifactManager(private val artifactsDir: Path) : ArtifactManage
     }
 
     override fun clear() {
-        val dir = artifactsDir.toFile()
-        if (dir.exists() && dir.isDirectory) {
-            dir.listFiles()?.forEach { file ->
-                if (file.isDirectory) {
-                    deleteDirectory(file)
+        // Delete all tracked artifacts
+        for ((_, path) in artifacts) {
+            if (path.exists()) {
+                if (path.isDirectory()) {
+                    deleteDirectory(path.toFile())
                 } else {
-                    file.delete()
+                    Files.delete(path)
                 }
             }
         }
+        artifacts.clear()
     }
 
     /**

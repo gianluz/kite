@@ -6,9 +6,7 @@ import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import io.kite.cli.Output
 import io.kite.cli.globalOptions
-import io.kite.core.ExecutionContext
-import io.kite.core.PlatformDetector
-import io.kite.core.Segment
+import io.kite.core.*
 import io.kite.dsl.FileDiscovery
 import io.kite.runtime.scheduler.ParallelScheduler
 import io.kite.runtime.scheduler.SequentialScheduler
@@ -57,6 +55,12 @@ class RideCommand : CliktCommand(
             // Create artifact manager with .kite/artifacts/ directory
             val artifactsDir = File(".kite/artifacts").toPath()
             val artifactManager = io.kite.core.FileSystemArtifactManager(artifactsDir)
+
+            // Restore artifacts from manifest (for cross-ride/CI artifact sharing)
+            val restoredCount = artifactManager.restoreFromManifest(artifactsDir.toFile())
+            if (restoredCount > 0 && opts.verbose) {
+                Output.info("Restored $restoredCount artifacts from previous ride")
+            }
 
             val context = platform.createContext(emptyMap(), artifactManager)
 
@@ -155,6 +159,12 @@ class RideCommand : CliktCommand(
 
             val result = kotlinx.coroutines.runBlocking {
                 scheduler.execute(segmentsToExecute, context)
+            }
+
+            // Save artifact manifest for cross-ride/CI sharing
+            artifactManager.saveManifest(artifactsDir.toFile(), rideName)
+            if (opts.verbose && artifactManager.list().isNotEmpty()) {
+                Output.info("Saved artifact manifest with ${artifactManager.list().size} artifacts")
             }
 
             // Show results
