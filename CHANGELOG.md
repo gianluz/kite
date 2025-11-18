@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **🔐 Secret Management & Security** (December 2025)
+- **🔐 Secret Management & Security** (November 2025)
     - `SecretMasker` singleton for automatic secret masking (111 lines)
     - Thread-safe with `ConcurrentHashMap` for concurrent access
     - Masks multiple encodings: plain text, URL-encoded, Base64
@@ -29,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Comprehensive documentation: `docs/SECURITY.md` (550+ lines)
     - 15 comprehensive tests - all passing
 
-- **🎯 Lifecycle Hooks** (December 2025)
+- **🎯 Lifecycle Hooks** (November 2025)
     - Added `onSuccess`, `onFailure`, `onComplete` hooks to Segment model
     - Added `onSuccess`, `onFailure`, `onComplete` hooks to Ride model
     - Full DSL support in `SegmentBuilder` and `RideBuilder`
@@ -42,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
       operations
     - Comprehensive documentation: `docs/LIFECYCLE_HOOKS.md`
 
-- **📦 Artifact Management System** (December 2025)
+- **📦 Artifact Management System** (November 2025)
     - `FileSystemArtifactManager` class (175 lines)
     - Thread-safe artifact tracking with `ConcurrentHashMap`
     - Automatic file/directory copying to `.kite/artifacts/`
@@ -63,7 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
         - `docs/ARTIFACTS_CROSS_RIDE.md` - Cross-ride sharing (470 lines)
     - 17 tests (13 unit + 4 integration)
 
-- **🚀 GitHub Actions Integration** (December 2025)
+- **🚀 GitHub Actions Integration** (November 2025)
     - **Two separate workflows** for clear separation:
         - `.github/workflows/pr.yml` - PR validation (ONLY on pull requests)
         - `.github/workflows/ci.yml` - CI build (ONLY on push to main)
@@ -83,7 +83,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - 44% faster with parallel execution (30s sequential → 17s parallel)
     - Documentation: `docs/GITHUB_ACTIONS.md` (complete rewrite - 390 lines)
 
-- **📊 CI Ride Enhancement** (December 2025)
+- **📊 CI Ride Enhancement** (November 2025)
     - Updated all test segments to save artifacts:
         - `test-results-core/`, `test-results-dsl/`, etc. (JUnit XML)
         - `test-reports-core/`, `test-reports-dsl/`, etc. (HTML reports)
