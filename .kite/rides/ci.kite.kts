@@ -16,6 +16,9 @@ ride {
             segment("test-integration")
         }
 
+        // Publish combined test results
+        segment("publish-test-results")
+
         // Final build step
         segment("build")
     }
