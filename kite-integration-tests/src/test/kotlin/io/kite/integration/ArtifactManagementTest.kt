@@ -22,7 +22,7 @@ class ArtifactManagementTest : IntegrationTestBase() {
                         artifact("data-file", "output.txt")
                     }
                     execute {
-                        val file = File("output.txt")
+                        val file = workspace.resolve("output.txt").toFile()
                         file.writeText("Generated data from producer")
                         println("Producer created artifact")
                     }
@@ -82,9 +82,9 @@ class ArtifactManagementTest : IntegrationTestBase() {
                         artifact("logs", "build.log")
                     }
                     execute {
-                        File("app.apk").writeText("fake apk")
-                        File("mapping.txt").writeText("fake mapping")
-                        File("build.log").writeText("fake log")
+                        workspace.resolve("app.apk").toFile().writeText("fake apk")
+                        workspace.resolve("mapping.txt").toFile().writeText("fake mapping")
+                        workspace.resolve("build.log").toFile().writeText("fake log")
                         println("Build created 3 artifacts")
                     }
                 }
@@ -145,7 +145,7 @@ class ArtifactManagementTest : IntegrationTestBase() {
                         artifact("config", "config.txt")
                     }
                     execute {
-                        File("config.txt").writeText("shared configuration")
+                        workspace.resolve("config.txt").toFile().writeText("shared configuration")
                         println("Setup created config")
                     }
                 }
@@ -202,12 +202,6 @@ class ArtifactManagementTest : IntegrationTestBase() {
 
     @Test
     fun `artifact directories work correctly`() {
-        // Create a directory structure in workspace
-        val testDir = File(workspaceRoot, "test-outputs")
-        testDir.mkdirs()
-        File(testDir, "file1.txt").writeText("content1")
-        File(testDir, "file2.txt").writeText("content2")
-
         createSegmentFile(
             "dir-artifacts.kite.kts",
             """
@@ -216,10 +210,10 @@ class ArtifactManagementTest : IntegrationTestBase() {
             segments {
                 segment("create-dir") {
                     outputs {
-                        artifact("test-outputs", "test-outputs/")
+                        artifact("test-outputs", "test-outputs")
                     }
                     execute {
-                        val dir = File("test-outputs")
+                        val dir = workspace.resolve("test-outputs").toFile()
                         dir.mkdirs()
                         File(dir, "file1.txt").writeText("content1")
                         File(dir, "file2.txt").writeText("content2")
