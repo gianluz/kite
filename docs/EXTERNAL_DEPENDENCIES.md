@@ -2,20 +2,25 @@
 
 This guide explains how to use external libraries (like Gson, Apache Commons, etc.) in your `.kite.kts` segment files.
 
-## Current Status: ✅ **TWO WAYS TO USE DEPENDENCIES**
+## Current Status: **DEPENDENCY SUPPORT**
 
-Kite now supports external dependencies in TWO ways:
+Kite supports external dependencies in TWO ways:
 
-1. **@DependsOn Annotation** (Recommended for standalone scripts) - ✅ **NEW!**
-2. **Classpath Dependencies** (Good for project-integrated builds)
+1. **@DependsOn Annotation** - ⚠️ **IDE Only** (Java 17+ runtime limitation)
+2. **Classpath Dependencies** - ✅ **RECOMMENDED** (Works everywhere)
 
-Both approaches work perfectly! Choose based on your use case.
+### Quick Recommendation:
+
+- **For development**: Use `@DependsOn` (works great in IntelliJ!)
+- **For production/CI**: Use classpath dependencies in `build.gradle.kts`
 
 ---
 
-## Method 1: @DependsOn Annotation ✅ **RECOMMENDED**
+## Method 1: @DependsOn Annotation ⚠️ **IDE DEVELOPMENT ONLY**
 
-**Best for**: Standalone `.kite.kts` scripts, no project integration needed!
+**Status**: Works in IntelliJ IDEA, has runtime issues with Java 17+ (upstream Kotlin limitation)
+
+**Best for**: IDE development and prototyping
 
 ### Quick Example
 
@@ -44,19 +49,22 @@ segments {
 }
 ```
 
-### Just run it!
+### Current Limitation
 
-```bash
-kite ride "My Ride"
-```
+⚠️ **Runtime Issue**: Due to a known limitation in `kotlin-scripting-dependencies-maven` with Java 17+, `@DependsOn`
+currently doesn't work when running scripts from the command line.
 
-**Output**:
-```
-✅ JSON serialization with @DependsOn successful!
-JSON: {"project":"Kite","version":"0.1.0"}
-```
+**What Works**:
 
-**That's it!** Dependencies are downloaded automatically on first run and cached for subsequent runs!
+- ✅ Full IntelliJ IDEA support (autocomplete, type checking, refactoring)
+- ✅ Dependencies are recognized and resolved in the IDE
+- ✅ Perfect for development and prototyping
+
+**What Doesn't Work**:
+
+- ❌ Runtime execution with `kite` CLI (Java 17+ incompatibility)
+
+**Workaround**: Add dependencies to `build.gradle.kts` for runtime execution (see Method 2 below)
 
 ### How It Works
 
@@ -92,9 +100,11 @@ segments {
 
 ---
 
-## Method 2: Classpath Dependencies
+## Method 2: Classpath Dependencies ✅ **RECOMMENDED**
 
-**Best for**: When Kite is integrated into your Gradle/Maven project.
+**Status**: ✅ Works perfectly everywhere (IDE + CLI + CI/CD)
+
+**Best for**: Production use, CI/CD pipelines, and reliable builds
 
 ### Step 1: Add Dependency to Your Project
 
@@ -144,13 +154,16 @@ segments {
 
 ## Comparison
 
-| Feature              | @DependsOn                            | Classpath                 |
-|----------------------|---------------------------------------|---------------------------|
-| **Setup**            | None needed                           | Add to build.gradle.kts   |
-| **IDE Autocomplete** | After first run                       | Immediate                 |
-| **Build Speed**      | Slower first run                      | Always fast               |
-| **Portability**      | High - scripts are self-contained     | Low - needs project setup |
-| **Best For**         | Standalone scripts, quick prototyping | Project-integrated builds |
+| Feature              | @DependsOn           | Classpath               |
+|----------------------|----------------------|-------------------------|
+| **Runtime Support**  | ❌ Java 17+ issue     | ✅ Works everywhere      |
+| **IDE Support**      | ✅ Full support       | ✅ Full support          |
+| **Setup**            | None needed          | Add to build.gradle.kts |
+| **IDE Autocomplete** | ✅ Works              | ✅ Works                 |
+| **CLI Execution**    | ❌ Not working        | ✅ Works                 |
+| **CI/CD**            | ❌ Not recommended    | ✅ Recommended           |
+| **Build Speed**      | N/A                  | Always fast             |
+| **Best For**         | IDE prototyping only | Production use          |
 
 ---
 
@@ -434,15 +447,36 @@ Autocomplete works immediately after adding to `build.gradle.kts` and reloading 
 2. Verify spelling and version number
 3. Add `@file:Repository` if using custom repository
 
+### Problem: @DependsOn works in IntelliJ but fails with CLI
+
+**Cause**: Known Java 17+ incompatibility with `kotlin-scripting-dependencies-maven`.
+
+**Solution**:
+
+Use the classpath approach for CLI/CI:
+
+```kotlin
+// build.gradle.kts
+dependencies {
+    implementation("com.google.code.gson:gson:2.10.1")
+}
+```
+
+Then in your script, just use the import (no `@file:DependsOn` needed):
+
+```kotlin
+import com.google.gson.Gson
+```
+
 ### Problem: Works locally but not in CI
 
 **Cause**: CI may not have Maven repository access.
 
 **Solution**:
 
+- Always use classpath dependencies for CI/CD
 - Ensure CI can access Maven Central
-- Or use classpath approach for CI builds
-- Or cache `~/.m2/repository` in CI
+- Cache dependencies in CI
 
 ---
 
@@ -493,18 +527,23 @@ import okhttp3.OkHttpClient
 
 ## Summary
 
-✅ **@DependsOn annotation works!** (NEW!)  
-✅ **Classpath dependencies work!**  
-✅ **Full IDE support** (after first run or via classpath)  
-✅ **All transitive dependencies resolved**  
-✅ **Maven Central + custom repositories supported**  
-✅ **Cached for fast subsequent runs**
+### What Works ✅
+
+- ✅ **Classpath dependencies** - Full support everywhere (IDE + CLI + CI)
+- ✅ **@DependsOn in IntelliJ** - Perfect for development and prototyping
+- ✅ **Full IDE autocomplete** for both approaches
+- ✅ **All transitive dependencies resolved**
+- ✅ **Maven Central + custom repositories supported**
+
+### What Doesn't Work ❌
+
+- ❌ **@DependsOn at runtime** - Java 17+ incompatibility (upstream Kotlin issue)
 
 ### Choose Your Approach
 
-**Standalone Scripts** → Use `@DependsOn`  
-**Project Builds** → Use classpath dependencies  
-**Both** → Works perfectly together!
+**Development/Prototyping** → Use `@DependsOn` in IntelliJ (great IDE experience!)  
+**Production/CLI/CI** → Use classpath dependencies (reliable and fast)  
+**Best Practice** → Start with `@DependsOn` for prototyping, migrate to classpath for production
 
 **Example**:
 ```kotlin
