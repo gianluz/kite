@@ -167,7 +167,6 @@ class SequentialScheduler : SegmentScheduler {
 
                 // Call onSuccess hook
                 segment.onSuccess?.invoke(contextWithLogger)
-
             } catch (e: Exception) {
                 finalStatus = SegmentStatus.FAILURE
                 finalError = e.message

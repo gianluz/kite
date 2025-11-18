@@ -43,13 +43,16 @@ class SegmentLogger(
 
     /**
      * Logs a message to the segment log file.
+     * Automatically masks any registered secrets.
      */
     private fun logToFile(
         message: String,
         level: String,
     ) {
         val timestamp = LocalDateTime.now().format(timeFormat)
-        val logEntry = "[$timestamp] [$segmentName] $message"
+        // Mask secrets before logging
+        val maskedMessage = io.kite.core.SecretMasker.mask(message, showHints = true)
+        val logEntry = "[$timestamp] [$segmentName] $maskedMessage"
 
         // Write to buffer
         buffer.appendLine(logEntry)
@@ -63,9 +66,9 @@ class SegmentLogger(
             val segmentColored = "${AnsiColors.RED}[$segmentName]${AnsiColors.RESET}"
             val coloredMessage =
                 when (level) {
-                    "ERROR" -> "${AnsiColors.BRIGHT_RED}$message${AnsiColors.RESET}"
-                    "WARN" -> "${AnsiColors.YELLOW}$message${AnsiColors.RESET}"
-                    else -> "${AnsiColors.WHITE}$message${AnsiColors.RESET}"
+                    "ERROR" -> "${AnsiColors.BRIGHT_RED}$maskedMessage${AnsiColors.RESET}"
+                    "WARN" -> "${AnsiColors.YELLOW}$maskedMessage${AnsiColors.RESET}"
+                    else -> "${AnsiColors.WHITE}$maskedMessage${AnsiColors.RESET}"
                 }
             println("$timestampColored $segmentColored $coloredMessage")
         }
@@ -101,10 +104,13 @@ class SegmentLogger(
 
     /**
      * Logs command execution start.
+     * Automatically masks any registered secrets in the command.
      */
     override fun logCommandStart(command: String) {
         val timestamp = LocalDateTime.now().format(timeFormat)
-        val logEntry = "[$timestamp] [$segmentName] $ $command"
+        // Mask secrets in command
+        val maskedCommand = io.kite.core.SecretMasker.mask(command, showHints = true)
+        val logEntry = "[$timestamp] [$segmentName] $ $maskedCommand"
 
         buffer.appendLine(logEntry)
         logFile.appendText(logEntry + "\n")
@@ -113,12 +119,13 @@ class SegmentLogger(
         if (showInConsole) {
             val timestampColored = "${AnsiColors.BLUE}[$timestamp]${AnsiColors.RESET}"
             val segmentColored = "${AnsiColors.RED}[$segmentName]${AnsiColors.RESET}"
-            println("$timestampColored $segmentColored ${AnsiColors.WHITE}$ $command${AnsiColors.RESET}")
+            println("$timestampColored $segmentColored ${AnsiColors.WHITE}$ $maskedCommand${AnsiColors.RESET}")
         }
     }
 
     /**
      * Logs command output line by line with timestamps.
+     * Automatically masks any registered secrets in the output.
      */
     override fun logCommandOutput(
         output: String,
@@ -129,7 +136,9 @@ class SegmentLogger(
         output.lines().forEach { line ->
             if (line.isNotEmpty()) {
                 val timestamp = LocalDateTime.now().format(timeFormat)
-                val logEntry = "[$timestamp] [$segmentName] $line"
+                // Mask secrets in output
+                val maskedLine = io.kite.core.SecretMasker.mask(line, showHints = true)
+                val logEntry = "[$timestamp] [$segmentName] $maskedLine"
 
                 buffer.appendLine(logEntry)
                 logFile.appendText(logEntry + "\n")
@@ -139,7 +148,7 @@ class SegmentLogger(
                     val timestampColored = "${AnsiColors.BLUE}[$timestamp]${AnsiColors.RESET}"
                     val segmentColored = "${AnsiColors.RED}[$segmentName]${AnsiColors.RESET}"
                     val color = if (isError) AnsiColors.BRIGHT_RED else AnsiColors.WHITE
-                    println("$timestampColored $segmentColored $color$line${AnsiColors.RESET}")
+                    println("$timestampColored $segmentColored $color$maskedLine${AnsiColors.RESET}")
                 }
             }
         }

@@ -51,6 +51,44 @@ data class ExecutionContext(
     ): String = environment[key] ?: default
 
     /**
+     * Gets an environment variable and automatically registers it as a secret.
+     * The value will be masked in all logs and outputs.
+     *
+     * Use this for sensitive values like API keys, tokens, passwords.
+     *
+     * Example:
+     * ```
+     * val apiKey = secret("API_KEY")
+     * exec("curl", "-H", "Authorization: Bearer $apiKey")
+     * // Logs will show: "Authorization: Bearer [API_KEY:***]"
+     * ```
+     *
+     * @param key The environment variable name
+     * @return The value, or null if not found
+     */
+    fun secret(key: String): String? {
+        val value = environment[key]
+        if (value != null) {
+            SecretMasker.registerSecret(value, hint = key)
+        }
+        return value
+    }
+
+    /**
+     * Gets an environment variable as a secret with a required non-null assertion.
+     * Throws IllegalStateException if the variable is not set.
+     *
+     * @param key The environment variable name
+     * @return The non-null value
+     * @throws IllegalStateException if the environment variable is not set
+     */
+    fun requireSecret(key: String): String {
+        val value = secret(key)
+        requireNotNull(value) { "Required secret environment variable '$key' is not set" }
+        return value
+    }
+
+    /**
      * Returns true if this is a merge/pull request build.
      */
     val isMergeRequest: Boolean
