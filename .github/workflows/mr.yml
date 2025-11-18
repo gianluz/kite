@@ -1,0 +1,47 @@
+name: MR Validation
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build Kite CLI
+        run: ./gradlew :kite-cli:installDist
+
+      - name: Run MR Validation
+        run: kite-cli/build/install/kite-cli/bin/kite-cli ride MR
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: .kite/artifacts/
+          retention-days: 7
+
+      - name: Publish Test Report
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: Test Results
+          path: '.kite/artifacts/test-results-*/TEST-*.xml'
+          reporter: java-junit
+          fail-on-error: true
