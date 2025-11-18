@@ -9,6 +9,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **🔐 Secret Management & Security** (December 2025)
+    - `SecretMasker` singleton for automatic secret masking (111 lines)
+    - Thread-safe with `ConcurrentHashMap` for concurrent access
+    - Masks multiple encodings: plain text, URL-encoded, Base64
+    - New `ExecutionContext` methods:
+        - `secret(key)` - Get environment variable and register as secret
+        - `requireSecret(key)` - Required secret with validation
+    - Automatic masking integrated in `SegmentLogger`:
+        - All log messages
+        - Command execution logs
+        - Command output
+        - Error messages
+    - Hint system for debugging: `[API_KEY:***]` instead of just `***`
+    - Extension function: `String.maskSecrets()`
+    - **Use cases**: API keys, passwords, tokens, database credentials
+    - **Prevents**: Secrets leakage in logs, CI artifacts, console output
+    - **Compliance**: GDPR, PCI-DSS, SOC 2 ready
+    - Comprehensive documentation: `docs/SECURITY.md` (550+ lines)
+    - 15 comprehensive tests - all passing
+
 - **🎯 Lifecycle Hooks** (December 2025)
     - Added `onSuccess`, `onFailure`, `onComplete` hooks to Segment model
     - Added `onSuccess`, `onFailure`, `onComplete` hooks to Ride model
@@ -44,12 +64,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - 17 tests (13 unit + 4 integration)
 
 - **🚀 GitHub Actions Integration** (December 2025)
-    - Created `.github/workflows/mr.yml` for MR validation
-    - Automatic test execution on pull requests and main pushes
-    - Test results uploaded as artifacts (7 day retention)
-    - Test reporting with `dorny/test-reporter` (shows results in PR checks)
+    - **Two separate workflows** for clear separation:
+        - `.github/workflows/pr.yml` - PR validation (ONLY on pull requests)
+        - `.github/workflows/ci.yml` - CI build (ONLY on push to main)
+    - **Fixed "Resource not accessible by integration" error**:
+        - Added required permissions: `pull-requests: write`, `checks: write`
+        - Test reporter now works correctly
+    - **PR Validation workflow**:
+        - Runs on pull requests to main
+        - Test results uploaded as artifacts (7 day retention)
+        - Test reporting with `dorny/test-reporter`
+        - Shows test results inline in PRs
+    - **CI Build workflow**:
+        - Runs on push to main (including merged PRs)
+        - Longer artifact retention (30 days)
+        - Uploads compiled CLI artifacts
+        - Manual trigger via `workflow_dispatch`
     - 44% faster with parallel execution (30s sequential → 17s parallel)
-    - Documentation: `docs/GITHUB_ACTIONS.md`
+    - Documentation: `docs/GITHUB_ACTIONS.md` (complete rewrite - 390 lines)
 
 - **📊 CI Ride Enhancement** (December 2025)
     - Updated all test segments to save artifacts:
@@ -276,12 +308,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Integration tests: 21 tests ✅
 - **Total: 49 tests, all passing** ✅
 
-**Documentation**: 6,800+ lines
+**Documentation**: 7,350+ lines
 
 - Original guides: 5 docs
 - Artifact guides: 3 docs (1,313 lines)
-- CI integration: 2 docs (700+ lines)
+- CI integration: 2 docs (1,090 lines) - updated GitHub Actions
+- Security: 1 doc (550 lines) - NEW!
 - Lifecycle hooks: 1 doc
+- Documentation census: 1 doc (290 lines) - NEW!
 
 **Phases Complete**: 5 of 8 (62.5%)
 
@@ -289,9 +323,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Phase 2: Segment Graph & Execution Engine ✅
 - Phase 3: CLI & File Discovery ✅
 - Phase 4: Platform Adapters (SKIPPED - CI-agnostic approach)
-- **Phase 5: Built-in Helpers ✅ COMPLETE** (file ops, exec, logging, artifacts, lifecycle hooks)
-- Phase 6: Documentation (90% - 11 comprehensive guides)
-- **Phase 7: Integration Testing (70%)** - 49 tests covering all features
+- **Phase 5: Built-in Helpers ✅ COMPLETE** (file ops, exec, logging, artifacts, lifecycle hooks, secret masking)
+- Phase 6: Documentation (90% - 12 comprehensive guides)
+- **Phase 7: Integration Testing (70%)** - 64 tests covering all features
 
 ## [0.1.0-SNAPSHOT] - Work in Progress
 

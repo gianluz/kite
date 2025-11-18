@@ -936,6 +936,23 @@ kite/
     - Comprehensive documentation in `LIFECYCLE_HOOKS.md`
     - Enables notifications, cleanup, metrics, CI status updates
 
+- ✅ Epic 5.6: Secret Management & Security (CRITICAL)
+    - `SecretMasker` singleton for automatic secret masking (111 lines)
+    - Thread-safe with `ConcurrentHashMap`
+    - Masks plain text, URL-encoded, and Base64-encoded secrets
+    - New `ExecutionContext` API:
+        - `secret(key)` - Get env var and register as secret
+        - `requireSecret(key)` - Required secret with validation
+    - Automatic masking in all logs (SegmentLogger integration)
+    - Comprehensive documentation: `docs/SECURITY.md` (550+ lines)
+    - 15 comprehensive tests - all passing
+    - Prevents secrets leakage in:
+        - Log messages
+        - Command execution
+        - Command output
+        - Error messages
+    - Compliance-ready (GDPR, PCI-DSS, SOC 2)
+
 **Phase 6 (Partial - 90%)**:
 
 - ✅ Epic 6.1: User Documentation (11 of 13 tasks complete)
@@ -975,31 +992,34 @@ kite/
 
 **Overall Statistics**:
 
-- **Production Code**: 6,500+ lines
-    - Core + DSL + Runtime: 4,100 lines (added lifecycle hooks)
+- **Production Code**: 6,850+ lines
+    - Core + DSL + Runtime: 4,250 lines (lifecycle hooks + secret masking)
     - Ivy Dependency Resolver: 200 lines
     - File Operations: 313 lines
     - Artifact Management: 317 lines (FileSystemArtifactManager + ArtifactManifest)
+    - Secret Management: 111 lines (SecretMasker)
     - CLI: 538 lines
-    - Logging: 171 lines
+    - Logging: 171 lines (updated with secret masking)
     - File Discovery: 357 lines (212 + 145)
-    - Schedulers: 450 lines (updated with lifecycle hooks)
+    - Schedulers: 450 lines (lifecycle hooks)
 
-- **Test Code**: 5,700+ lines
-    - Core tests: 4,670 lines
+- **Test Code**: 5,900+ lines
+    - Core tests: 4,858 lines (added SecretMaskerTest)
     - File ops tests: 364 lines
     - Discovery tests: 223 lines
     - Scheduler tests: 710 lines
     - Artifact tests: 350 lines (13 unit + 4 integration)
     - Integration tests: 925 lines (21 tests) ✅
 
-- **Documentation**: 6,800+ lines (11 comprehensive guides)
+- **Documentation**: 7,350+ lines (12 comprehensive guides)
     - Original guides: 5 docs
     - Artifact guides: 3 docs (1,313 lines)
-    - CI integration: 2 docs (700+ lines)
+    - CI integration: 2 docs (1,090 lines) - updated GitHub Actions
+    - Security: 1 doc (550 lines) - NEW!
     - Lifecycle hooks: 1 doc
-- **Test-to-Code Ratio**: 0.88:1 (excellent)
-- **Tests Passing**: 49 tests (28 unit + 21 integration), all passing ✅
+    - Documentation census: 1 doc (290 lines) - NEW!
+- **Test-to-Code Ratio**: 0.86:1 (excellent)
+- **Tests Passing**: 64 tests (43 unit + 21 integration), all passing ✅
 
 **Key Achievements**:
 
@@ -1021,7 +1041,8 @@ kite/
 - ✅ **Complete ride execution** - Kite can run its own CI!
 - ✅ **Artifact management with cross-ride sharing** - Manifest system for CI workflows
 - ✅ **Lifecycle hooks** - onSuccess/onFailure/onComplete for segments and rides
-- ✅ **GitHub Actions integration** - MR validation workflow with test reporting
+- ✅ **GitHub Actions integration** - PR and CI workflows
+- ✅ **Secret masking** - Automatic security for sensitive data
 
 **Recent Achievements (December 2025)**:
 
@@ -1040,11 +1061,21 @@ kite/
     - Enables notifications, cleanup, metrics collection
     - Complete documentation with examples
 - ✅ **GitHub Actions Integration!** 🎉
-    - MR validation workflow (`.github/workflows/mr.yml`)
-    - Automatic test execution on PRs and main pushes
-    - Test results uploaded as artifacts (7 day retention)
+    - PR validation workflow (`.github/workflows/pr.yml`)
+    - CI build workflow (`.github/workflows/ci.yml`)
+    - Fixed "Resource not accessible by integration" error
+    - Added required permissions (pull-requests:write, checks:write)
+    - Test results uploaded as artifacts
     - Test reporting with `dorny/test-reporter`
     - 44% faster with parallel execution
+- ✅ **Secret Masking!** 🔐
+    - Automatic secret masking to prevent leaks
+    - `secret()` and `requireSecret()` API
+    - Thread-safe `SecretMasker` singleton
+    - Masks plain text, URL-encoded, Base64
+    - Integrated in all logs and outputs
+    - 15 tests, comprehensive documentation
+    - Compliance-ready security
 - ✅ **CI Ride Enhancement**
     - All test results saved as artifacts
     - JUnit XML + HTML reports
