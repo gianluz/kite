@@ -145,8 +145,8 @@ class SequentialScheduler : SegmentScheduler {
                 // Store output artifacts if segment succeeded
                 segment.outputs.forEach { (artifactName, artifactPath) ->
                     try {
-                        val fullPath = context.workspace.resolve(artifactPath)
-                        context.artifacts.put(artifactName, fullPath)
+                        val fullPath = contextWithLogger.workspace.resolve(artifactPath)
+                        contextWithLogger.artifacts.put(artifactName, fullPath)
                         logger.info("Stored artifact '$artifactName' from '$artifactPath'")
                     } catch (e: Exception) {
                         logger.warn("Failed to store artifact '$artifactName': ${e.message}")
