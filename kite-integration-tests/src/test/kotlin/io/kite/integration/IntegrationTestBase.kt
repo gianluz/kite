@@ -78,9 +78,13 @@ abstract class IntegrationTestBase {
         val segmentMap = loadResult.segmentMap()
         val segments = collectSegmentsFromFlow(ride.flow, segmentMap)
 
-        // Create execution context
+        // Create execution context with workspace as working directory
         val platform = PlatformDetector.detect()
         val context = platform.createContext(emptyMap())
+
+        // Change to workspace directory for execution
+        val originalDir = System.getProperty("user.dir")
+        System.setProperty("user.dir", workspaceRoot.absolutePath)
 
         // Execute with captured output
         val outputStream = ByteArrayOutputStream()
@@ -108,6 +112,7 @@ abstract class IntegrationTestBase {
         } finally {
             System.setOut(originalOut)
             System.setErr(originalErr)
+            System.setProperty("user.dir", originalDir)
         }
     }
 
