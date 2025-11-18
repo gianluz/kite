@@ -21,8 +21,6 @@ import kotlin.io.path.exists
 @Serializable
 data class ArtifactManifestData(
     val artifacts: Map<String, ArtifactEntry> = emptyMap(),
-    val rideName: String? = null,
-    val timestamp: Long = System.currentTimeMillis(),
     val version: Int = 1
 )
 
@@ -101,7 +99,7 @@ class ArtifactManifest(private val artifactsDir: File) {
     /**
      * Thread-safe: Update manifest by adding/updating artifact entries.
      */
-    fun update(artifactManager: ArtifactManager, rideName: String? = null) = lock.write {
+    fun update(artifactManager: ArtifactManager) = lock.write {
         val entries = mutableMapOf<String, ArtifactEntry>()
 
         for (name in artifactManager.list()) {
@@ -124,9 +122,7 @@ class ArtifactManifest(private val artifactsDir: File) {
         }
 
         val data = ArtifactManifestData(
-            artifacts = entries,
-            rideName = rideName,
-            timestamp = System.currentTimeMillis()
+            artifacts = entries
         )
 
         save(data)
@@ -170,9 +166,9 @@ class ArtifactManifest(private val artifactsDir: File) {
 /**
  * Extension: Save artifact manifest after ride completes.
  */
-fun ArtifactManager.saveManifest(artifactsDir: File, rideName: String? = null) {
+fun ArtifactManager.saveManifest(artifactsDir: File) {
     val manifest = ArtifactManifest(artifactsDir)
-    manifest.update(this, rideName)
+    manifest.update(this)
 }
 
 /**

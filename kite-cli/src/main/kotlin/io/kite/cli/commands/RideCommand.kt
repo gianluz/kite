@@ -162,7 +162,7 @@ class RideCommand : CliktCommand(
             }
 
             // Save artifact manifest for cross-ride/CI sharing
-            artifactManager.saveManifest(artifactsDir.toFile(), rideName)
+            artifactManager.saveManifest(artifactsDir.toFile())
             if (opts.verbose && artifactManager.list().isNotEmpty()) {
                 Output.info("Saved artifact manifest with ${artifactManager.list().size} artifacts")
             }
