@@ -22,11 +22,12 @@ dependencies {
     implementation("org.codehaus.plexus:plexus-component-annotations:2.1.1")
     implementation("javax.inject:javax.inject:1")
 
+    // Apache Ivy for Java 17 compatible dependency resolution
+    // Ivy is used by kotlin-main-kts and works with Java 17, unlike Maven/Aether 3.6.x
+    implementation("org.apache.ivy:ivy:2.5.2")
+
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
-
-    // Test dependencies (also available to scripts via classpath)
-    implementation("com.google.code.gson:gson:2.10.1") // For testing script dependencies
 
     // Test dependencies
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")

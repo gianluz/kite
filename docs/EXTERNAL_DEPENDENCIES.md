@@ -2,25 +2,25 @@
 
 This guide explains how to use external libraries (like Gson, Apache Commons, etc.) in your `.kite.kts` segment files.
 
-## Current Status: **DEPENDENCY SUPPORT**
+## Current Status: ✅ **FULL DEPENDENCY SUPPORT**
 
 Kite supports external dependencies in TWO ways:
 
-1. **@DependsOn Annotation** - ⚠️ **IDE Only** (Java 17+ runtime limitation)
-2. **Classpath Dependencies** - ✅ **RECOMMENDED** (Works everywhere)
+1. **@DependsOn Annotation** - ✅ **WORKS WITH JAVA 17!** (Uses Ivy resolver)
+2. **Classpath Dependencies** - ✅ **ALSO WORKS** (Traditional approach)
 
 ### Quick Recommendation:
 
-- **For development**: Use `@DependsOn` (works great in IntelliJ!)
-- **For production/CI**: Use classpath dependencies in `build.gradle.kts`
+- **For standalone scripts**: Use `@DependsOn` (portable, self-contained!)
+- **For project builds**: Use classpath dependencies in `build.gradle.kts`
 
 ---
 
-## Method 1: @DependsOn Annotation ⚠️ **IDE DEVELOPMENT ONLY**
+## Method 1: @DependsOn Annotation ✅ **RECOMMENDED FOR STANDALONE SCRIPTS**
 
-**Status**: Works in IntelliJ IDEA, has runtime issues with Java 17+ (upstream Kotlin limitation)
+**Status**: ✅ Works everywhere - IDE + CLI + CI/CD (Java 17 compatible!)
 
-**Best for**: IDE development and prototyping
+**Best for**: Standalone scripts, quick prototyping, shareable workflows
 
 ### Quick Example
 
@@ -49,36 +49,22 @@ segments {
 }
 ```
 
-### Current Limitation
-
-⚠️ **Runtime Issue**: Due to a known limitation in `kotlin-scripting-dependencies-maven` with Java 17+, `@DependsOn`
-currently doesn't work when running scripts from the command line.
-
-**What Works**:
-
-- ✅ Full IntelliJ IDEA support (autocomplete, type checking, refactoring)
-- ✅ Dependencies are recognized and resolved in the IDE
-- ✅ Perfect for development and prototyping
-
-**What Doesn't Work**:
-
-- ❌ Runtime execution with `kite` CLI (Java 17+ incompatibility)
-
-**Workaround**: Add dependencies to `build.gradle.kts` for runtime execution (see Method 2 below)
-
 ### How It Works
+
+Kite uses **Apache Ivy** for dependency resolution (same as `kotlin-main.kts`):
 
 - `@file:DependsOn("group:artifact:version")` - Declares a Maven dependency
 - `@file:Repository("url")` - Adds a custom Maven repository (optional, defaults to Maven Central)
-- Dependencies are resolved at runtime using Maven
-- Downloaded JARs are cached in your local Maven repository (`~/.m2/repository`)
+- Dependencies are resolved at runtime using Apache Ivy
+- Downloaded JARs are cached in your local Ivy cache (`~/.ivy2/cache`)
 - Subsequent runs use cached dependencies (much faster!)
+- **Java 17+ compatible** - Uses Ivy instead of Maven/Aether
 
 ### Multiple Dependencies
 
 ```kotlin
 @file:DependsOn("com.google.code.gson:gson:2.10.1")
-@file:DependsOn("org.apache.commons:commons-lang3:3.12.0")
+@file:DependsOn("org.apache.commons:commons-lang3:3.14.0")
 @file:DependsOn("com.squareup.okhttp3:okhttp:4.12.0")
 @file:Repository("https://repo.maven.apache.org/maven2/")
 
@@ -100,11 +86,11 @@ segments {
 
 ---
 
-## Method 2: Classpath Dependencies ✅ **RECOMMENDED**
+## Method 2: Classpath Dependencies ✅ **RECOMMENDED FOR PROJECT BUILDS**
 
 **Status**: ✅ Works perfectly everywhere (IDE + CLI + CI/CD)
 
-**Best for**: Production use, CI/CD pipelines, and reliable builds
+**Best for**: Production use, centralized dependency management, version catalogs
 
 ### Step 1: Add Dependency to Your Project
 
@@ -148,7 +134,7 @@ segments {
 - ✅ When you want centralized dependency management
 - ✅ When you need version catalogs or dependency locking
 - ✅ Faster build times (no runtime resolution)
-- ✅ Better for CI/CD pipelines
+- ✅ Better for CI/CD pipelines with strict dependency control
 
 ---
 
@@ -156,22 +142,24 @@ segments {
 
 | Feature              | @DependsOn           | Classpath               |
 |----------------------|----------------------|-------------------------|
-| **Runtime Support**  | ❌ Java 17+ issue     | ✅ Works everywhere      |
+| **Runtime Support**  | ✅ Works everywhere   | ✅ Works everywhere      |
 | **IDE Support**      | ✅ Full support       | ✅ Full support          |
 | **Setup**            | None needed          | Add to build.gradle.kts |
 | **IDE Autocomplete** | ✅ Works              | ✅ Works                 |
-| **CLI Execution**    | ❌ Not working        | ✅ Works                 |
-| **CI/CD**            | ❌ Not recommended    | ✅ Recommended           |
-| **Build Speed**      | N/A                  | Always fast             |
-| **Best For**         | IDE prototyping only | Production use          |
+| **CLI Execution**    | ✅ Works              | ✅ Works                 |
+| **CI/CD**            | ✅ Works              | ✅ Works                 |
+| **Portability**      | ✅ Self-contained     | ⚠️ Needs project setup   |
+| **Build Speed**      | First run: slower    | Always fast             |
+| **Best For**         | Standalone scripts   | Project builds          |
 
 ---
 
 ## Complete Working Example
 
-Here's a real example from the Kite repository demonstrating `@DependsOn`:
+Here's a real example demonstrating `@DependsOn`:
 
 ### File Structure
+
 ```
 .kite/
 ├── segments/
@@ -222,7 +210,7 @@ segments {
             val jsonString = """
                 {
                     "name": "Test Segment",
-                    "status": "running",
+                    "status" to "running",
                     "timestamp": 1234567890
                 }
             """.trimIndent()
@@ -266,6 +254,8 @@ $ kite ride "Test Dependencies"
   🪁 Kite Ride: Test Dependencies
 ══════════════════════════════════════════════════════════
 
+:: loading settings :: url = jar:file:/path/to/kite-cli.jar!/org/apache/ivy/core/settings/ivysettings.xml
+
 ▶ Execution Plan
 ℹ Segments to execute: 2
   ⋯ • test-json
@@ -278,13 +268,13 @@ $ kite ride "Test Dependencies"
 Parsed data: {name=Test Segment, status=running, timestamp=1.23456789E9}
 
 ▶ Results
-  ✓ test-json (10ms)
-  ✓ test-json-parse (1ms)
+  ✓ test-json (12ms)
+  ✓ test-json-parse (3ms)
 
 Summary:
   Total: 2 segments
   ✓ Success: 2
-  Duration: 2063ms
+  Duration: 3.9s
 
 🎉 All segments completed successfully!
 ```
@@ -332,7 +322,7 @@ segment("fetch-data") {
 ### 3. String Utilities (Apache Commons)
 
 ```kotlin
-@file:DependsOn("org.apache.commons:commons-lang3:3.12.0")
+@file:DependsOn("org.apache.commons:commons-lang3:3.14.0")
 
 import org.apache.commons.lang3.StringUtils
 
@@ -370,7 +360,7 @@ segment("with-logging") {
 
 IntelliJ will show unresolved references initially, but after the first run:
 
-1. Dependencies are downloaded to `~/.m2/repository`
+1. Dependencies are downloaded to `~/.ivy2/cache`
 2. **Reload Gradle Project** in IntelliJ
 3. Autocomplete and type checking work!
 
@@ -397,6 +387,7 @@ Autocomplete works immediately after adding to `build.gradle.kts` and reloading 
 ```
 
 **With @DependsOn**:
+
 ```
 1. Write .kite.kts script with @file:DependsOn
 2. Run
@@ -409,6 +400,26 @@ Autocomplete works immediately after adding to `build.gradle.kts` and reloading 
 3. **Self-Documenting** - Dependencies are declared in the script itself
 4. **Quick Prototyping** - Try libraries without modifying project files
 5. **Distribution-Ready** - Scripts work anywhere Kite is installed
+6. **Java 17 Compatible** - Uses Ivy resolver that works with modern Java
+
+---
+
+## Technical Details: Ivy vs Maven Resolver
+
+### Why Ivy?
+
+Kite uses **Apache Ivy** for dependency resolution instead of Maven/Aether:
+
+- ✅ **Java 17+ Compatible** - No internal reflection issues
+- ✅ **Lightweight** - Smaller footprint than Maven resolver
+- ✅ **Battle-tested** - Used by `kotlin-main.kts` successfully
+- ✅ **Maven-compatible** - Resolves from Maven Central and custom repos
+- ✅ **Transitive dependencies** - Automatically resolves all dependencies
+
+### Previous Limitation (Now Fixed!)
+
+Earlier versions of Kite used `kotlin-scripting-dependencies-maven` which had a known Java 17+ incompatibility due to
+Guice/Aether internal issues. This has been replaced with a custom Ivy-based resolver.
 
 ---
 
@@ -434,7 +445,7 @@ Autocomplete works immediately after adding to `build.gradle.kts` and reloading 
 **Solution**:
 
 - First run: Slow (downloading)
-- Subsequent runs: Fast (cached in `~/.m2/repository`)
+- Subsequent runs: Fast (cached in `~/.ivy2/cache`)
 - This is normal and expected!
 
 ### Problem: "Failed to resolve" error
@@ -447,36 +458,15 @@ Autocomplete works immediately after adding to `build.gradle.kts` and reloading 
 2. Verify spelling and version number
 3. Add `@file:Repository` if using custom repository
 
-### Problem: @DependsOn works in IntelliJ but fails with CLI
-
-**Cause**: Known Java 17+ incompatibility with `kotlin-scripting-dependencies-maven`.
-
-**Solution**:
-
-Use the classpath approach for CLI/CI:
-
-```kotlin
-// build.gradle.kts
-dependencies {
-    implementation("com.google.code.gson:gson:2.10.1")
-}
-```
-
-Then in your script, just use the import (no `@file:DependsOn` needed):
-
-```kotlin
-import com.google.gson.Gson
-```
-
 ### Problem: Works locally but not in CI
 
-**Cause**: CI may not have Maven repository access.
+**Cause**: CI may not have Maven repository access or Ivy cache.
 
 **Solution**:
 
-- Always use classpath dependencies for CI/CD
 - Ensure CI can access Maven Central
-- Cache dependencies in CI
+- Cache `~/.ivy2/cache` in CI for faster builds
+- Or use classpath dependencies for stricter CI control
 
 ---
 
@@ -529,23 +519,22 @@ import okhttp3.OkHttpClient
 
 ### What Works ✅
 
-- ✅ **Classpath dependencies** - Full support everywhere (IDE + CLI + CI)
-- ✅ **@DependsOn in IntelliJ** - Perfect for development and prototyping
+- ✅ **@DependsOn everywhere** - Full support (IDE + CLI + CI) with Java 17+
+- ✅ **Classpath dependencies** - Full support everywhere
 - ✅ **Full IDE autocomplete** for both approaches
 - ✅ **All transitive dependencies resolved**
 - ✅ **Maven Central + custom repositories supported**
-
-### What Doesn't Work ❌
-
-- ❌ **@DependsOn at runtime** - Java 17+ incompatibility (upstream Kotlin issue)
+- ✅ **Apache Ivy resolver** - Lightweight and Java 17 compatible
 
 ### Choose Your Approach
 
-**Development/Prototyping** → Use `@DependsOn` in IntelliJ (great IDE experience!)  
-**Production/CLI/CI** → Use classpath dependencies (reliable and fast)  
-**Best Practice** → Start with `@DependsOn` for prototyping, migrate to classpath for production
+**Standalone Scripts** → Use `@DependsOn` (portable and self-contained!)  
+**Project Builds** → Use classpath dependencies (centralized management)  
+**Quick Prototyping** → Use `@DependsOn` (no build file changes needed)  
+**CI/CD Pipelines** → Either works! (Use classpath for stricter control)
 
 **Example**:
+
 ```kotlin
 // Standalone script - works anywhere!
 @file:DependsOn("com.google.code.gson:gson:2.10.1")
@@ -567,4 +556,4 @@ segments {
 ---
 
 **Kite is now a TRUE scripting tool - write `.kite.kts` files anywhere and run them with automatic dependency
-resolution!** 🪁
+resolution, even with Java 17+!** 🪁
