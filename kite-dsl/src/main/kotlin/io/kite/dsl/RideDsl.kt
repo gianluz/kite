@@ -33,7 +33,9 @@ class RideBuilder {
 
     private val environmentVars = mutableMapOf<String, String>()
     private var flowNode: FlowNode? = null
+    private var onSuccessFn: (suspend () -> Unit)? = null
     private var onFailureFn: (suspend (Throwable) -> Unit)? = null
+    private var onCompleteFn: (suspend (Boolean) -> Unit)? = null
 
     /**
      * Adds an environment variable for this ride.
@@ -60,12 +62,54 @@ class RideBuilder {
     }
 
     /**
+     * Sets a success handler for this ride.
+     *
+     * Called when all segments complete successfully.
+     *
+     * Usage:
+     * ```
+     * onSuccess {
+     *     println("Ride completed successfully!")
+     *     // Send notification, trigger deployment, etc.
+     * }
+     * ```
+     */
+    fun onSuccess(block: suspend () -> Unit) {
+        onSuccessFn = block
+    }
+
+    /**
      * Sets a failure handler for this ride.
      *
-     * @param block Failure handler lambda
+     * Called when any segment fails.
+     *
+     * Usage:
+     * ```
+     * onFailure { error ->
+     *     println("Ride failed: ${error.message}")
+     *     // Send failure notification, rollback, etc.
+     * }
+     * ```
      */
     fun onFailure(block: suspend (Throwable) -> Unit) {
         onFailureFn = block
+    }
+
+    /**
+     * Sets a completion handler for this ride.
+     *
+     * Called when ride completes (success or failure).
+     *
+     * Usage:
+     * ```
+     * onComplete { success ->
+     *     println("Ride completed. Success: $success")
+     *     // Cleanup, reporting, etc.
+     * }
+     * ```
+     */
+    fun onComplete(block: suspend (Boolean) -> Unit) {
+        onCompleteFn = block
     }
 
     /**
@@ -80,7 +124,9 @@ class RideBuilder {
             flow = flowNode!!,
             environment = environmentVars.toMap(),
             maxConcurrency = maxConcurrency,
+            onSuccess = onSuccessFn,
             onFailure = onFailureFn,
+            onComplete = onCompleteFn,
         )
     }
 }

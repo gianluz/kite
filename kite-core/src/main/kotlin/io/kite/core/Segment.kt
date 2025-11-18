@@ -18,6 +18,9 @@ import kotlin.time.Duration
  * @property retryOn List of exception types that should trigger a retry
  * @property inputs List of artifact names this segment requires as inputs
  * @property outputs Map of artifact names to file paths this segment produces
+ * @property onSuccess Callback invoked when segment completes successfully
+ * @property onFailure Callback invoked when segment fails (after all retries exhausted)
+ * @property onComplete Callback invoked when segment completes (regardless of success/failure)
  * @property execute Lambda that performs the actual work of this segment
  */
 data class Segment(
@@ -31,6 +34,9 @@ data class Segment(
     val retryOn: List<String> = emptyList(), // Exception class names
     val inputs: List<String> = emptyList(), // Input artifact names
     val outputs: Map<String, String> = emptyMap(), // Output artifact name -> path
+    val onSuccess: (suspend ExecutionContext.() -> Unit)? = null,
+    val onFailure: (suspend ExecutionContext.(Throwable) -> Unit)? = null,
+    val onComplete: (suspend ExecutionContext.(SegmentStatus) -> Unit)? = null,
     val execute: suspend ExecutionContext.() -> Unit,
 ) {
     init {

@@ -79,6 +79,9 @@ class SegmentBuilder(private val name: String) {
     private val outputArtifacts = mutableMapOf<String, String>()
     private var conditionFn: ((ExecutionContext) -> Boolean)? = null
     private var executeFn: (suspend ExecutionContext.() -> Unit)? = null
+    private var onSuccessFn: (suspend ExecutionContext.() -> Unit)? = null
+    private var onFailureFn: (suspend ExecutionContext.(Throwable) -> Unit)? = null
+    private var onCompleteFn: (suspend ExecutionContext.(io.kite.core.SegmentStatus) -> Unit)? = null
 
     /**
      * Adds a dependency on another segment.
@@ -173,6 +176,53 @@ class SegmentBuilder(private val name: String) {
     }
 
     /**
+     * Defines a callback to run when the segment completes successfully.
+     *
+     * Usage:
+     * ```
+     * onSuccess {
+     *     println("Segment completed successfully!")
+     *     // Send success notification, update status, etc.
+     * }
+     * ```
+     */
+    fun onSuccess(block: suspend ExecutionContext.() -> Unit) {
+        onSuccessFn = block
+    }
+
+    /**
+     * Defines a callback to run when the segment fails.
+     *
+     * This runs after all retries are exhausted.
+     *
+     * Usage:
+     * ```
+     * onFailure { error ->
+     *     println("Segment failed: ${error.message}")
+     *     // Send failure notification, cleanup, etc.
+     * }
+     * ```
+     */
+    fun onFailure(block: suspend ExecutionContext.(Throwable) -> Unit) {
+        onFailureFn = block
+    }
+
+    /**
+     * Defines a callback to run when the segment completes (success or failure).
+     *
+     * Usage:
+     * ```
+     * onComplete { status ->
+     *     println("Segment completed with status: $status")
+     *     // Cleanup, logging, etc.
+     * }
+     * ```
+     */
+    fun onComplete(block: suspend ExecutionContext.(io.kite.core.SegmentStatus) -> Unit) {
+        onCompleteFn = block
+    }
+
+    /**
      * Builds the Segment from the configured properties.
      */
     fun build(): Segment {
@@ -189,6 +239,9 @@ class SegmentBuilder(private val name: String) {
             retryOn = retryExceptions.toList(),
             inputs = inputArtifacts.toList(),
             outputs = outputArtifacts.toMap(),
+            onSuccess = onSuccessFn,
+            onFailure = onFailureFn,
+            onComplete = onCompleteFn,
             execute = executeFn!!,
         )
     }

@@ -10,14 +10,18 @@ package io.kite.core
  * @property flow The execution flow (sequential, parallel, or nested structure)
  * @property environment Environment variables to set for all segments in this ride
  * @property maxConcurrency Maximum number of segments to run in parallel (null = unlimited)
+ * @property onSuccess Callback invoked when all segments complete successfully
  * @property onFailure Callback invoked if any segment in the ride fails
+ * @property onComplete Callback invoked when ride completes (regardless of success/failure)
  */
 data class Ride(
     val name: String,
     val flow: FlowNode,
     val environment: Map<String, String> = emptyMap(),
     val maxConcurrency: Int? = null,
+    val onSuccess: (suspend () -> Unit)? = null,
     val onFailure: (suspend (Throwable) -> Unit)? = null,
+    val onComplete: (suspend (Boolean) -> Unit)? = null, // Boolean = success
 ) {
     init {
         require(name.isNotBlank()) { "Ride name cannot be blank" }
