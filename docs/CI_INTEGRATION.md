@@ -472,6 +472,32 @@ segment("deploy") {
 
 ---
 
+## Important: Cross-Ride Artifact Usage
+
+⚠️ **When using artifacts across different rides/CI jobs**, you can't use `artifacts.get()` because it only knows about
+artifacts from the **current ride execution**.
+
+**Solution: Use file paths directly:**
+
+```kotlin
+// In a ride that uses artifacts from a previous job:
+segment("test") {
+    execute {
+        // Don't use: artifacts.get("apk")  ❌ Returns null in new ride
+        
+        // Instead, use file path directly:
+        val apk = File(".kite/artifacts/apk")  // ✅ Works!
+        if (!apk.exists()) error("APK not found")
+        
+        exec("adb", "install", apk.absolutePath)
+    }
+}
+```
+
+**See [`ARTIFACTS_CROSS_RIDE.md`](ARTIFACTS_CROSS_RIDE.md) for complete guide** with multiple solutions and patterns.
+
+---
+
 ## Summary
 
 **Kite makes CI integration trivial:**
@@ -487,10 +513,15 @@ segment("deploy") {
      with: { path: .kite/artifacts/ }
    ```
 
-3. **In other jobs**: Download and use
+3. **In other jobs**: Download and use with file paths
    ```yaml
    - uses: actions/download-artifact@v4
    - run: kite ride TEST
+   ```
+
+4. **In TEST ride**: Access via file paths
+   ```kotlin
+   val apk = File(".kite/artifacts/apk")  // Direct file access
    ```
 
 **That's it!** No complexity, no custom scripts, just standard directories. 🎯
