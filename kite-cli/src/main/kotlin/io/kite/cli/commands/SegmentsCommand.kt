@@ -20,7 +20,7 @@ class SegmentsCommand : CliktCommand(
 ) {
     private val json by option(
         "--json",
-        help = "Output in JSON format"
+        help = "Output in JSON format",
     ).flag()
 
     override fun run() {
@@ -39,9 +39,10 @@ class SegmentsCommand : CliktCommand(
 
             // Discover and load segments
             val discovery = FileDiscovery()
-            val loadResult = runBlocking {
-                discovery.loadAll()
-            }
+            val loadResult =
+                runBlocking {
+                    discovery.loadAll()
+                }
 
             if (!loadResult.success) {
                 if (!json) {
@@ -106,7 +107,6 @@ class SegmentsCommand : CliktCommand(
 
                 terminal.println((dim)("Total: ${segments.size} segments"))
             }
-
         } catch (e: Exception) {
             if (opts.debug) {
                 Output.error("Exception: ${e.message}")
@@ -117,30 +117,31 @@ class SegmentsCommand : CliktCommand(
     }
 
     private fun outputJson(segments: List<io.kite.core.Segment>) {
-        val json = buildString {
-            appendLine("{")
-            appendLine("  \"segments\": [")
-            segments.forEachIndexed { index, segment ->
-                appendLine("    {")
-                appendLine("      \"name\": \"${segment.name}\",")
-                if (segment.description != null) {
-                    appendLine("      \"description\": \"${segment.description}\",")
+        val json =
+            buildString {
+                appendLine("{")
+                appendLine("  \"segments\": [")
+                segments.forEachIndexed { index, segment ->
+                    appendLine("    {")
+                    appendLine("      \"name\": \"${segment.name}\",")
+                    if (segment.description != null) {
+                        appendLine("      \"description\": \"${segment.description}\",")
+                    }
+                    appendLine("      \"dependsOn\": [${segment.dependsOn.joinToString(", ") { "\"$it\"" }}],")
+                    appendLine("      \"timeout\": ${segment.timeout?.toString() ?: "null"},")
+                    appendLine("      \"maxRetries\": ${segment.maxRetries},")
+                    appendLine("      \"hasCondition\": ${segment.condition != null}")
+                    append("    }")
+                    if (index < segments.size - 1) {
+                        appendLine(",")
+                    } else {
+                        appendLine()
+                    }
                 }
-                appendLine("      \"dependsOn\": [${segment.dependsOn.joinToString(", ") { "\"$it\"" }}],")
-                appendLine("      \"timeout\": ${segment.timeout?.toString() ?: "null"},")
-                appendLine("      \"maxRetries\": ${segment.maxRetries},")
-                appendLine("      \"hasCondition\": ${segment.condition != null}")
-                append("    }")
-                if (index < segments.size - 1) {
-                    appendLine(",")
-                } else {
-                    appendLine()
-                }
+                appendLine("  ],")
+                appendLine("  \"total\": ${segments.size}")
+                appendLine("}")
             }
-            appendLine("  ],")
-            appendLine("  \"total\": ${segments.size}")
-            appendLine("}")
-        }
         println(json)
     }
 }

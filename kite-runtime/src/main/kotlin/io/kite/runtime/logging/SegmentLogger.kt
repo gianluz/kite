@@ -1,8 +1,6 @@
 package io.kite.runtime.logging
 
-import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.PrintStream
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -30,9 +28,8 @@ object AnsiColors {
 class SegmentLogger(
     private val segmentName: String,
     private val logDir: File = File(".kite/logs"),
-    private val showInConsole: Boolean = false
+    private val showInConsole: Boolean = false,
 ) : io.kite.core.SegmentLoggerInterface {
-
     private val logFile: File = logDir.resolve("$segmentName.log")
     private val buffer = StringBuilder()
     private val timeFormat = DateTimeFormatter.ofPattern("HH:mm:ss.SSS")
@@ -47,7 +44,10 @@ class SegmentLogger(
     /**
      * Logs a message to the segment log file.
      */
-    private fun logToFile(message: String, level: String) {
+    private fun logToFile(
+        message: String,
+        level: String,
+    ) {
         val timestamp = LocalDateTime.now().format(timeFormat)
         val logEntry = "[$timestamp] [$segmentName] $message"
 
@@ -61,11 +61,12 @@ class SegmentLogger(
         if (showInConsole) {
             val timestampColored = "${AnsiColors.BLUE}[$timestamp]${AnsiColors.RESET}"
             val segmentColored = "${AnsiColors.RED}[$segmentName]${AnsiColors.RESET}"
-            val coloredMessage = when (level) {
-                "ERROR" -> "${AnsiColors.BRIGHT_RED}$message${AnsiColors.RESET}"
-                "WARN" -> "${AnsiColors.YELLOW}$message${AnsiColors.RESET}"
-                else -> "${AnsiColors.WHITE}$message${AnsiColors.RESET}"
-            }
+            val coloredMessage =
+                when (level) {
+                    "ERROR" -> "${AnsiColors.BRIGHT_RED}$message${AnsiColors.RESET}"
+                    "WARN" -> "${AnsiColors.YELLOW}$message${AnsiColors.RESET}"
+                    else -> "${AnsiColors.WHITE}$message${AnsiColors.RESET}"
+                }
             println("$timestampColored $segmentColored $coloredMessage")
         }
     }
@@ -119,7 +120,10 @@ class SegmentLogger(
     /**
      * Logs command output line by line with timestamps.
      */
-    override fun logCommandOutput(output: String, isError: Boolean) {
+    override fun logCommandOutput(
+        output: String,
+        isError: Boolean,
+    ) {
         if (output.isBlank()) return
 
         output.lines().forEach { line ->
@@ -144,7 +148,11 @@ class SegmentLogger(
     /**
      * Logs command completion.
      */
-    override fun logCommandComplete(command: String, exitCode: Int, durationMs: Long) {
+    override fun logCommandComplete(
+        command: String,
+        exitCode: Int,
+        durationMs: Long,
+    ) {
         val timestamp = LocalDateTime.now().format(timeFormat)
         val status = if (exitCode == 0) "✓" else "✗"
         val message = "Command $status (exit: $exitCode, ${durationMs}ms)"
@@ -180,7 +188,7 @@ enum class LogLevel {
     DEBUG,
     INFO,
     WARN,
-    ERROR
+    ERROR,
 }
 
 /**
@@ -188,7 +196,7 @@ enum class LogLevel {
  */
 data class LogConfig(
     val logDir: File = File(".kite/logs"),
-    val keepLogs: Boolean = false
+    val keepLogs: Boolean = false,
 )
 
 /**
@@ -211,12 +219,16 @@ object LogManager {
     /**
      * Creates a logger for a segment and sets it as current for this thread.
      */
-    fun startSegmentLogging(segmentName: String, showInConsole: Boolean = false): SegmentLogger {
-        val logger = SegmentLogger(
-            segmentName = segmentName,
-            logDir = config.logDir,
-            showInConsole = showInConsole
-        )
+    fun startSegmentLogging(
+        segmentName: String,
+        showInConsole: Boolean = false,
+    ): SegmentLogger {
+        val logger =
+            SegmentLogger(
+                segmentName = segmentName,
+                logDir = config.logDir,
+                showInConsole = showInConsole,
+            )
         activeLoggers[segmentName] = logger
         currentLogger.set(logger)
         return logger

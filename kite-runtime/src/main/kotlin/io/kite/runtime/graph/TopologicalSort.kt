@@ -9,7 +9,7 @@ import io.kite.core.Segment
  * all dependencies are satisfied before a segment executes.
  */
 class TopologicalSort(
-    private val graph: SegmentGraph
+    private val graph: SegmentGraph,
 ) {
     /**
      * Sorts segments in topological order.
@@ -74,7 +74,7 @@ class TopologicalSort(
             val missing = segments.filter { it !in sorted }
             throw IllegalStateException(
                 "Topological sort failed: ${missing.size} segments not sorted. " +
-                        "This indicates a cycle or missing dependencies."
+                    "This indicates a cycle or missing dependencies.",
             )
         }
 
@@ -147,7 +147,7 @@ class TopologicalSort(
             levels = levels.size,
             maxParallelism = maxParallelism,
             minParallelism = minParallelism,
-            avgParallelism = avgParallelism
+            avgParallelism = avgParallelism,
         )
     }
 }
@@ -156,10 +156,10 @@ class TopologicalSort(
  * Exception thrown when attempting to sort a graph with cycles.
  */
 class CyclicDependencyException(
-    val cycles: List<Cycle>
+    val cycles: List<Cycle>,
 ) : Exception(
-    "Cannot sort graph with cycles: " + cycles.joinToString("; ") { it.toString() }
-)
+        "Cannot sort graph with cycles: " + cycles.joinToString("; ") { it.toString() },
+    )
 
 /**
  * Statistics about topological sort results.
@@ -169,7 +169,7 @@ data class SortStats(
     val levels: Int,
     val maxParallelism: Int,
     val minParallelism: Int,
-    val avgParallelism: Double
+    val avgParallelism: Double,
 ) {
     /**
      * Parallelization efficiency: how well segments can be parallelized.
@@ -177,12 +177,16 @@ data class SortStats(
      * 0.0 = no parallelism (all segments sequential)
      */
     val parallelizationEfficiency: Double
-        get() = if (totalSegments <= 1) 1.0
-        else avgParallelism / totalSegments
+        get() =
+            if (totalSegments <= 1) {
+                1.0
+            } else {
+                avgParallelism / totalSegments
+            }
 
     override fun toString(): String {
         return "SortStats(segments=$totalSegments, levels=$levels, " +
-                "maxParallel=$maxParallelism, avgParallel=${"%.2f".format(avgParallelism)}, " +
-                "efficiency=${"%.2f".format(parallelizationEfficiency * 100)}%)"
+            "maxParallel=$maxParallelism, avgParallel=${"%.2f".format(avgParallelism)}, " +
+            "efficiency=${"%.2f".format(parallelizationEfficiency * 100)}%)"
     }
 }

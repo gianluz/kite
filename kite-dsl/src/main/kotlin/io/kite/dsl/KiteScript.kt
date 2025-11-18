@@ -14,6 +14,6 @@ import kotlin.script.experimental.annotations.KotlinScript
     displayName = "Kite Script",
     fileExtension = "kite.kts",
     compilationConfiguration = KiteScriptCompilationConfiguration::class,
-    evaluationConfiguration = KiteScriptEvaluationConfiguration::class
+    evaluationConfiguration = KiteScriptEvaluationConfiguration::class,
 )
 abstract class KiteScript

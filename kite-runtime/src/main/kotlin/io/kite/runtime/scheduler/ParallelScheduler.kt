@@ -18,16 +18,15 @@ import java.util.concurrent.ConcurrentHashMap
  * in parallel, while respecting maxConcurrency limits.
  */
 class ParallelScheduler(
-    private val maxConcurrency: Int = Runtime.getRuntime().availableProcessors()
+    private val maxConcurrency: Int = Runtime.getRuntime().availableProcessors(),
 ) : SegmentScheduler {
-
     init {
         require(maxConcurrency > 0) { "maxConcurrency must be > 0" }
     }
 
     override suspend fun execute(
         segments: List<Segment>,
-        context: ExecutionContext
+        context: ExecutionContext,
     ): SchedulerResult {
         if (segments.isEmpty()) {
             return SchedulerResult(emptyMap())
@@ -39,31 +38,36 @@ class ParallelScheduler(
 
         if (!validation.isValid) {
             return SchedulerResult(
-                segmentResults = segments.associate {
-                    it.name to SegmentResult(
-                        segment = it,
-                        status = SegmentStatus.SKIPPED,
-                        error = "Graph validation failed: ${validation.errors.first()}"
-                    )
-                }
+                segmentResults =
+                    segments.associate {
+                        it.name to
+                            SegmentResult(
+                                segment = it,
+                                status = SegmentStatus.SKIPPED,
+                                error = "Graph validation failed: ${validation.errors.first()}",
+                            )
+                    },
             )
         }
 
         // Get topological sort with levels
         val sorter = TopologicalSort(graph)
-        val sorted = try {
-            sorter.sort()
-        } catch (e: Exception) {
-            return SchedulerResult(
-                segmentResults = segments.associate {
-                    it.name to SegmentResult(
-                        segment = it,
-                        status = SegmentStatus.FAILURE,
-                        error = e.message
-                    )
-                }
-            )
-        }
+        val sorted =
+            try {
+                sorter.sort()
+            } catch (e: Exception) {
+                return SchedulerResult(
+                    segmentResults =
+                        segments.associate {
+                            it.name to
+                                SegmentResult(
+                                    segment = it,
+                                    status = SegmentStatus.FAILURE,
+                                    error = e.message,
+                                )
+                        },
+                )
+            }
 
         // Get execution levels for parallel execution
         val levels = sorter.sortByLevels()
@@ -103,31 +107,34 @@ class ParallelScheduler(
     private suspend fun executeSegmentWithChecks(
         segment: Segment,
         results: ConcurrentHashMap<String, SegmentResult>,
-        context: ExecutionContext
+        context: ExecutionContext,
     ): SegmentResult {
         // Check if segment should execute based on condition
         if (!segment.shouldExecute(context)) {
-            val result = SegmentResult(
-                segment = segment,
-                status = SegmentStatus.SKIPPED,
-                message = "Skipped due to condition"
-            )
+            val result =
+                SegmentResult(
+                    segment = segment,
+                    status = SegmentStatus.SKIPPED,
+                    message = "Skipped due to condition",
+                )
             results[segment.name] = result
             return result
         }
 
         // Check if dependencies succeeded
-        val dependenciesFailed = segment.dependsOn.any { depName ->
-            val depResult = results[depName]
-            depResult?.status?.isFailed == true || depResult?.status == SegmentStatus.SKIPPED
-        }
+        val dependenciesFailed =
+            segment.dependsOn.any { depName ->
+                val depResult = results[depName]
+                depResult?.status?.isFailed == true || depResult?.status == SegmentStatus.SKIPPED
+            }
 
         if (dependenciesFailed) {
-            val result = SegmentResult(
-                segment = segment,
-                status = SegmentStatus.SKIPPED,
-                message = "Skipped due to failed or skipped dependencies"
-            )
+            val result =
+                SegmentResult(
+                    segment = segment,
+                    status = SegmentStatus.SKIPPED,
+                    message = "Skipped due to failed or skipped dependencies",
+                )
             results[segment.name] = result
             return result
         }
@@ -143,7 +150,7 @@ class ParallelScheduler(
      */
     private suspend fun executeSegment(
         segment: Segment,
-        context: ExecutionContext
+        context: ExecutionContext,
     ): SegmentResult {
         val startTime = System.currentTimeMillis()
 
@@ -179,7 +186,7 @@ class ParallelScheduler(
                     segment = segment,
                     status = SegmentStatus.SUCCESS,
                     durationMs = duration,
-                    logOutput = logger.getOutput()
+                    logOutput = logger.getOutput(),
                 )
             } finally {
                 // Clean up logging
@@ -202,7 +209,7 @@ class ParallelScheduler(
                 error = e.message,
                 exception = e,
                 durationMs = duration,
-                logOutput = logger?.getOutput()
+                logOutput = logger?.getOutput(),
             )
         }
     }

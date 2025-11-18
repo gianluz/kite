@@ -7,7 +7,6 @@ import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import io.kite.cli.Output
 import io.kite.cli.globalOptions
-import io.kite.core.ExecutionContext
 import io.kite.core.PlatformDetector
 import io.kite.core.Segment
 import io.kite.dsl.FileDiscovery
@@ -27,12 +26,12 @@ class RunCommand : CliktCommand(
 
     private val dryRun by option(
         "--dry-run",
-        help = "Show execution plan without running"
+        help = "Show execution plan without running",
     ).flag()
 
     private val sequential by option(
         "--sequential",
-        help = "Force sequential execution (disable parallelism)"
+        help = "Force sequential execution (disable parallelism)",
     ).flag()
 
     override fun run() {
@@ -69,9 +68,10 @@ class RunCommand : CliktCommand(
             }
 
             val discovery = FileDiscovery()
-            val loadResult = runBlocking {
-                discovery.loadAll()
-            }
+            val loadResult =
+                runBlocking {
+                    discovery.loadAll()
+                }
 
             if (!loadResult.success) {
                 Output.error("Failed to load .kite files:")
@@ -123,11 +123,12 @@ class RunCommand : CliktCommand(
                 Output.section("Execution Plan")
                 Output.info("Segments to execute: ${segmentsToExecute.size}")
                 segmentsToExecute.forEach { segment ->
-                    val deps = if (segment.dependsOn.isNotEmpty()) {
-                        " (depends on: ${segment.dependsOn.joinToString(", ")})"
-                    } else {
-                        ""
-                    }
+                    val deps =
+                        if (segment.dependsOn.isNotEmpty()) {
+                            " (depends on: ${segment.dependsOn.joinToString(", ")})"
+                        } else {
+                            ""
+                        }
                     val requested = if (segment.name in segmentNames) " [requested]" else ""
                     Output.progress("• ${segment.name}$deps$requested")
                 }
@@ -144,18 +145,20 @@ class RunCommand : CliktCommand(
                 Output.section("Executing Segments")
             }
 
-            val scheduler = if (sequential) {
-                if (opts.verbose) Output.info("Using sequential scheduler")
-                SequentialScheduler()
-            } else {
-                val concurrency = Runtime.getRuntime().availableProcessors()
-                if (opts.verbose) Output.info("Using parallel scheduler (max concurrency: $concurrency)")
-                ParallelScheduler(maxConcurrency = concurrency)
-            }
+            val scheduler =
+                if (sequential) {
+                    if (opts.verbose) Output.info("Using sequential scheduler")
+                    SequentialScheduler()
+                } else {
+                    val concurrency = Runtime.getRuntime().availableProcessors()
+                    if (opts.verbose) Output.info("Using parallel scheduler (max concurrency: $concurrency)")
+                    ParallelScheduler(maxConcurrency = concurrency)
+                }
 
-            val result = runBlocking {
-                scheduler.execute(segmentsToExecute, context)
-            }
+            val result =
+                runBlocking {
+                    scheduler.execute(segmentsToExecute, context)
+                }
 
             // Show results
             if (!opts.quiet) {
@@ -164,7 +167,7 @@ class RunCommand : CliktCommand(
                     Output.result(
                         segment = segResult.segment.name,
                         status = segResult.status.name,
-                        duration = segResult.durationMs
+                        duration = segResult.durationMs,
                     )
                 }
             }
@@ -177,7 +180,7 @@ class RunCommand : CliktCommand(
                     success = result.successCount,
                     failed = result.failureCount,
                     skipped = result.skippedCount,
-                    duration = totalDuration
+                    duration = totalDuration,
                 )
             }
 
@@ -185,7 +188,6 @@ class RunCommand : CliktCommand(
             if (result.failureCount > 0) {
                 throw Exception("Execution failed with ${result.failureCount} failed segments")
             }
-
         } catch (e: Exception) {
             if (opts.debug) {
                 Output.error("Exception: ${e.message}")
@@ -200,7 +202,7 @@ class RunCommand : CliktCommand(
      */
     private fun collectDependencies(
         requestedSegments: List<Segment>,
-        segmentMap: Map<String, Segment>
+        segmentMap: Map<String, Segment>,
     ): List<Segment> {
         val collected = mutableSetOf<Segment>()
         val toProcess = ArrayDeque(requestedSegments)

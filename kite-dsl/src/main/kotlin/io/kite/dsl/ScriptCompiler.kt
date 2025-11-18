@@ -4,7 +4,6 @@ import java.io.File
 import kotlin.script.experimental.api.*
 import kotlin.script.experimental.host.toScriptSource
 import kotlin.script.experimental.jvmhost.BasicJvmScriptingHost
-import kotlin.script.experimental.jvmhost.createJvmCompilationConfigurationFromTemplate
 
 /**
  * Compiles and evaluates Kite scripts (.kite.kts files).
@@ -15,7 +14,7 @@ import kotlin.script.experimental.jvmhost.createJvmCompilationConfigurationFromT
  * - Error reporting
  */
 class ScriptCompiler(
-    private val enableCache: Boolean = true
+    private val enableCache: Boolean = true,
 ) {
     private val scriptingHost = BasicJvmScriptingHost()
     private val compilationCache = mutableMapOf<String, CompiledScript>()
@@ -91,6 +90,7 @@ class ScriptCompiler(
  */
 sealed class ScriptResult<out T> {
     data class Success<T>(val value: T) : ScriptResult<T>()
+
     data class Failure(val errors: List<ScriptDiagnostic>) : ScriptResult<Nothing>()
 }
 
@@ -100,12 +100,12 @@ sealed class ScriptResult<out T> {
 data class ScriptDiagnostic(
     val message: String,
     val severity: Severity,
-    val location: SourceCode.Location?
+    val location: SourceCode.Location?,
 ) {
     enum class Severity {
         ERROR,
         WARNING,
-        INFO
+        INFO,
     }
 
     override fun toString(): String {
@@ -121,20 +121,22 @@ fun <T> ResultWithDiagnostics<T>.toScriptResult(): ScriptResult<T> {
     return when (this) {
         is ResultWithDiagnostics.Success -> ScriptResult.Success(this.value)
         is ResultWithDiagnostics.Failure -> {
-            val diagnostics = this.reports.map { report ->
-                ScriptDiagnostic(
-                    message = report.message,
-                    severity = when (report.severity) {
-                        kotlin.script.experimental.api.ScriptDiagnostic.Severity.ERROR ->
-                            ScriptDiagnostic.Severity.ERROR
+            val diagnostics =
+                this.reports.map { report ->
+                    ScriptDiagnostic(
+                        message = report.message,
+                        severity =
+                            when (report.severity) {
+                                kotlin.script.experimental.api.ScriptDiagnostic.Severity.ERROR ->
+                                    ScriptDiagnostic.Severity.ERROR
 
-                        kotlin.script.experimental.api.ScriptDiagnostic.Severity.WARNING ->
-                            ScriptDiagnostic.Severity.WARNING
-                        else -> ScriptDiagnostic.Severity.INFO
-                    },
-                    location = report.location
-                )
-            }
+                                kotlin.script.experimental.api.ScriptDiagnostic.Severity.WARNING ->
+                                    ScriptDiagnostic.Severity.WARNING
+                                else -> ScriptDiagnostic.Severity.INFO
+                            },
+                        location = report.location,
+                    )
+                }
             ScriptResult.Failure(diagnostics)
         }
     }

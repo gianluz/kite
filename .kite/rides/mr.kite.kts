@@ -15,8 +15,12 @@ ride {
             segment("test-cli")
             segment("test-integration")
         }
-        
+
         // Finally: Full build to ensure everything compiles
         segment("build")
+
+        // TODO: Add code quality checks once codebase is ktlint/detekt compliant
+        // segment("ktlint")
+        // segment("detekt")
     }
 }

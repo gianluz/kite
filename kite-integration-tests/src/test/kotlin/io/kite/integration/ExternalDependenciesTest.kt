@@ -1,13 +1,11 @@
 package io.kite.integration
 
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
 
 /**
  * Integration tests for @DependsOn external dependency resolution.
  */
 class ExternalDependenciesTest : IntegrationTestBase() {
-
     @Test
     fun `resolve and use Gson via DependsOn annotation`() {
         createSegmentFile(
@@ -26,7 +24,7 @@ class ExternalDependenciesTest : IntegrationTestBase() {
                     }
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         createRideFile(
@@ -38,7 +36,7 @@ class ExternalDependenciesTest : IntegrationTestBase() {
                     segment("test-gson")
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = executeRide("Gson Test")
@@ -68,7 +66,7 @@ class ExternalDependenciesTest : IntegrationTestBase() {
                     }
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         createRideFile(
@@ -80,7 +78,7 @@ class ExternalDependenciesTest : IntegrationTestBase() {
                     segment("test-commons")
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = executeRide("Commons Test")
@@ -111,7 +109,7 @@ class ExternalDependenciesTest : IntegrationTestBase() {
                     }
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         createRideFile(
@@ -123,7 +121,7 @@ class ExternalDependenciesTest : IntegrationTestBase() {
                     segment("test-multi")
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = executeRide("Multi Deps")

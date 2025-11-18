@@ -9,9 +9,10 @@ import java.nio.file.Path
 import kotlin.test.*
 
 class FileOperationsTest {
-
     @Test
-    fun `readFile reads file contents`(@TempDir tempDir: Path) {
+    fun `readFile reads file contents`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
         val file = tempDir.resolve("test.txt").toFile()
         file.writeText("Hello, World!")
@@ -22,7 +23,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `readFile throws when file doesn't exist`(@TempDir tempDir: Path) {
+    fun `readFile throws when file doesn't exist`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
 
         // File.readText() throws FileNotFoundException, not NoSuchFileException
@@ -32,7 +35,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `readLines reads file as lines`(@TempDir tempDir: Path) {
+    fun `readLines reads file as lines`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
         val file = tempDir.resolve("lines.txt").toFile()
         file.writeText("Line 1\nLine 2\nLine 3")
@@ -43,7 +48,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `writeFile creates new file with content`(@TempDir tempDir: Path) {
+    fun `writeFile creates new file with content`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
 
         context.writeFile("new.txt", "New content")
@@ -54,7 +61,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `writeFile overwrites existing file`(@TempDir tempDir: Path) {
+    fun `writeFile overwrites existing file`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
         val file = tempDir.resolve("existing.txt").toFile()
         file.writeText("Old content")
@@ -65,7 +74,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `writeFile creates parent directories`(@TempDir tempDir: Path) {
+    fun `writeFile creates parent directories`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
 
         context.writeFile("subdir/nested/file.txt", "Content")
@@ -76,7 +87,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `appendFile appends to existing file`(@TempDir tempDir: Path) {
+    fun `appendFile appends to existing file`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
         val file = tempDir.resolve("append.txt").toFile()
         file.writeText("First")
@@ -87,7 +100,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `appendFile creates new file if doesn't exist`(@TempDir tempDir: Path) {
+    fun `appendFile creates new file if doesn't exist`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
 
         context.appendFile("new.txt", "Content")
@@ -98,7 +113,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `copyFile copies single file`(@TempDir tempDir: Path) {
+    fun `copyFile copies single file`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
         val source = tempDir.resolve("source.txt").toFile()
         source.writeText("Content to copy")
@@ -112,7 +129,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `copyFile copies directory recursively`(@TempDir tempDir: Path) {
+    fun `copyFile copies directory recursively`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
         val sourceDir = tempDir.resolve("source").toFile()
         sourceDir.mkdirs()
@@ -131,7 +150,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `copyFile with overwrite replaces existing file`(@TempDir tempDir: Path) {
+    fun `copyFile with overwrite replaces existing file`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
         val source = tempDir.resolve("source.txt").toFile()
         source.writeText("New content")
@@ -144,7 +165,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `copyFile without overwrite throws when destination exists`(@TempDir tempDir: Path) {
+    fun `copyFile without overwrite throws when destination exists`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
         val source = tempDir.resolve("source.txt").toFile()
         source.writeText("Content")
@@ -157,7 +180,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `moveFile moves file to new location`(@TempDir tempDir: Path) {
+    fun `moveFile moves file to new location`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
         val source = tempDir.resolve("source.txt").toFile()
         source.writeText("Content to move")
@@ -171,7 +196,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `moveFile with overwrite replaces existing file`(@TempDir tempDir: Path) {
+    fun `moveFile with overwrite replaces existing file`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
         val source = tempDir.resolve("source.txt").toFile()
         source.writeText("New content")
@@ -185,7 +212,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `deleteFile deletes single file`(@TempDir tempDir: Path) {
+    fun `deleteFile deletes single file`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
         val file = tempDir.resolve("delete-me.txt").toFile()
         file.writeText("Content")
@@ -196,7 +225,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `deleteFile with recursive deletes directory`(@TempDir tempDir: Path) {
+    fun `deleteFile with recursive deletes directory`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
         val dir = tempDir.resolve("delete-dir").toFile()
         dir.mkdirs()
@@ -210,7 +241,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `deleteFile does nothing if path doesn't exist`(@TempDir tempDir: Path) {
+    fun `deleteFile does nothing if path doesn't exist`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
 
         // Should not throw
@@ -218,7 +251,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `createDirectory creates single directory`(@TempDir tempDir: Path) {
+    fun `createDirectory creates single directory`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
 
         context.createDirectory("new-dir")
@@ -229,7 +264,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `createDirectory creates nested directories`(@TempDir tempDir: Path) {
+    fun `createDirectory creates nested directories`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
 
         context.createDirectory("level1/level2/level3")
@@ -240,7 +277,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `listFiles lists files in directory`(@TempDir tempDir: Path) {
+    fun `listFiles lists files in directory`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
         val dir = tempDir.resolve("list-test").toFile()
         dir.mkdirs()
@@ -256,7 +295,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `listFiles with recursive lists all nested files`(@TempDir tempDir: Path) {
+    fun `listFiles with recursive lists all nested files`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
         val dir = tempDir.resolve("recursive-test").toFile()
         dir.mkdirs()
@@ -275,7 +316,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `listFiles throws when path is not a directory`(@TempDir tempDir: Path) {
+    fun `listFiles throws when path is not a directory`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
         val file = tempDir.resolve("file.txt").toFile()
         file.writeText("Content")
@@ -286,7 +329,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `findFiles finds files matching glob pattern`(@TempDir tempDir: Path) {
+    fun `findFiles finds files matching glob pattern`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
         val dir = tempDir.toFile()
         dir.resolve("test1.kt").writeText("Kotlin 1")
@@ -302,7 +347,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `fileExists returns true when file exists`(@TempDir tempDir: Path) {
+    fun `fileExists returns true when file exists`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
         val file = tempDir.resolve("exists.txt").toFile()
         file.writeText("Content")
@@ -311,14 +358,18 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `fileExists returns false when file doesn't exist`(@TempDir tempDir: Path) {
+    fun `fileExists returns false when file doesn't exist`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
 
         assertFalse(context.fileExists("nonexistent.txt"))
     }
 
     @Test
-    fun `isDirectory returns true for directories`(@TempDir tempDir: Path) {
+    fun `isDirectory returns true for directories`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
         val dir = tempDir.resolve("test-dir").toFile()
         dir.mkdirs()
@@ -327,7 +378,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `isDirectory returns false for files`(@TempDir tempDir: Path) {
+    fun `isDirectory returns false for files`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
         val file = tempDir.resolve("test.txt").toFile()
         file.writeText("Content")
@@ -336,7 +389,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `isFile returns true for files`(@TempDir tempDir: Path) {
+    fun `isFile returns true for files`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
         val file = tempDir.resolve("test.txt").toFile()
         file.writeText("Content")
@@ -345,7 +400,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `isFile returns false for directories`(@TempDir tempDir: Path) {
+    fun `isFile returns false for directories`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
         val dir = tempDir.resolve("test-dir").toFile()
         dir.mkdirs()
@@ -354,7 +411,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `fileSize returns size in bytes`(@TempDir tempDir: Path) {
+    fun `fileSize returns size in bytes`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
         val file = tempDir.resolve("sized.txt").toFile()
         val content = "12345" // 5 bytes
@@ -366,7 +425,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `createTempDir creates temporary directory`(@TempDir tempDir: Path) {
+    fun `createTempDir creates temporary directory`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
 
         val tempDirPath = context.createTempDir("test-")
@@ -378,7 +439,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `createTempFile creates temporary file`(@TempDir tempDir: Path) {
+    fun `createTempFile creates temporary file`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
 
         val tempFilePath = context.createTempFile("test-", ".tmp")
@@ -391,7 +454,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `absolutePath returns absolute path`(@TempDir tempDir: Path) {
+    fun `absolutePath returns absolute path`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
         val file = tempDir.resolve("test.txt").toFile()
         file.writeText("Content")
@@ -403,7 +468,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `file operations work with absolute paths`(@TempDir tempDir: Path) {
+    fun `file operations work with absolute paths`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
         val absolutePath = tempDir.resolve("absolute.txt").toFile().absolutePath
 
@@ -414,7 +481,9 @@ class FileOperationsTest {
     }
 
     @Test
-    fun `file operations work with nested relative paths`(@TempDir tempDir: Path) {
+    fun `file operations work with nested relative paths`(
+        @TempDir tempDir: Path,
+    ) {
         val context = createContext(tempDir)
 
         context.writeFile("level1/level2/nested.txt", "Nested content")
@@ -427,7 +496,7 @@ class FileOperationsTest {
         return ExecutionContext(
             branch = "test",
             commitSha = "abc123",
-            workspace = tempDir
+            workspace = tempDir,
         )
     }
 }

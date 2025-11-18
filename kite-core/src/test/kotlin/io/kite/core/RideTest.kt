@@ -6,13 +6,12 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class RideTest {
-
     @Test
     fun `ride requires non-blank name`() {
         assertThrows<IllegalArgumentException> {
             Ride(
                 name = "",
-                flow = FlowNode.SegmentRef("build")
+                flow = FlowNode.SegmentRef("build"),
             )
         }
     }
@@ -23,7 +22,7 @@ class RideTest {
             Ride(
                 name = "test",
                 flow = FlowNode.SegmentRef("build"),
-                maxConcurrency = 0
+                maxConcurrency = 0,
             )
         }
 
@@ -31,17 +30,18 @@ class RideTest {
             Ride(
                 name = "test",
                 flow = FlowNode.SegmentRef("build"),
-                maxConcurrency = -1
+                maxConcurrency = -1,
             )
         }
     }
 
     @Test
     fun `ride with minimal properties`() {
-        val ride = Ride(
-            name = "MR Ride",
-            flow = FlowNode.SegmentRef("build")
-        )
+        val ride =
+            Ride(
+                name = "MR Ride",
+                flow = FlowNode.SegmentRef("build"),
+            )
 
         assertEquals("MR Ride", ride.name)
         assertEquals(emptyMap(), ride.environment)
@@ -52,13 +52,14 @@ class RideTest {
     @Test
     fun `ride with all properties`() {
         val onFailure: suspend (Throwable) -> Unit = {}
-        val ride = Ride(
-            name = "Full Ride",
-            flow = FlowNode.SegmentRef("build"),
-            environment = mapOf("KEY" to "value"),
-            maxConcurrency = 4,
-            onFailure = onFailure
-        )
+        val ride =
+            Ride(
+                name = "Full Ride",
+                flow = FlowNode.SegmentRef("build"),
+                environment = mapOf("KEY" to "value"),
+                maxConcurrency = 4,
+                onFailure = onFailure,
+            )
 
         assertEquals("Full Ride", ride.name)
         assertEquals(mapOf("KEY" to "value"), ride.environment)
@@ -68,16 +69,18 @@ class RideTest {
 
     @Test
     fun `validate detects missing segments`() {
-        val ride = Ride(
-            name = "Test",
-            flow = FlowNode.Sequential(
-                listOf(
-                    FlowNode.SegmentRef("build"),
-                    FlowNode.SegmentRef("test"),
-                    FlowNode.SegmentRef("missing")
-                )
+        val ride =
+            Ride(
+                name = "Test",
+                flow =
+                    FlowNode.Sequential(
+                        listOf(
+                            FlowNode.SegmentRef("build"),
+                            FlowNode.SegmentRef("test"),
+                            FlowNode.SegmentRef("missing"),
+                        ),
+                    ),
             )
-        )
 
         val availableSegments = setOf("build", "test")
         val errors = ride.validate(availableSegments)
@@ -88,15 +91,17 @@ class RideTest {
 
     @Test
     fun `validate passes with all segments present`() {
-        val ride = Ride(
-            name = "Test",
-            flow = FlowNode.Sequential(
-                listOf(
-                    FlowNode.SegmentRef("build"),
-                    FlowNode.SegmentRef("test")
-                )
+        val ride =
+            Ride(
+                name = "Test",
+                flow =
+                    FlowNode.Sequential(
+                        listOf(
+                            FlowNode.SegmentRef("build"),
+                            FlowNode.SegmentRef("test"),
+                        ),
+                    ),
             )
-        )
 
         val availableSegments = setOf("build", "test", "lint")
         val errors = ride.validate(availableSegments)
@@ -106,15 +111,17 @@ class RideTest {
 
     @Test
     fun `validate detects empty parallel blocks`() {
-        val ride = Ride(
-            name = "Test",
-            flow = FlowNode.Sequential(
-                listOf(
-                    FlowNode.SegmentRef("build"),
-                    FlowNode.Parallel(emptyList())
-                )
+        val ride =
+            Ride(
+                name = "Test",
+                flow =
+                    FlowNode.Sequential(
+                        listOf(
+                            FlowNode.SegmentRef("build"),
+                            FlowNode.Parallel(emptyList()),
+                        ),
+                    ),
             )
-        )
 
         val errors = ride.validate(setOf("build"))
 
@@ -123,16 +130,18 @@ class RideTest {
 
     @Test
     fun `toString includes key information`() {
-        val ride = Ride(
-            name = "MR Ride",
-            flow = FlowNode.Sequential(
-                listOf(
-                    FlowNode.SegmentRef("build"),
-                    FlowNode.SegmentRef("test")
-                )
-            ),
-            maxConcurrency = 4
-        )
+        val ride =
+            Ride(
+                name = "MR Ride",
+                flow =
+                    FlowNode.Sequential(
+                        listOf(
+                            FlowNode.SegmentRef("build"),
+                            FlowNode.SegmentRef("test"),
+                        ),
+                    ),
+                maxConcurrency = 4,
+            )
 
         val str = ride.toString()
         assertTrue(str.contains("MR Ride"))
@@ -142,7 +151,6 @@ class RideTest {
 }
 
 class FlowNodeTest {
-
     @Test
     fun `SegmentRef requires non-blank name`() {
         assertThrows<IllegalArgumentException> {
@@ -159,10 +167,11 @@ class FlowNodeTest {
 
     @Test
     fun `SegmentRef with overrides`() {
-        val overrides = SegmentOverrides(
-            dependsOn = listOf("lint"),
-            enabled = false
-        )
+        val overrides =
+            SegmentOverrides(
+                dependsOn = listOf("lint"),
+                enabled = false,
+            )
         val node = FlowNode.SegmentRef("test", overrides)
 
         assertEquals("test", node.segmentName)
@@ -178,13 +187,14 @@ class FlowNodeTest {
 
     @Test
     fun `Sequential allSegmentReferences combines all nodes`() {
-        val node = FlowNode.Sequential(
-            listOf(
-                FlowNode.SegmentRef("build"),
-                FlowNode.SegmentRef("test"),
-                FlowNode.SegmentRef("lint")
+        val node =
+            FlowNode.Sequential(
+                listOf(
+                    FlowNode.SegmentRef("build"),
+                    FlowNode.SegmentRef("test"),
+                    FlowNode.SegmentRef("lint"),
+                ),
             )
-        )
 
         val refs = node.allSegmentReferences()
         assertEquals(3, refs.size)
@@ -195,17 +205,18 @@ class FlowNodeTest {
 
     @Test
     fun `Sequential with nested Parallel allSegmentReferences`() {
-        val node = FlowNode.Sequential(
-            listOf(
-                FlowNode.SegmentRef("build"),
-                FlowNode.Parallel(
-                    listOf(
-                        FlowNode.SegmentRef("unitTest"),
-                        FlowNode.SegmentRef("integrationTest")
-                    )
-                )
+        val node =
+            FlowNode.Sequential(
+                listOf(
+                    FlowNode.SegmentRef("build"),
+                    FlowNode.Parallel(
+                        listOf(
+                            FlowNode.SegmentRef("unitTest"),
+                            FlowNode.SegmentRef("integrationTest"),
+                        ),
+                    ),
+                ),
             )
-        )
 
         val refs = node.allSegmentReferences()
         assertEquals(3, refs.size)
@@ -216,13 +227,14 @@ class FlowNodeTest {
 
     @Test
     fun `Parallel allSegmentReferences combines all nodes`() {
-        val node = FlowNode.Parallel(
-            listOf(
-                FlowNode.SegmentRef("unitTest"),
-                FlowNode.SegmentRef("lint"),
-                FlowNode.SegmentRef("detekt")
+        val node =
+            FlowNode.Parallel(
+                listOf(
+                    FlowNode.SegmentRef("unitTest"),
+                    FlowNode.SegmentRef("lint"),
+                    FlowNode.SegmentRef("detekt"),
+                ),
             )
-        )
 
         val refs = node.allSegmentReferences()
         assertEquals(3, refs.size)
@@ -241,13 +253,14 @@ class FlowNodeTest {
 
     @Test
     fun `findEmptyParallelBlocks detects empty blocks`() {
-        val node = FlowNode.Sequential(
-            listOf(
-                FlowNode.SegmentRef("build"),
-                FlowNode.Parallel(emptyList()),
-                FlowNode.SegmentRef("deploy")
+        val node =
+            FlowNode.Sequential(
+                listOf(
+                    FlowNode.SegmentRef("build"),
+                    FlowNode.Parallel(emptyList()),
+                    FlowNode.SegmentRef("deploy"),
+                ),
             )
-        )
 
         val empty = node.findEmptyParallelBlocks()
         assertEquals(1, empty.size)
@@ -255,17 +268,18 @@ class FlowNodeTest {
 
     @Test
     fun `findEmptyParallelBlocks returns empty for valid flow`() {
-        val node = FlowNode.Sequential(
-            listOf(
-                FlowNode.SegmentRef("build"),
-                FlowNode.Parallel(
-                    listOf(
-                        FlowNode.SegmentRef("test1"),
-                        FlowNode.SegmentRef("test2")
-                    )
-                )
+        val node =
+            FlowNode.Sequential(
+                listOf(
+                    FlowNode.SegmentRef("build"),
+                    FlowNode.Parallel(
+                        listOf(
+                            FlowNode.SegmentRef("test1"),
+                            FlowNode.SegmentRef("test2"),
+                        ),
+                    ),
+                ),
             )
-        )
 
         val empty = node.findEmptyParallelBlocks()
         assertTrue(empty.isEmpty())

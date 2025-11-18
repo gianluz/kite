@@ -21,7 +21,6 @@ import kotlin.time.Duration.Companion.milliseconds
  * - Asserting on execution results
  */
 abstract class IntegrationTestBase {
-
     @TempDir
     lateinit var workspaceRoot: File
 
@@ -31,9 +30,13 @@ abstract class IntegrationTestBase {
      * @param resourcePath Path relative to resources/fixtures (e.g., "segments/build.kite.kts")
      * @param targetPath Path in workspace (e.g., ".kite/segments/build.kite.kts")
      */
-    protected fun loadFixture(resourcePath: String, targetPath: String) {
-        val resource = javaClass.classLoader.getResourceAsStream("fixtures/$resourcePath")
-            ?: error("Fixture not found: fixtures/$resourcePath")
+    protected fun loadFixture(
+        resourcePath: String,
+        targetPath: String,
+    ) {
+        val resource =
+            javaClass.classLoader.getResourceAsStream("fixtures/$resourcePath")
+                ?: error("Fixture not found: fixtures/$resourcePath")
 
         val targetFile = File(workspaceRoot, targetPath)
         targetFile.parentFile.mkdirs()
@@ -45,7 +48,10 @@ abstract class IntegrationTestBase {
     /**
      * Create a segment file directly in the workspace.
      */
-    protected fun createSegmentFile(name: String, content: String) {
+    protected fun createSegmentFile(
+        name: String,
+        content: String,
+    ) {
         val file = File(workspaceRoot, ".kite/segments/$name")
         file.parentFile.mkdirs()
         file.writeText(content)
@@ -54,7 +60,10 @@ abstract class IntegrationTestBase {
     /**
      * Create a ride file directly in the workspace.
      */
-    protected fun createRideFile(name: String, content: String) {
+    protected fun createRideFile(
+        name: String,
+        content: String,
+    ) {
         val file = File(workspaceRoot, ".kite/rides/$name")
         file.parentFile.mkdirs()
         file.writeText(content)
@@ -63,70 +72,72 @@ abstract class IntegrationTestBase {
     /**
      * Execute a ride and return the result.
      */
-    protected fun executeRide(rideName: String): RideExecutionResult = runBlocking {
-        // Discover and load Kite files
-        val discovery = FileDiscovery(workspaceRoot)
-        val loadResult = discovery.loadAll()
+    protected fun executeRide(rideName: String): RideExecutionResult =
+        runBlocking {
+            // Discover and load Kite files
+            val discovery = FileDiscovery(workspaceRoot)
+            val loadResult = discovery.loadAll()
 
-        assertTrue(loadResult.success, "Failed to load Kite files: ${loadResult.errors}")
+            assertTrue(loadResult.success, "Failed to load Kite files: ${loadResult.errors}")
 
-        // Find the ride
-        val ride = loadResult.rides.find { it.name == rideName }
-            ?: error("Ride not found: $rideName. Available: ${loadResult.rides.map { it.name }}")
+            // Find the ride
+            val ride =
+                loadResult.rides.find { it.name == rideName }
+                    ?: error("Ride not found: $rideName. Available: ${loadResult.rides.map { it.name }}")
 
-        // Collect segments from the ride's flow
-        val segmentMap = loadResult.segmentMap()
-        val segments = collectSegmentsFromFlow(ride.flow, segmentMap)
+            // Collect segments from the ride's flow
+            val segmentMap = loadResult.segmentMap()
+            val segments = collectSegmentsFromFlow(ride.flow, segmentMap)
 
-        // Create execution context with workspace as working directory
-        val platform = PlatformDetector.detect()
+            // Create execution context with workspace as working directory
+            val platform = PlatformDetector.detect()
 
-        // Create artifact manager with test workspace artifacts directory
-        val artifactsDir = workspaceRoot.toPath().resolve(".kite/artifacts")
-        val artifactManager = io.kite.core.FileSystemArtifactManager(artifactsDir)
+            // Create artifact manager with test workspace artifacts directory
+            val artifactsDir = workspaceRoot.toPath().resolve(".kite/artifacts")
+            val artifactManager = io.kite.core.FileSystemArtifactManager(artifactsDir)
 
-        val context = platform.createContext(emptyMap(), artifactManager)
+            val context = platform.createContext(emptyMap(), artifactManager)
 
-        // Change to workspace directory for execution
-        val originalDir = System.getProperty("user.dir")
-        System.setProperty("user.dir", workspaceRoot.absolutePath)
+            // Change to workspace directory for execution
+            val originalDir = System.getProperty("user.dir")
+            System.setProperty("user.dir", workspaceRoot.absolutePath)
 
-        // Execute with captured output
-        val outputStream = ByteArrayOutputStream()
-        val errorStream = ByteArrayOutputStream()
-        val originalOut = System.out
-        val originalErr = System.err
+            // Execute with captured output
+            val outputStream = ByteArrayOutputStream()
+            val errorStream = ByteArrayOutputStream()
+            val originalOut = System.out
+            val originalErr = System.err
 
-        try {
-            System.setOut(PrintStream(outputStream))
-            System.setErr(PrintStream(errorStream))
+            try {
+                System.setOut(PrintStream(outputStream))
+                System.setErr(PrintStream(errorStream))
 
-            val scheduler = ParallelScheduler(maxConcurrency = ride.maxConcurrency ?: 4)
-            val result = scheduler.execute(segments, context)
+                val scheduler = ParallelScheduler(maxConcurrency = ride.maxConcurrency ?: 4)
+                val result = scheduler.execute(segments, context)
 
-            RideExecutionResult(
-                success = result.isSuccess,
-                totalSegments = result.totalSegments,
-                successCount = result.successCount,
-                failureCount = result.failureCount,
-                duration = result.executionTimeMs.milliseconds,
-                output = outputStream.toString(),
-                error = errorStream.toString(),
-                segmentResults = result.segmentResults.mapValues { it.value.isSuccess }
-            )
-        } finally {
-            System.setOut(originalOut)
-            System.setErr(originalErr)
-            System.setProperty("user.dir", originalDir)
+                RideExecutionResult(
+                    success = result.isSuccess,
+                    totalSegments = result.totalSegments,
+                    successCount = result.successCount,
+                    failureCount = result.failureCount,
+                    duration = result.executionTimeMs.milliseconds,
+                    output = outputStream.toString(),
+                    error = errorStream.toString(),
+                    segmentResults = result.segmentResults.mapValues { it.value.isSuccess },
+                )
+            } finally {
+                System.setOut(originalOut)
+                System.setErr(originalErr)
+                System.setProperty("user.dir", originalDir)
+            }
         }
-    }
 
     /**
      * Recursively collect segments from a flow node.
      */
     private fun collectSegmentsFromFlow(
         flow: io.kite.core.FlowNode,
-        segmentMap: Map<String, io.kite.core.Segment>
+        segmentMap: Map<String, io.kite.core.Segment>,
     ): List<io.kite.core.Segment> {
         val segments = mutableListOf<io.kite.core.Segment>()
 
@@ -165,7 +176,7 @@ abstract class IntegrationTestBase {
         val duration: kotlin.time.Duration,
         val output: String,
         val error: String,
-        val segmentResults: Map<String, Boolean>
+        val segmentResults: Map<String, Boolean>,
     ) {
         fun assertSuccess() {
             assertTrue(success, "Ride execution failed. Output:\n$output\nError:\n$error")

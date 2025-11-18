@@ -10,160 +10,175 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class ScriptCompilerTest {
-
     @TempDir
     lateinit var tempDir: File
 
     @Test
-    fun `compile requires existing file`() = runTest {
-        val compiler = ScriptCompiler()
-        val nonExistentFile = File(tempDir, "nonexistent.kite.kts")
+    fun `compile requires existing file`() =
+        runTest {
+            val compiler = ScriptCompiler()
+            val nonExistentFile = File(tempDir, "nonexistent.kite.kts")
 
-        assertThrows<IllegalArgumentException> {
-            compiler.compile(nonExistentFile)
+            assertThrows<IllegalArgumentException> {
+                compiler.compile(nonExistentFile)
+            }
         }
-    }
 
     @Test
-    fun `compile requires kts extension`() = runTest {
-        val compiler = ScriptCompiler()
-        val wrongExtension = File(tempDir, "script.txt").apply {
-            writeText("println(\"test\")")
-        }
+    fun `compile requires kts extension`() =
+        runTest {
+            val compiler = ScriptCompiler()
+            val wrongExtension =
+                File(tempDir, "script.txt").apply {
+                    writeText("println(\"test\")")
+                }
 
-        assertThrows<IllegalArgumentException> {
-            compiler.compile(wrongExtension)
+            assertThrows<IllegalArgumentException> {
+                compiler.compile(wrongExtension)
+            }
         }
-    }
 
     @Test
-    fun `compile simple script successfully`() = runTest {
-        val compiler = ScriptCompiler()
-        val scriptFile = File(tempDir, "simple.kite.kts").apply {
-            writeText(
-                """
-                println("Hello from Kite")
-            """.trimIndent()
-            )
+    fun `compile simple script successfully`() =
+        runTest {
+            val compiler = ScriptCompiler()
+            val scriptFile =
+                File(tempDir, "simple.kite.kts").apply {
+                    writeText(
+                        """
+                        println("Hello from Kite")
+                        """.trimIndent(),
+                    )
+                }
+
+            val result = compiler.compile(scriptFile)
+
+            assertTrue(result is ResultWithDiagnostics.Success)
         }
-
-        val result = compiler.compile(scriptFile)
-
-        assertTrue(result is ResultWithDiagnostics.Success)
-    }
 
     @Test
-    fun `compile caches compiled scripts`() = runTest {
-        val compiler = ScriptCompiler(enableCache = true)
-        val scriptFile = File(tempDir, "cached.kite.kts").apply {
-            writeText(
-                """
-                println("Cached script")
-            """.trimIndent()
-            )
+    fun `compile caches compiled scripts`() =
+        runTest {
+            val compiler = ScriptCompiler(enableCache = true)
+            val scriptFile =
+                File(tempDir, "cached.kite.kts").apply {
+                    writeText(
+                        """
+                        println("Cached script")
+                        """.trimIndent(),
+                    )
+                }
+
+            assertEquals(0, compiler.cacheSize())
+
+            // First compilation
+            val result1 = compiler.compile(scriptFile)
+            assertTrue(result1 is ResultWithDiagnostics.Success)
+            assertEquals(1, compiler.cacheSize())
+
+            // Second compilation (should use cache)
+            val result2 = compiler.compile(scriptFile)
+            assertTrue(result2 is ResultWithDiagnostics.Success)
+            assertEquals(1, compiler.cacheSize())
         }
-
-        assertEquals(0, compiler.cacheSize())
-
-        // First compilation
-        val result1 = compiler.compile(scriptFile)
-        assertTrue(result1 is ResultWithDiagnostics.Success)
-        assertEquals(1, compiler.cacheSize())
-
-        // Second compilation (should use cache)
-        val result2 = compiler.compile(scriptFile)
-        assertTrue(result2 is ResultWithDiagnostics.Success)
-        assertEquals(1, compiler.cacheSize())
-    }
 
     @Test
-    fun `clearCache removes cached scripts`() = runTest {
-        val compiler = ScriptCompiler(enableCache = true)
-        val scriptFile = File(tempDir, "cached.kite.kts").apply {
-            writeText(
-                """
-                println("Cached script")
-            """.trimIndent()
-            )
+    fun `clearCache removes cached scripts`() =
+        runTest {
+            val compiler = ScriptCompiler(enableCache = true)
+            val scriptFile =
+                File(tempDir, "cached.kite.kts").apply {
+                    writeText(
+                        """
+                        println("Cached script")
+                        """.trimIndent(),
+                    )
+                }
+
+            compiler.compile(scriptFile)
+            assertEquals(1, compiler.cacheSize())
+
+            compiler.clearCache()
+            assertEquals(0, compiler.cacheSize())
         }
-
-        compiler.compile(scriptFile)
-        assertEquals(1, compiler.cacheSize())
-
-        compiler.clearCache()
-        assertEquals(0, compiler.cacheSize())
-    }
 
     @Test
-    fun `cache can be disabled`() = runTest {
-        val compiler = ScriptCompiler(enableCache = false)
-        val scriptFile = File(tempDir, "uncached.kite.kts").apply {
-            writeText(
-                """
-                println("Uncached script")
-            """.trimIndent()
-            )
-        }
+    fun `cache can be disabled`() =
+        runTest {
+            val compiler = ScriptCompiler(enableCache = false)
+            val scriptFile =
+                File(tempDir, "uncached.kite.kts").apply {
+                    writeText(
+                        """
+                        println("Uncached script")
+                        """.trimIndent(),
+                    )
+                }
 
-        compiler.compile(scriptFile)
-        assertEquals(0, compiler.cacheSize())
-    }
+            compiler.compile(scriptFile)
+            assertEquals(0, compiler.cacheSize())
+        }
 
     @Test
-    fun `compileAndEvaluate executes simple script`() = runTest {
-        val compiler = ScriptCompiler()
-        val scriptFile = File(tempDir, "execute.kite.kts").apply {
-            writeText(
-                """
-                val x = 42
-                x
-            """.trimIndent()
-            )
+    fun `compileAndEvaluate executes simple script`() =
+        runTest {
+            val compiler = ScriptCompiler()
+            val scriptFile =
+                File(tempDir, "execute.kite.kts").apply {
+                    writeText(
+                        """
+                        val x = 42
+                        x
+                        """.trimIndent(),
+                    )
+                }
+
+            val result = compiler.compileAndEvaluate(scriptFile)
+
+            assertTrue(result is ResultWithDiagnostics.Success)
         }
-
-        val result = compiler.compileAndEvaluate(scriptFile)
-
-        assertTrue(result is ResultWithDiagnostics.Success)
-    }
 
     @Test
-    fun `compile reports errors for invalid syntax`() = runTest {
-        val compiler = ScriptCompiler()
-        val scriptFile = File(tempDir, "invalid.kite.kts").apply {
-            writeText(
-                """
-                this is not valid kotlin
-            """.trimIndent()
-            )
+    fun `compile reports errors for invalid syntax`() =
+        runTest {
+            val compiler = ScriptCompiler()
+            val scriptFile =
+                File(tempDir, "invalid.kite.kts").apply {
+                    writeText(
+                        """
+                        this is not valid kotlin
+                        """.trimIndent(),
+                    )
+                }
+
+            val result = compiler.compile(scriptFile)
+
+            assertTrue(result is ResultWithDiagnostics.Failure)
+            assertTrue(result.reports.isNotEmpty())
         }
-
-        val result = compiler.compile(scriptFile)
-
-        assertTrue(result is ResultWithDiagnostics.Failure)
-        assertTrue(result.reports.isNotEmpty())
-    }
 
     @Test
-    fun `compile allows implicit imports`() = runTest {
-        val compiler = ScriptCompiler()
-        val scriptFile = File(tempDir, "imports.kite.kts").apply {
-            writeText(
-                """
-                // Should be able to use imports from compilation configuration
-                val duration = 5.seconds
-                duration
-            """.trimIndent()
-            )
+    fun `compile allows implicit imports`() =
+        runTest {
+            val compiler = ScriptCompiler()
+            val scriptFile =
+                File(tempDir, "imports.kite.kts").apply {
+                    writeText(
+                        """
+                        // Should be able to use imports from compilation configuration
+                        val duration = 5.seconds
+                        duration
+                        """.trimIndent(),
+                    )
+                }
+
+            val result = compiler.compile(scriptFile)
+
+            assertTrue(result is ResultWithDiagnostics.Success)
         }
-
-        val result = compiler.compile(scriptFile)
-
-        assertTrue(result is ResultWithDiagnostics.Success)
-    }
 }
 
 class ScriptResultTest {
-
     @Test
     fun `Success contains value`() {
         val result: ScriptResult<Int> = ScriptResult.Success(42)
@@ -174,11 +189,12 @@ class ScriptResultTest {
 
     @Test
     fun `Failure contains diagnostics`() {
-        val diagnostic = ScriptDiagnostic(
-            message = "Error message",
-            severity = ScriptDiagnostic.Severity.ERROR,
-            location = null
-        )
+        val diagnostic =
+            ScriptDiagnostic(
+                message = "Error message",
+                severity = ScriptDiagnostic.Severity.ERROR,
+                location = null,
+            )
         val result: ScriptResult<Nothing> = ScriptResult.Failure(listOf(diagnostic))
 
         assertTrue(result is ScriptResult.Failure)
@@ -188,14 +204,14 @@ class ScriptResultTest {
 }
 
 class ScriptDiagnosticTest {
-
     @Test
     fun `toString includes severity and message`() {
-        val diagnostic = ScriptDiagnostic(
-            message = "Test error",
-            severity = ScriptDiagnostic.Severity.ERROR,
-            location = null
-        )
+        val diagnostic =
+            ScriptDiagnostic(
+                message = "Test error",
+                severity = ScriptDiagnostic.Severity.ERROR,
+                location = null,
+            )
 
         val str = diagnostic.toString()
         assertTrue(str.contains("ERROR"))
@@ -204,11 +220,12 @@ class ScriptDiagnosticTest {
 
     @Test
     fun `toString without location`() {
-        val diagnostic = ScriptDiagnostic(
-            message = "Test warning",
-            severity = ScriptDiagnostic.Severity.WARNING,
-            location = null
-        )
+        val diagnostic =
+            ScriptDiagnostic(
+                message = "Test warning",
+                severity = ScriptDiagnostic.Severity.WARNING,
+                location = null,
+            )
 
         val str = diagnostic.toString()
         assertTrue(str.contains("WARNING"))

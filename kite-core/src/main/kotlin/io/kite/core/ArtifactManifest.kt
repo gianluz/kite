@@ -5,7 +5,6 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.nio.file.Files
-import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.concurrent.read
@@ -21,16 +20,16 @@ import kotlin.io.path.exists
 @Serializable
 data class ArtifactManifestData(
     val artifacts: Map<String, ArtifactEntry> = emptyMap(),
-    val version: Int = 1
+    val version: Int = 1,
 )
 
 @Serializable
 data class ArtifactEntry(
     val name: String,
-    val relativePath: String,  // Relative to artifacts directory
-    val type: String,  // "file" or "directory"
+    val relativePath: String, // Relative to artifacts directory
+    val type: String, // "file" or "directory"
     val sizeBytes: Long,
-    val createdAt: Long
+    val createdAt: Long,
 )
 
 /**
@@ -39,16 +38,16 @@ data class ArtifactEntry(
  * Handles serialization/deserialization with atomic file operations.
  */
 class ArtifactManifest(private val artifactsDir: File) {
-
     private val manifestFile = File(artifactsDir, MANIFEST_FILENAME)
     private val tempFile = File(artifactsDir, "$MANIFEST_FILENAME.tmp")
     private val lock = ReentrantReadWriteLock()
 
-    private val json = Json {
-        prettyPrint = true
-        ignoreUnknownKeys = true
-        encodeDefaults = true
-    }
+    private val json =
+        Json {
+            prettyPrint = true
+            ignoreUnknownKeys = true
+            encodeDefaults = true
+        }
 
     companion object {
         private const val MANIFEST_FILENAME = ".manifest.json"
@@ -57,17 +56,18 @@ class ArtifactManifest(private val artifactsDir: File) {
     /**
      * Thread-safe: Load manifest from disk.
      */
-    fun load(): ArtifactManifestData? = lock.read {
-        if (!manifestFile.exists()) return null
+    fun load(): ArtifactManifestData? =
+        lock.read {
+            if (!manifestFile.exists()) return null
 
-        try {
-            val content = manifestFile.readText()
-            json.decodeFromString<ArtifactManifestData>(content)
-        } catch (e: Exception) {
-            // If manifest is corrupted, return null
-            null
+            try {
+                val content = manifestFile.readText()
+                json.decodeFromString<ArtifactManifestData>(content)
+            } catch (e: Exception) {
+                // If manifest is corrupted, return null
+                null
+            }
         }
-    }
 
     /**
      * Thread-safe: Save manifest to disk atomically.
@@ -76,78 +76,83 @@ class ArtifactManifest(private val artifactsDir: File) {
      * 1. Write to temp file
      * 2. Atomic rename
      */
-    fun save(data: ArtifactManifestData) = lock.write {
-        try {
-            // Write to temp file first
-            val jsonContent = json.encodeToString(data)
-            tempFile.writeText(jsonContent)
+    fun save(data: ArtifactManifestData) =
+        lock.write {
+            try {
+                // Write to temp file first
+                val jsonContent = json.encodeToString(data)
+                tempFile.writeText(jsonContent)
 
-            // Atomic rename
-            Files.move(
-                tempFile.toPath(),
-                manifestFile.toPath(),
-                StandardCopyOption.ATOMIC_MOVE,
-                StandardCopyOption.REPLACE_EXISTING
-            )
-        } catch (e: Exception) {
-            // Clean up temp file on failure
-            tempFile.delete()
-            throw e
+                // Atomic rename
+                Files.move(
+                    tempFile.toPath(),
+                    manifestFile.toPath(),
+                    StandardCopyOption.ATOMIC_MOVE,
+                    StandardCopyOption.REPLACE_EXISTING,
+                )
+            } catch (e: Exception) {
+                // Clean up temp file on failure
+                tempFile.delete()
+                throw e
+            }
         }
-    }
 
     /**
      * Thread-safe: Update manifest by adding/updating artifact entries.
      */
-    fun update(artifactManager: ArtifactManager) = lock.write {
-        val entries = mutableMapOf<String, ArtifactEntry>()
+    fun update(artifactManager: ArtifactManager) =
+        lock.write {
+            val entries = mutableMapOf<String, ArtifactEntry>()
 
-        for (name in artifactManager.list()) {
-            val path = artifactManager.get(name) ?: continue
-            val file = path.toFile()
+            for (name in artifactManager.list()) {
+                val path = artifactManager.get(name) ?: continue
+                val file = path.toFile()
 
-            if (file.exists()) {
-                val relativePath = file.toRelativeString(artifactsDir)
-                val type = if (file.isDirectory) "directory" else "file"
-                val size = calculateSize(file)
+                if (file.exists()) {
+                    val relativePath = file.toRelativeString(artifactsDir)
+                    val type = if (file.isDirectory) "directory" else "file"
+                    val size = calculateSize(file)
 
-                entries[name] = ArtifactEntry(
-                    name = name,
-                    relativePath = relativePath,
-                    type = type,
-                    sizeBytes = size,
-                    createdAt = System.currentTimeMillis()
-                )
+                    entries[name] =
+                        ArtifactEntry(
+                            name = name,
+                            relativePath = relativePath,
+                            type = type,
+                            sizeBytes = size,
+                            createdAt = System.currentTimeMillis(),
+                        )
+                }
             }
+
+            val data =
+                ArtifactManifestData(
+                    artifacts = entries,
+                )
+
+            save(data)
         }
-
-        val data = ArtifactManifestData(
-            artifacts = entries
-        )
-
-        save(data)
-    }
 
     /**
      * Thread-safe: Restore artifacts from manifest into artifact manager.
      *
      * @return Number of artifacts successfully restored
      */
-    fun restore(artifactManager: ArtifactManager): Int = lock.read {
-        val data = load() ?: return 0
-        var restored = 0
+    fun restore(artifactManager: ArtifactManager): Int =
+        lock.read {
+            val data = load() ?: return 0
+            var restored = 0
 
-        for ((name, entry) in data.artifacts) {
-            val artifactFile = File(artifactsDir, entry.relativePath)
+            for ((name, entry) in data.artifacts) {
+                val artifactFile = File(artifactsDir, entry.relativePath)
 
-            if (artifactFile.exists()) {
-                artifactManager.put(name, artifactFile.toPath())
-                restored++
+                if (artifactFile.exists()) {
+                    artifactManager.put(name, artifactFile.toPath())
+                    restored++
+                }
             }
-        }
 
-        return restored
-    }
+            return restored
+        }
 
     /**
      * Calculate total size of file or directory.

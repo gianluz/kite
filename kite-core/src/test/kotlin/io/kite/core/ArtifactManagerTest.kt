@@ -9,7 +9,6 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class InMemoryArtifactManagerTest {
-
     @Test
     fun `can put and get artifacts`() {
         val manager = InMemoryArtifactManager()

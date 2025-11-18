@@ -10,30 +10,29 @@ import io.kite.core.*
 import io.kite.dsl.FileDiscovery
 import io.kite.runtime.scheduler.ParallelScheduler
 import io.kite.runtime.scheduler.SequentialScheduler
-import java.io.File
 import kotlinx.coroutines.runBlocking
+import java.io.File
 
 /**
  * Execute a named ride.
  */
 class RideCommand : CliktCommand(
     name = "ride",
-    help = "Execute a named ride from .kite/rides/<name>.kite.kts"
+    help = "Execute a named ride from .kite/rides/<name>.kite.kts",
 ) {
-
     private val rideName by argument(
         name = "name",
-        help = "Name of the ride to execute"
+        help = "Name of the ride to execute",
     )
 
     private val dryRun by option(
         "--dry-run",
-        help = "Show execution plan without running"
+        help = "Show execution plan without running",
     ).flag()
 
     private val sequential by option(
         "--sequential",
-        help = "Force sequential execution (disable parallelism)"
+        help = "Force sequential execution (disable parallelism)",
     ).flag()
 
     override fun run() {
@@ -83,9 +82,10 @@ class RideCommand : CliktCommand(
             }
 
             val discovery = FileDiscovery()
-            val loadResult = kotlinx.coroutines.runBlocking {
-                discovery.loadAll()
-            }
+            val loadResult =
+                kotlinx.coroutines.runBlocking {
+                    discovery.loadAll()
+                }
 
             if (!loadResult.success) {
                 Output.error("Failed to load .kite files:")
@@ -130,9 +130,12 @@ class RideCommand : CliktCommand(
                 Output.section("Execution Plan")
                 Output.info("Segments to execute: ${segmentsToExecute.size}")
                 segmentsToExecute.forEach { segment ->
-                    val deps = if (segment.dependsOn.isNotEmpty()) {
-                        " (depends on: ${segment.dependsOn.joinToString(", ")})"
-                    } else ""
+                    val deps =
+                        if (segment.dependsOn.isNotEmpty()) {
+                            " (depends on: ${segment.dependsOn.joinToString(", ")})"
+                        } else {
+                            ""
+                        }
                     Output.progress("• ${segment.name}$deps")
                 }
             }
@@ -148,18 +151,20 @@ class RideCommand : CliktCommand(
                 Output.section("Executing Ride")
             }
 
-            val scheduler = if (sequential) {
-                if (opts.verbose) Output.info("Using sequential scheduler")
-                SequentialScheduler()
-            } else {
-                val concurrency = ride.maxConcurrency ?: Runtime.getRuntime().availableProcessors()
-                if (opts.verbose) Output.info("Using parallel scheduler (max concurrency: $concurrency)")
-                ParallelScheduler(maxConcurrency = concurrency)
-            }
+            val scheduler =
+                if (sequential) {
+                    if (opts.verbose) Output.info("Using sequential scheduler")
+                    SequentialScheduler()
+                } else {
+                    val concurrency = ride.maxConcurrency ?: Runtime.getRuntime().availableProcessors()
+                    if (opts.verbose) Output.info("Using parallel scheduler (max concurrency: $concurrency)")
+                    ParallelScheduler(maxConcurrency = concurrency)
+                }
 
-            val result = kotlinx.coroutines.runBlocking {
-                scheduler.execute(segmentsToExecute, context)
-            }
+            val result =
+                kotlinx.coroutines.runBlocking {
+                    scheduler.execute(segmentsToExecute, context)
+                }
 
             // Save artifact manifest for cross-ride/CI sharing
             artifactManager.saveManifest(artifactsDir.toFile())
@@ -174,7 +179,7 @@ class RideCommand : CliktCommand(
                     Output.result(
                         segment = segResult.segment.name,
                         status = segResult.status.name,
-                        duration = segResult.durationMs
+                        duration = segResult.durationMs,
                     )
 
                     // Show error details if segment failed
@@ -189,8 +194,8 @@ class RideCommand : CliktCommand(
 
             // Calculate timing stats
             val totalDuration = System.currentTimeMillis() - startTime
-            val sequentialDuration = result.totalDurationMs  // Sum of all segment durations
-            val parallelDuration = result.executionTimeMs    // Actual wall-clock execution time
+            val sequentialDuration = result.totalDurationMs // Sum of all segment durations
+            val parallelDuration = result.executionTimeMs // Actual wall-clock execution time
 
             // Show summary
             if (!opts.quiet) {
@@ -201,7 +206,7 @@ class RideCommand : CliktCommand(
                     skipped = result.skippedCount,
                     duration = totalDuration,
                     parallelDuration = parallelDuration,
-                    sequentialDuration = sequentialDuration
+                    sequentialDuration = sequentialDuration,
                 )
             }
 
@@ -219,7 +224,6 @@ class RideCommand : CliktCommand(
                 }
                 throw Exception("Ride failed with ${result.failureCount} failed segments")
             }
-
         } catch (e: Exception) {
             if (opts.debug) {
                 Output.error("Exception: ${e.message}")
@@ -234,7 +238,7 @@ class RideCommand : CliktCommand(
      */
     private fun collectSegments(
         flow: io.kite.core.FlowNode,
-        segmentMap: Map<String, Segment>
+        segmentMap: Map<String, Segment>,
     ): List<Segment> {
         val segments = mutableListOf<Segment>()
 
@@ -255,11 +259,12 @@ class RideCommand : CliktCommand(
                 val segment = segmentMap[flow.segmentName]
                 if (segment != null) {
                     // Apply overrides if present
-                    val finalSegment = if (flow.overrides != null) {
-                        applyOverrides(segment, flow.overrides)
-                    } else {
-                        segment
-                    }
+                    val finalSegment =
+                        if (flow.overrides != null) {
+                            applyOverrides(segment, flow.overrides)
+                        } else {
+                            segment
+                        }
                     segments.add(finalSegment)
                 } else {
                     Output.error("Segment '${flow.segmentName}' referenced in ride but not found")
@@ -275,7 +280,7 @@ class RideCommand : CliktCommand(
      */
     private fun applyOverrides(
         segment: Segment,
-        overrides: io.kite.core.SegmentOverrides
+        overrides: io.kite.core.SegmentOverrides,
     ): Segment {
         // For now, return the segment as-is since Segment is immutable
         // In a full implementation, we'd create a new Segment with overrides

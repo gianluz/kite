@@ -42,7 +42,10 @@ fun ExecutionContext.readLines(path: String): List<String> {
  * @param path Path to the file (relative to workspace or absolute)
  * @param content Content to write
  */
-fun ExecutionContext.writeFile(path: String, content: String) {
+fun ExecutionContext.writeFile(
+    path: String,
+    content: String,
+) {
     val file = resolveFile(path)
     file.parentFile?.mkdirs()
     file.writeText(content)
@@ -54,7 +57,10 @@ fun ExecutionContext.writeFile(path: String, content: String) {
  * @param path Path to the file (relative to workspace or absolute)
  * @param content Content to append
  */
-fun ExecutionContext.appendFile(path: String, content: String) {
+fun ExecutionContext.appendFile(
+    path: String,
+    content: String,
+) {
     val file = resolveFile(path)
     file.parentFile?.mkdirs()
     file.appendText(content)
@@ -68,7 +74,11 @@ fun ExecutionContext.appendFile(path: String, content: String) {
  * @param overwrite Whether to overwrite destination if it exists
  * @throws FileAlreadyExistsException if destination exists and overwrite is false
  */
-fun ExecutionContext.copyFile(source: String, destination: String, overwrite: Boolean = false) {
+fun ExecutionContext.copyFile(
+    source: String,
+    destination: String,
+    overwrite: Boolean = false,
+) {
     val srcPath = resolveFile(source).toPath()
     val dstPath = resolveFile(destination).toPath()
 
@@ -92,7 +102,11 @@ fun ExecutionContext.copyFile(source: String, destination: String, overwrite: Bo
  * @param overwrite Whether to overwrite destination if it exists
  * @throws FileAlreadyExistsException if destination exists and overwrite is false
  */
-fun ExecutionContext.moveFile(source: String, destination: String, overwrite: Boolean = false) {
+fun ExecutionContext.moveFile(
+    source: String,
+    destination: String,
+    overwrite: Boolean = false,
+) {
     val srcPath = resolveFile(source).toPath()
     val dstPath = resolveFile(destination).toPath()
 
@@ -112,7 +126,10 @@ fun ExecutionContext.moveFile(source: String, destination: String, overwrite: Bo
  * @param recursive If true, delete directories recursively
  * @throws DirectoryNotEmptyException if path is a non-empty directory and recursive is false
  */
-fun ExecutionContext.deleteFile(path: String, recursive: Boolean = false) {
+fun ExecutionContext.deleteFile(
+    path: String,
+    recursive: Boolean = false,
+) {
     val file = resolveFile(path)
     val filePath = file.toPath()
 
@@ -121,17 +138,26 @@ fun ExecutionContext.deleteFile(path: String, recursive: Boolean = false) {
     }
 
     if (Files.isDirectory(filePath) && recursive) {
-        Files.walkFileTree(filePath, object : SimpleFileVisitor<Path>() {
-            override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
-                Files.delete(file)
-                return FileVisitResult.CONTINUE
-            }
+        Files.walkFileTree(
+            filePath,
+            object : SimpleFileVisitor<Path>() {
+                override fun visitFile(
+                    file: Path,
+                    attrs: BasicFileAttributes,
+                ): FileVisitResult {
+                    Files.delete(file)
+                    return FileVisitResult.CONTINUE
+                }
 
-            override fun postVisitDirectory(dir: Path, exc: java.io.IOException?): FileVisitResult {
-                Files.delete(dir)
-                return FileVisitResult.CONTINUE
-            }
-        })
+                override fun postVisitDirectory(
+                    dir: Path,
+                    exc: java.io.IOException?,
+                ): FileVisitResult {
+                    Files.delete(dir)
+                    return FileVisitResult.CONTINUE
+                }
+            },
+        )
     } else {
         Files.delete(filePath)
     }
@@ -154,7 +180,10 @@ fun ExecutionContext.createDirectory(path: String) {
  * @param recursive If true, list files recursively
  * @return List of file paths relative to workspace
  */
-fun ExecutionContext.listFiles(path: String, recursive: Boolean = false): List<String> {
+fun ExecutionContext.listFiles(
+    path: String,
+    recursive: Boolean = false,
+): List<String> {
     val dir = resolveFile(path)
     if (!dir.isDirectory) {
         throw NotDirectoryException(path)
@@ -180,7 +209,10 @@ fun ExecutionContext.listFiles(path: String, recursive: Boolean = false): List<S
  * @param startPath Starting directory (relative to workspace or absolute)
  * @return List of matching file paths relative to workspace
  */
-fun ExecutionContext.findFiles(pattern: String, startPath: String = "."): List<String> {
+fun ExecutionContext.findFiles(
+    pattern: String,
+    startPath: String = ".",
+): List<String> {
     val start = resolveFile(startPath).toPath()
     val matcher = FileSystems.getDefault().getPathMatcher("glob:$pattern")
 
@@ -250,7 +282,10 @@ fun ExecutionContext.createTempDir(prefix: String = "kite-"): String {
  * @param suffix Optional suffix for the file name (e.g., ".txt")
  * @return Path to the created temporary file
  */
-fun ExecutionContext.createTempFile(prefix: String = "kite-", suffix: String = ".tmp"): String {
+fun ExecutionContext.createTempFile(
+    prefix: String = "kite-",
+    suffix: String = ".tmp",
+): String {
     val tempFile = Files.createTempFile(prefix, suffix).toFile()
     return workspace.relativize(tempFile.toPath()).toString()
 }
@@ -288,22 +323,35 @@ private fun ExecutionContext.resolveFile(path: String): File {
  * @param destination Destination directory path
  * @param overwrite Whether to overwrite existing files
  */
-private fun copyDirectory(source: Path, destination: Path, overwrite: Boolean) {
-    Files.walkFileTree(source, object : SimpleFileVisitor<Path>() {
-        override fun preVisitDirectory(dir: Path, attrs: BasicFileAttributes): FileVisitResult {
-            val targetDir = destination.resolve(source.relativize(dir))
-            Files.createDirectories(targetDir)
-            return FileVisitResult.CONTINUE
-        }
-
-        override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
-            val targetFile = destination.resolve(source.relativize(file))
-            if (overwrite) {
-                Files.copy(file, targetFile, StandardCopyOption.REPLACE_EXISTING)
-            } else {
-                Files.copy(file, targetFile)
+private fun copyDirectory(
+    source: Path,
+    destination: Path,
+    overwrite: Boolean,
+) {
+    Files.walkFileTree(
+        source,
+        object : SimpleFileVisitor<Path>() {
+            override fun preVisitDirectory(
+                dir: Path,
+                attrs: BasicFileAttributes,
+            ): FileVisitResult {
+                val targetDir = destination.resolve(source.relativize(dir))
+                Files.createDirectories(targetDir)
+                return FileVisitResult.CONTINUE
             }
-            return FileVisitResult.CONTINUE
-        }
-    })
+
+            override fun visitFile(
+                file: Path,
+                attrs: BasicFileAttributes,
+            ): FileVisitResult {
+                val targetFile = destination.resolve(source.relativize(file))
+                if (overwrite) {
+                    Files.copy(file, targetFile, StandardCopyOption.REPLACE_EXISTING)
+                } else {
+                    Files.copy(file, targetFile)
+                }
+                return FileVisitResult.CONTINUE
+            }
+        },
+    )
 }

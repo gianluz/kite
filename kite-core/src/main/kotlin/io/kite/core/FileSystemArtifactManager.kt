@@ -18,7 +18,6 @@ import kotlin.io.path.isDirectory
  * @param artifactsDir The directory where artifacts will be stored
  */
 class FileSystemArtifactManager(private val artifactsDir: Path) : ArtifactManager {
-
     // Track artifacts in memory for fast lookups
     private val artifacts = java.util.concurrent.ConcurrentHashMap<String, Path>()
 
@@ -27,7 +26,10 @@ class FileSystemArtifactManager(private val artifactsDir: Path) : ArtifactManage
         Files.createDirectories(artifactsDir)
     }
 
-    override fun put(name: String, path: Path) {
+    override fun put(
+        name: String,
+        path: Path,
+    ) {
         require(name.isNotBlank()) { "Artifact name cannot be blank" }
         require(path.exists()) { "Artifact path does not exist: $path" }
 
@@ -85,7 +87,10 @@ class FileSystemArtifactManager(private val artifactsDir: Path) : ArtifactManage
     /**
      * Recursively copies a directory.
      */
-    private fun copyDirectory(source: Path, destination: Path) {
+    private fun copyDirectory(
+        source: Path,
+        destination: Path,
+    ) {
         Files.walk(source).forEach { sourcePath ->
             val targetPath = destination.resolve(source.relativize(sourcePath))
             if (Files.isDirectory(sourcePath)) {

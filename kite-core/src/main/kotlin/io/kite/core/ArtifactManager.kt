@@ -16,7 +16,10 @@ interface ArtifactManager {
      * @param name Unique name for this artifact
      * @param path Path to the artifact file or directory
      */
-    fun put(name: String, path: Path)
+    fun put(
+        name: String,
+        path: Path,
+    )
 
     /**
      * Retrieves an artifact by name.
@@ -64,7 +67,10 @@ interface ArtifactManager {
 class InMemoryArtifactManager : ArtifactManager {
     private val artifacts = mutableMapOf<String, Path>()
 
-    override fun put(name: String, path: Path) {
+    override fun put(
+        name: String,
+        path: Path,
+    ) {
         require(name.isNotBlank()) { "Artifact name cannot be blank" }
         artifacts[name] = path
     }

@@ -31,7 +31,7 @@ data class Segment(
     val retryOn: List<String> = emptyList(), // Exception class names
     val inputs: List<String> = emptyList(), // Input artifact names
     val outputs: Map<String, String> = emptyMap(), // Output artifact name -> path
-    val execute: suspend ExecutionContext.() -> Unit
+    val execute: suspend ExecutionContext.() -> Unit,
 ) {
     init {
         require(name.isNotBlank()) { "Segment name cannot be blank" }
@@ -82,7 +82,9 @@ enum class SegmentStatus {
     SKIPPED,
 
     /** Segment execution timed out */
-    TIMEOUT;
+    TIMEOUT,
+
+    ;
 
     /**
      * Returns true if this status represents a completed state (not pending or running).

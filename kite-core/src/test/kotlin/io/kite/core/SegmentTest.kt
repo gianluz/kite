@@ -10,7 +10,6 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 class SegmentTest {
-
     @Test
     fun `segment requires non-blank name`() {
         assertThrows<IllegalArgumentException> {
@@ -53,17 +52,18 @@ class SegmentTest {
         val condition: (ExecutionContext) -> Boolean = { it.isLocal }
         val execute: suspend ExecutionContext.() -> Unit = {}
 
-        val segment = Segment(
-            name = "test",
-            description = "Run tests",
-            dependsOn = listOf("build"),
-            condition = condition,
-            timeout = 10.minutes,
-            maxRetries = 3,
-            retryDelay = 5.seconds,
-            retryOn = listOf("IOException", "TimeoutException"),
-            execute = execute
-        )
+        val segment =
+            Segment(
+                name = "test",
+                description = "Run tests",
+                dependsOn = listOf("build"),
+                condition = condition,
+                timeout = 10.minutes,
+                maxRetries = 3,
+                retryDelay = 5.seconds,
+                retryOn = listOf("IOException", "TimeoutException"),
+                execute = execute,
+            )
 
         assertEquals("test", segment.name)
         assertEquals("Run tests", segment.description)
@@ -85,24 +85,27 @@ class SegmentTest {
 
     @Test
     fun `shouldExecute evaluates condition`() {
-        val segment = Segment(
-            name = "test",
-            condition = { it.isLocal },
-            execute = {}
-        )
+        val segment =
+            Segment(
+                name = "test",
+                condition = { it.isLocal },
+                execute = {},
+            )
 
-        val localContext = ExecutionContext(
-            branch = "main",
-            commitSha = "abc123",
-            isLocal = true
-        )
+        val localContext =
+            ExecutionContext(
+                branch = "main",
+                commitSha = "abc123",
+                isLocal = true,
+            )
         assertTrue(segment.shouldExecute(localContext))
 
-        val ciContext = ExecutionContext(
-            branch = "main",
-            commitSha = "abc123",
-            isLocal = false
-        )
+        val ciContext =
+            ExecutionContext(
+                branch = "main",
+                commitSha = "abc123",
+                isLocal = false,
+            )
         assertFalse(segment.shouldExecute(ciContext))
     }
 
@@ -125,12 +128,13 @@ class SegmentTest {
 
     @Test
     fun `toString includes key information`() {
-        val segment = Segment(
-            name = "build",
-            description = "Build the app",
-            dependsOn = listOf("lint", "test"),
-            execute = {}
-        )
+        val segment =
+            Segment(
+                name = "build",
+                description = "Build the app",
+                dependsOn = listOf("lint", "test"),
+                execute = {},
+            )
 
         val str = segment.toString()
         assertTrue(str.contains("build"))
@@ -141,7 +145,6 @@ class SegmentTest {
 }
 
 class SegmentStatusTest {
-
     @Test
     fun `isCompleted is false for PENDING and RUNNING`() {
         assertFalse(SegmentStatus.PENDING.isCompleted)

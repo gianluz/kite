@@ -1,12 +1,11 @@
 package io.kite.dsl
 
+import kotlinx.coroutines.runBlocking
 import kotlin.script.experimental.api.*
 import kotlin.script.experimental.dependencies.*
-import kotlin.script.experimental.dependencies.maven.MavenDependenciesResolver
 import kotlin.script.experimental.jvm.JvmDependency
 import kotlin.script.experimental.jvm.dependenciesFromCurrentContext
 import kotlin.script.experimental.jvm.jvm
-import kotlinx.coroutines.runBlocking
 
 /**
  * Compilation configuration for Kite scripts.
@@ -74,7 +73,7 @@ object KiteScriptCompilationConfiguration : ScriptCompilationConfiguration({
         "java.nio.file.*",
         // Scripting annotations for dependency resolution
         "kotlin.script.experimental.dependencies.DependsOn",
-        "kotlin.script.experimental.dependencies.Repository"
+        "kotlin.script.experimental.dependencies.Repository",
     )
 
     // Make current context dependencies available to scripts
@@ -122,7 +121,7 @@ object KiteScriptEvaluationConfiguration : ScriptEvaluationConfiguration({
 private val resolver by lazy {
     CompoundDependenciesResolver(
         FileSystemDependenciesResolver(),
-        IvyDependenciesResolver()  // Java 17 compatible!
+        IvyDependenciesResolver(), // Java 17 compatible!
     )
 }
 
@@ -134,10 +133,11 @@ private val resolver by lazy {
  * https://kotlinlang.org/docs/custom-script-deps-tutorial.html
  */
 private fun configureDepsOnAnnotations(
-    context: ScriptConfigurationRefinementContext
+    context: ScriptConfigurationRefinementContext,
 ): ResultWithDiagnostics<ScriptCompilationConfiguration> {
-    val annotations = context.collectedData?.get(ScriptCollectedData.collectedAnnotations)?.takeIf { it.isNotEmpty() }
-        ?: return context.compilationConfiguration.asSuccess()
+    val annotations =
+        context.collectedData?.get(ScriptCollectedData.collectedAnnotations)?.takeIf { it.isNotEmpty() }
+            ?: return context.compilationConfiguration.asSuccess()
 
     return runBlocking {
         resolver.resolveFromScriptSourceAnnotations(annotations)

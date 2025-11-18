@@ -7,12 +7,14 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TopologicalSortTest {
-
-    private fun createSegment(name: String, dependsOn: List<String> = emptyList()): Segment {
+    private fun createSegment(
+        name: String,
+        dependsOn: List<String> = emptyList(),
+    ): Segment {
         return Segment(
             name = name,
             dependsOn = dependsOn,
-            execute = {}
+            execute = {},
         )
     }
 
@@ -281,9 +283,10 @@ class TopologicalSortTest {
         val graph = SegmentGraph(listOf(a, b, c))
         val sorter = TopologicalSort(graph)
 
-        val exception = assertThrows<CyclicDependencyException> {
-            sorter.sort()
-        }
+        val exception =
+            assertThrows<CyclicDependencyException> {
+                sorter.sort()
+            }
 
         assertTrue(exception.message!!.contains("Cannot sort graph with cycles"))
         assertEquals(1, exception.cycles.size)

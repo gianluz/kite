@@ -16,21 +16,22 @@ class ProcessExecutionProviderImpl : ProcessExecutionProvider {
         vararg args: String,
         workingDir: File,
         env: Map<String, String>,
-        timeout: Duration?
+        timeout: Duration?,
     ): ProcessExecutionResult {
-        val result = executor.execute(
-            command = command,
-            args = *args,
-            workingDir = workingDir,
-            env = env,
-            timeout = timeout
-        )
+        val result =
+            executor.execute(
+                command = command,
+                args = *args,
+                workingDir = workingDir,
+                env = env,
+                timeout = timeout,
+            )
 
         return ProcessExecutionResult(
             command = result.command,
             exitCode = result.exitCode,
             output = result.stdout,
-            duration = result.duration
+            duration = result.duration,
         )
     }
 
@@ -39,21 +40,22 @@ class ProcessExecutionProviderImpl : ProcessExecutionProvider {
         vararg args: String,
         workingDir: File,
         env: Map<String, String>,
-        timeout: Duration?
+        timeout: Duration?,
     ): ProcessExecutionResult? {
-        val result = executor.executeOrNull(
-            command = command,
-            args = *args,
-            workingDir = workingDir,
-            env = env,
-            timeout = timeout
-        ) ?: return null
+        val result =
+            executor.executeOrNull(
+                command = command,
+                args = *args,
+                workingDir = workingDir,
+                env = env,
+                timeout = timeout,
+            ) ?: return null
 
         return ProcessExecutionResult(
             command = result.command,
             exitCode = result.exitCode,
             output = result.stdout,
-            duration = result.duration
+            duration = result.duration,
         )
     }
 
@@ -61,20 +63,21 @@ class ProcessExecutionProviderImpl : ProcessExecutionProvider {
         command: String,
         workingDir: File,
         env: Map<String, String>,
-        timeout: Duration?
+        timeout: Duration?,
     ): ProcessExecutionResult {
-        val result = executor.shell(
-            command = command,
-            workingDir = workingDir,
-            env = env,
-            timeout = timeout
-        )
+        val result =
+            executor.shell(
+                command = command,
+                workingDir = workingDir,
+                env = env,
+                timeout = timeout,
+            )
 
         return ProcessExecutionResult(
             command = result.command,
             exitCode = result.exitCode,
             output = result.stdout,
-            duration = result.duration
+            duration = result.duration,
         )
     }
 }

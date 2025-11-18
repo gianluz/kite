@@ -41,7 +41,10 @@ class RideBuilder {
      * @param key Environment variable name
      * @param value Environment variable value
      */
-    fun env(key: String, value: String) {
+    fun env(
+        key: String,
+        value: String,
+    ) {
         environmentVars[key] = value
     }
 
@@ -77,7 +80,7 @@ class RideBuilder {
             flow = flowNode!!,
             environment = environmentVars.toMap(),
             maxConcurrency = maxConcurrency,
-            onFailure = onFailureFn
+            onFailure = onFailureFn,
         )
     }
 }
@@ -107,14 +110,18 @@ class FlowBuilder {
      * @param segmentName Name of the segment to execute
      * @param block Optional configuration block for overrides
      */
-    fun segment(segmentName: String, block: (SegmentOverridesBuilder.() -> Unit)? = null) {
-        val overrides = if (block != null) {
-            val builder = SegmentOverridesBuilder()
-            builder.block()
-            builder.build()
-        } else {
-            SegmentOverrides()
-        }
+    fun segment(
+        segmentName: String,
+        block: (SegmentOverridesBuilder.() -> Unit)? = null,
+    ) {
+        val overrides =
+            if (block != null) {
+                val builder = SegmentOverridesBuilder()
+                builder.block()
+                builder.build()
+            } else {
+                SegmentOverrides()
+            }
 
         nodes.add(FlowNode.SegmentRef(segmentName, overrides))
     }
@@ -163,14 +170,18 @@ class ParallelFlowBuilder {
      * @param segmentName Name of the segment to execute
      * @param block Optional configuration block for overrides
      */
-    fun segment(segmentName: String, block: (SegmentOverridesBuilder.() -> Unit)? = null) {
-        val overrides = if (block != null) {
-            val builder = SegmentOverridesBuilder()
-            builder.block()
-            builder.build()
-        } else {
-            SegmentOverrides()
-        }
+    fun segment(
+        segmentName: String,
+        block: (SegmentOverridesBuilder.() -> Unit)? = null,
+    ) {
+        val overrides =
+            if (block != null) {
+                val builder = SegmentOverridesBuilder()
+                builder.block()
+                builder.build()
+            } else {
+                SegmentOverrides()
+            }
 
         nodes.add(FlowNode.SegmentRef(segmentName, overrides))
     }
@@ -238,7 +249,7 @@ class SegmentOverridesBuilder {
             dependsOn = if (dependencies.isNotEmpty()) dependencies.toList() else null,
             condition = conditionFn,
             timeout = timeout,
-            enabled = enabled
+            enabled = enabled,
         )
     }
 }

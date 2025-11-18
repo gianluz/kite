@@ -3,12 +3,9 @@ package io.kite.core
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
-import java.nio.file.Files
-import java.nio.file.Path
 import kotlin.test.*
 
 class FileSystemArtifactManagerTest {
-
     @TempDir
     lateinit var tempDir: File
 

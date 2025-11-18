@@ -18,7 +18,7 @@ import kotlin.script.experimental.api.ResultWithDiagnostics
  */
 class FileDiscovery(
     private val workspaceRoot: File = File("."),
-    private val compiler: ScriptCompiler = ScriptCompiler()
+    private val compiler: ScriptCompiler = ScriptCompiler(),
 ) {
     companion object {
         const val KITE_DIR = ".kite"
@@ -70,14 +70,15 @@ class FileDiscovery(
             return SegmentLoadResult(emptyList(), emptyList())
         }
 
-        val results = coroutineScope {
-            files.map { file ->
-                async {
-                    val result = compiler.compileAndEvaluate(file)
-                    FileLoadResult(file, result)
-                }
-            }.awaitAll()
-        }
+        val results =
+            coroutineScope {
+                files.map { file ->
+                    async {
+                        val result = compiler.compileAndEvaluate(file)
+                        FileLoadResult(file, result)
+                    }
+                }.awaitAll()
+            }
 
         val segments = mutableListOf<Segment>()
         val errors = mutableListOf<FileLoadError>()
@@ -96,8 +97,8 @@ class FileDiscovery(
                                 errors.add(
                                     FileLoadError(
                                         fileResult.file,
-                                        "Segment file must return List<Segment>, got: ${returnValue.value?.javaClass}"
-                                    )
+                                        "Segment file must return List<Segment>, got: ${returnValue.value?.javaClass}",
+                                    ),
                                 )
                             }
                         }
@@ -106,8 +107,8 @@ class FileDiscovery(
                             errors.add(
                                 FileLoadError(
                                     fileResult.file,
-                                    "Segment file did not return a value"
-                                )
+                                    "Segment file did not return a value",
+                                ),
                             )
                         }
                     }
@@ -134,14 +135,15 @@ class FileDiscovery(
             return RideLoadResult(emptyList(), emptyList())
         }
 
-        val results = coroutineScope {
-            files.map { file ->
-                async {
-                    val result = compiler.compileAndEvaluate(file)
-                    FileLoadResult(file, result)
-                }
-            }.awaitAll()
-        }
+        val results =
+            coroutineScope {
+                files.map { file ->
+                    async {
+                        val result = compiler.compileAndEvaluate(file)
+                        FileLoadResult(file, result)
+                    }
+                }.awaitAll()
+            }
 
         val rides = mutableListOf<Ride>()
         val errors = mutableListOf<FileLoadError>()
@@ -159,8 +161,8 @@ class FileDiscovery(
                                 errors.add(
                                     FileLoadError(
                                         fileResult.file,
-                                        "Ride file must return Ride, got: ${returnValue.value?.javaClass}"
-                                    )
+                                        "Ride file must return Ride, got: ${returnValue.value?.javaClass}",
+                                    ),
                                 )
                             }
                         }
@@ -169,8 +171,8 @@ class FileDiscovery(
                             errors.add(
                                 FileLoadError(
                                     fileResult.file,
-                                    "Ride file did not return a value"
-                                )
+                                    "Ride file did not return a value",
+                                ),
                             )
                         }
                     }
@@ -198,7 +200,7 @@ class FileDiscovery(
         return KiteLoadResult(
             segments = segmentResult.segments,
             rides = rideResult.rides,
-            errors = segmentResult.errors + rideResult.errors
+            errors = segmentResult.errors + rideResult.errors,
         )
     }
 }
@@ -208,7 +210,7 @@ class FileDiscovery(
  */
 private data class FileLoadResult(
     val file: File,
-    val result: ResultWithDiagnostics<kotlin.script.experimental.api.EvaluationResult>
+    val result: ResultWithDiagnostics<kotlin.script.experimental.api.EvaluationResult>,
 )
 
 /**
@@ -216,7 +218,7 @@ private data class FileLoadResult(
  */
 data class FileLoadError(
     val file: File,
-    val message: String
+    val message: String,
 ) {
     override fun toString(): String = "${file.path}: $message"
 }
@@ -226,7 +228,7 @@ data class FileLoadError(
  */
 data class SegmentLoadResult(
     val segments: List<Segment>,
-    val errors: List<FileLoadError>
+    val errors: List<FileLoadError>,
 ) {
     val success: Boolean get() = errors.isEmpty()
 }
@@ -236,7 +238,7 @@ data class SegmentLoadResult(
  */
 data class RideLoadResult(
     val rides: List<Ride>,
-    val errors: List<FileLoadError>
+    val errors: List<FileLoadError>,
 ) {
     val success: Boolean get() = errors.isEmpty()
 }
@@ -247,7 +249,7 @@ data class RideLoadResult(
 data class KiteLoadResult(
     val segments: List<Segment>,
     val rides: List<Ride>,
-    val errors: List<FileLoadError>
+    val errors: List<FileLoadError>,
 ) {
     val success: Boolean get() = errors.isEmpty()
 

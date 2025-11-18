@@ -17,7 +17,7 @@ data class Ride(
     val flow: FlowNode,
     val environment: Map<String, String> = emptyMap(),
     val maxConcurrency: Int? = null,
-    val onFailure: (suspend (Throwable) -> Unit)? = null
+    val onFailure: (suspend (Throwable) -> Unit)? = null,
 ) {
     init {
         require(name.isNotBlank()) { "Ride name cannot be blank" }
@@ -52,7 +52,7 @@ data class Ride(
 
     override fun toString(): String {
         return "Ride(name='$name', segments=${flow.allSegmentReferences().size}, " +
-                "maxConcurrency=$maxConcurrency)"
+            "maxConcurrency=$maxConcurrency)"
     }
 }
 
@@ -85,8 +85,7 @@ sealed class FlowNode {
             require(nodes.isNotEmpty()) { "Sequential flow must have at least one node" }
         }
 
-        override fun allSegmentReferences(): Set<String> =
-            nodes.flatMap { it.allSegmentReferences() }.toSet()
+        override fun allSegmentReferences(): Set<String> = nodes.flatMap { it.allSegmentReferences() }.toSet()
 
         override fun findEmptyParallelBlocks(): List<Int> =
             nodes.flatMapIndexed { index, node ->
@@ -104,12 +103,14 @@ sealed class FlowNode {
      * All nodes are executed concurrently.
      */
     data class Parallel(val nodes: List<FlowNode>) : FlowNode() {
-        override fun allSegmentReferences(): Set<String> =
-            nodes.flatMap { it.allSegmentReferences() }.toSet()
+        override fun allSegmentReferences(): Set<String> = nodes.flatMap { it.allSegmentReferences() }.toSet()
 
         override fun findEmptyParallelBlocks(): List<Int> =
-            if (nodes.isEmpty()) listOf(0)
-            else nodes.flatMap { it.findEmptyParallelBlocks() }
+            if (nodes.isEmpty()) {
+                listOf(0)
+            } else {
+                nodes.flatMap { it.findEmptyParallelBlocks() }
+            }
     }
 
     /**
@@ -120,7 +121,7 @@ sealed class FlowNode {
      */
     data class SegmentRef(
         val segmentName: String,
-        val overrides: SegmentOverrides = SegmentOverrides()
+        val overrides: SegmentOverrides = SegmentOverrides(),
     ) : FlowNode() {
         init {
             require(segmentName.isNotBlank()) { "Segment name cannot be blank" }
@@ -142,5 +143,5 @@ data class SegmentOverrides(
     val dependsOn: List<String>? = null,
     val condition: ((ExecutionContext) -> Boolean)? = null,
     val timeout: kotlin.time.Duration? = null,
-    val enabled: Boolean = true
+    val enabled: Boolean = true,
 )

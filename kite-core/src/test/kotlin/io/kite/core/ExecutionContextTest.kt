@@ -9,13 +9,13 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class ExecutionContextTest {
-
     @Test
     fun `context with minimal properties`() {
-        val context = ExecutionContext(
-            branch = "main",
-            commitSha = "abc123"
-        )
+        val context =
+            ExecutionContext(
+                branch = "main",
+                commitSha = "abc123",
+            )
 
         assertEquals("main", context.branch)
         assertEquals("abc123", context.commitSha)
@@ -32,17 +32,18 @@ class ExecutionContextTest {
         val artifacts = InMemoryArtifactManager()
         val workspace = Paths.get("/workspace")
 
-        val context = ExecutionContext(
-            branch = "feature/test",
-            commitSha = "def456",
-            mrNumber = "123",
-            isRelease = true,
-            isLocal = false,
-            ciPlatform = CIPlatform.GITLAB,
-            environment = env,
-            workspace = workspace,
-            artifacts = artifacts
-        )
+        val context =
+            ExecutionContext(
+                branch = "feature/test",
+                commitSha = "def456",
+                mrNumber = "123",
+                isRelease = true,
+                isLocal = false,
+                ciPlatform = CIPlatform.GITLAB,
+                environment = env,
+                workspace = workspace,
+                artifacts = artifacts,
+            )
 
         assertEquals("feature/test", context.branch)
         assertEquals("def456", context.commitSha)
@@ -57,11 +58,12 @@ class ExecutionContextTest {
 
     @Test
     fun `env returns environment variable`() {
-        val context = ExecutionContext(
-            branch = "main",
-            commitSha = "abc123",
-            environment = mapOf("KEY" to "value", "NUM" to "42")
-        )
+        val context =
+            ExecutionContext(
+                branch = "main",
+                commitSha = "abc123",
+                environment = mapOf("KEY" to "value", "NUM" to "42"),
+            )
 
         assertEquals("value", context.env("KEY"))
         assertEquals("42", context.env("NUM"))
@@ -70,11 +72,12 @@ class ExecutionContextTest {
 
     @Test
     fun `requireEnv returns value or throws`() {
-        val context = ExecutionContext(
-            branch = "main",
-            commitSha = "abc123",
-            environment = mapOf("KEY" to "value")
-        )
+        val context =
+            ExecutionContext(
+                branch = "main",
+                commitSha = "abc123",
+                environment = mapOf("KEY" to "value"),
+            )
 
         assertEquals("value", context.requireEnv("KEY"))
 
@@ -85,11 +88,12 @@ class ExecutionContextTest {
 
     @Test
     fun `envOrDefault returns value or default`() {
-        val context = ExecutionContext(
-            branch = "main",
-            commitSha = "abc123",
-            environment = mapOf("KEY" to "value")
-        )
+        val context =
+            ExecutionContext(
+                branch = "main",
+                commitSha = "abc123",
+                environment = mapOf("KEY" to "value"),
+            )
 
         assertEquals("value", context.envOrDefault("KEY", "default"))
         assertEquals("default", context.envOrDefault("MISSING", "default"))
@@ -97,48 +101,53 @@ class ExecutionContextTest {
 
     @Test
     fun `isMergeRequest is true when mrNumber is set`() {
-        val withMR = ExecutionContext(
-            branch = "main",
-            commitSha = "abc123",
-            mrNumber = "42"
-        )
+        val withMR =
+            ExecutionContext(
+                branch = "main",
+                commitSha = "abc123",
+                mrNumber = "42",
+            )
         assertTrue(withMR.isMergeRequest)
 
-        val withoutMR = ExecutionContext(
-            branch = "main",
-            commitSha = "abc123",
-            mrNumber = null
-        )
+        val withoutMR =
+            ExecutionContext(
+                branch = "main",
+                commitSha = "abc123",
+                mrNumber = null,
+            )
         assertFalse(withoutMR.isMergeRequest)
     }
 
     @Test
     fun `isCI is opposite of isLocal`() {
-        val local = ExecutionContext(
-            branch = "main",
-            commitSha = "abc123",
-            isLocal = true
-        )
+        val local =
+            ExecutionContext(
+                branch = "main",
+                commitSha = "abc123",
+                isLocal = true,
+            )
         assertFalse(local.isCI)
 
-        val ci = ExecutionContext(
-            branch = "main",
-            commitSha = "abc123",
-            isLocal = false
-        )
+        val ci =
+            ExecutionContext(
+                branch = "main",
+                commitSha = "abc123",
+                isLocal = false,
+            )
         assertTrue(ci.isCI)
     }
 
     @Test
     fun `toString includes key information`() {
-        val context = ExecutionContext(
-            branch = "feature/test",
-            commitSha = "abc123def456",
-            mrNumber = "42",
-            isRelease = true,
-            isLocal = false,
-            ciPlatform = CIPlatform.GITLAB
-        )
+        val context =
+            ExecutionContext(
+                branch = "feature/test",
+                commitSha = "abc123def456",
+                mrNumber = "42",
+                isRelease = true,
+                isLocal = false,
+                ciPlatform = CIPlatform.GITLAB,
+            )
 
         val str = context.toString()
         assertTrue(str.contains("feature/test"))
@@ -151,7 +160,6 @@ class ExecutionContextTest {
 }
 
 class CIPlatformTest {
-
     @Test
     fun `displayName returns readable names`() {
         assertEquals("GitLab CI", CIPlatform.GITLAB.displayName)

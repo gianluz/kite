@@ -23,16 +23,15 @@ import kotlin.script.experimental.dependencies.*
  * Based on the implementation in kotlin-main-kts which uses Ivy successfully with Java 17.
  */
 class IvyDependenciesResolver : ExternalDependenciesResolver {
-
     private val ivy: Ivy by lazy { createIvy() }
 
     override fun acceptsRepository(repositoryCoordinates: RepositoryCoordinates): Boolean {
         // Accept http/https URLs or "mavenCentral" alias
         val coords = repositoryCoordinates.string
         return coords.startsWith("http://") ||
-                coords.startsWith("https://") ||
-                coords == "mavenCentral" ||
-                coords.startsWith("file://")
+            coords.startsWith("https://") ||
+            coords == "mavenCentral" ||
+            coords.startsWith("file://")
     }
 
     override fun acceptsArtifact(artifactCoordinates: String): Boolean {
@@ -44,7 +43,7 @@ class IvyDependenciesResolver : ExternalDependenciesResolver {
     override suspend fun resolve(
         artifactCoordinates: String,
         options: ExternalDependenciesResolver.Options,
-        sourceCodeLocation: SourceCode.LocationWithId?
+        sourceCodeLocation: SourceCode.LocationWithId?,
     ): ResultWithDiagnostics<List<File>> {
         return try {
             val files = resolveArtifact(artifactCoordinates)
@@ -57,7 +56,7 @@ class IvyDependenciesResolver : ExternalDependenciesResolver {
     override fun addRepository(
         repositoryCoordinates: RepositoryCoordinates,
         options: ExternalDependenciesResolver.Options,
-        sourceCodeLocation: SourceCode.LocationWithId?
+        sourceCodeLocation: SourceCode.LocationWithId?,
     ): ResultWithDiagnostics<Boolean> {
         return try {
             val coords = repositoryCoordinates.string
@@ -89,41 +88,46 @@ class IvyDependenciesResolver : ExternalDependenciesResolver {
         } catch (e: Exception) {
             makeFailureResult(
                 "Failed to add repository ${repositoryCoordinates.string}: ${e.message}",
-                sourceCodeLocation
+                sourceCodeLocation,
             )
         }
     }
 
     private fun createIvy(): Ivy {
-        val ivySettings = IvySettings().apply {
-            // Set to warn level to reduce noise
-            Message.setDefaultLogger(DefaultMessageLogger(Message.MSG_WARN))
+        val ivySettings =
+            IvySettings().apply {
+                // Set to warn level to reduce noise
+                Message.setDefaultLogger(DefaultMessageLogger(Message.MSG_WARN))
 
-            // Default cache directory
-            defaultCache = File(System.getProperty("user.home"), ".ivy2/cache")
+                // Default cache directory
+                defaultCache = File(System.getProperty("user.home"), ".ivy2/cache")
 
-            // Create chain resolver
-            val chainResolver = ChainResolver().apply {
-                name = "kite-chain"
+                // Create chain resolver
+                val chainResolver =
+                    ChainResolver().apply {
+                        name = "kite-chain"
 
-                // Add Maven Central
-                add(createMavenResolver("central", "https://repo1.maven.org/maven2/"))
+                        // Add Maven Central
+                        add(createMavenResolver("central", "https://repo1.maven.org/maven2/"))
 
-                // Add local Maven repo if it exists
-                val localM2 = File(System.getProperty("user.home"), ".m2/repository")
-                if (localM2.exists()) {
-                    add(createMavenResolver("local", localM2.toURI().toString()))
-                }
+                        // Add local Maven repo if it exists
+                        val localM2 = File(System.getProperty("user.home"), ".m2/repository")
+                        if (localM2.exists()) {
+                            add(createMavenResolver("local", localM2.toURI().toString()))
+                        }
+                    }
+
+                addResolver(chainResolver)
+                setDefaultResolver(chainResolver.name)
             }
-
-            addResolver(chainResolver)
-            setDefaultResolver(chainResolver.name)
-        }
 
         return Ivy.newInstance(ivySettings)
     }
 
-    private fun createMavenResolver(name: String, root: String): IBiblioResolver {
+    private fun createMavenResolver(
+        name: String,
+        root: String,
+    ): IBiblioResolver {
         return IBiblioResolver().apply {
             this.name = name
             this.root = root
@@ -143,10 +147,11 @@ class IvyDependenciesResolver : ExternalDependenciesResolver {
         moduleDescriptor.addDependency(dependency)
 
         // Resolve
-        val resolveOptions = ResolveOptions().apply {
-            isTransitive = true
-            confs = arrayOf("default")
-        }
+        val resolveOptions =
+            ResolveOptions().apply {
+                isTransitive = true
+                confs = arrayOf("default")
+            }
 
         val resolveReport = ivy.resolve(moduleDescriptor, resolveOptions)
 

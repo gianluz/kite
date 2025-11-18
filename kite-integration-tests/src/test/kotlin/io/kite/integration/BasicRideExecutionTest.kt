@@ -8,7 +8,6 @@ import kotlin.test.assertTrue
  * Integration tests for basic ride execution.
  */
 class BasicRideExecutionTest : IntegrationTestBase() {
-
     @Test
     fun `execute simple ride with single segment`() {
         // Create a simple segment
@@ -22,7 +21,7 @@ class BasicRideExecutionTest : IntegrationTestBase() {
                     }
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         // Create a ride
@@ -35,7 +34,7 @@ class BasicRideExecutionTest : IntegrationTestBase() {
                     segment("hello")
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         // Execute
@@ -70,7 +69,7 @@ class BasicRideExecutionTest : IntegrationTestBase() {
                     }
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         createRideFile(
@@ -84,7 +83,7 @@ class BasicRideExecutionTest : IntegrationTestBase() {
                     segment("third")
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = executeRide("Multi")
@@ -121,7 +120,7 @@ class BasicRideExecutionTest : IntegrationTestBase() {
                     }
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         createRideFile(
@@ -135,7 +134,7 @@ class BasicRideExecutionTest : IntegrationTestBase() {
                     segment("test")
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = executeRide("Dependencies")
@@ -173,7 +172,7 @@ class BasicRideExecutionTest : IntegrationTestBase() {
                     }
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         createRideFile(
@@ -188,7 +187,7 @@ class BasicRideExecutionTest : IntegrationTestBase() {
                     segment("compile")
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = executeRide("Parallel")
@@ -221,7 +220,7 @@ class BasicRideExecutionTest : IntegrationTestBase() {
                     }
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         createRideFile(
@@ -235,7 +234,7 @@ class BasicRideExecutionTest : IntegrationTestBase() {
                     segment("never-runs")
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = executeRide("Failing")

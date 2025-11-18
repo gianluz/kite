@@ -1,6 +1,5 @@
 package io.kite.core
 
-import java.nio.file.Path
 import java.nio.file.Paths
 
 /**
@@ -34,7 +33,7 @@ interface PlatformAdapter {
      */
     fun createContext(
         environment: Map<String, String>,
-        artifacts: ArtifactManager = InMemoryArtifactManager()
+        artifacts: ArtifactManager = InMemoryArtifactManager(),
     ): ExecutionContext
 }
 
@@ -53,7 +52,7 @@ class GitLabCIPlatformAdapter : PlatformAdapter {
 
     override fun createContext(
         environment: Map<String, String>,
-        artifacts: ArtifactManager
+        artifacts: ArtifactManager,
     ): ExecutionContext {
         val branch = environment["CI_COMMIT_REF_NAME"] ?: "unknown"
         val commitSha = environment["CI_COMMIT_SHA"] ?: "unknown"
@@ -71,7 +70,7 @@ class GitLabCIPlatformAdapter : PlatformAdapter {
             ciPlatform = CIPlatform.GITLAB,
             environment = environment,
             workspace = workspace,
-            artifacts = artifacts
+            artifacts = artifacts,
         )
     }
 }
@@ -91,18 +90,20 @@ class GitHubActionsPlatformAdapter : PlatformAdapter {
 
     override fun createContext(
         environment: Map<String, String>,
-        artifacts: ArtifactManager
+        artifacts: ArtifactManager,
     ): ExecutionContext {
         val ref = environment["GITHUB_REF"] ?: "unknown"
-        val branch = when {
-            ref.startsWith("refs/heads/") -> ref.removePrefix("refs/heads/")
-            ref.startsWith("refs/pull/") -> "pr-${ref.split("/").getOrNull(2)}"
-            else -> ref
-        }
+        val branch =
+            when {
+                ref.startsWith("refs/heads/") -> ref.removePrefix("refs/heads/")
+                ref.startsWith("refs/pull/") -> "pr-${ref.split("/").getOrNull(2)}"
+                else -> ref
+            }
         val commitSha = environment["GITHUB_SHA"] ?: "unknown"
-        val prNumber = environment["GITHUB_EVENT_NAME"]?.takeIf { it == "pull_request" }?.let {
-            ref.split("/").getOrNull(2)
-        }
+        val prNumber =
+            environment["GITHUB_EVENT_NAME"]?.takeIf { it == "pull_request" }?.let {
+                ref.split("/").getOrNull(2)
+            }
         // TODO: Detect release label from PR event payload
         val isRelease = false
         val workspace = environment["GITHUB_WORKSPACE"]?.let { Paths.get(it) } ?: Paths.get(".")
@@ -116,7 +117,7 @@ class GitHubActionsPlatformAdapter : PlatformAdapter {
             ciPlatform = CIPlatform.GITHUB,
             environment = environment,
             workspace = workspace,
-            artifacts = artifacts
+            artifacts = artifacts,
         )
     }
 }
@@ -132,25 +133,27 @@ class LocalPlatformAdapter : PlatformAdapter {
     override fun detect(environment: Map<String, String>): Boolean {
         // Local is the default fallback, detected by absence of CI indicators
         return environment["CI"] != "true" &&
-                environment["GITLAB_CI"] != "true" &&
-                environment["GITHUB_ACTIONS"] != "true"
+            environment["GITLAB_CI"] != "true" &&
+            environment["GITHUB_ACTIONS"] != "true"
     }
 
     override fun createContext(
         environment: Map<String, String>,
-        artifacts: ArtifactManager
+        artifacts: ArtifactManager,
     ): ExecutionContext {
         // Use Git commands to get branch and SHA (would be implemented in Phase 5)
         // For now, use placeholders
-        val branch = runCatching {
-            // This will be implemented with actual Git command execution
-            "main"
-        }.getOrDefault("unknown")
+        val branch =
+            runCatching {
+                // This will be implemented with actual Git command execution
+                "main"
+            }.getOrDefault("unknown")
 
-        val commitSha = runCatching {
-            // This will be implemented with actual Git command execution
-            "0000000000000000000000000000000000000000"
-        }.getOrDefault("unknown")
+        val commitSha =
+            runCatching {
+                // This will be implemented with actual Git command execution
+                "0000000000000000000000000000000000000000"
+            }.getOrDefault("unknown")
 
         val workspace = Paths.get(System.getProperty("user.dir"))
 
@@ -163,7 +166,7 @@ class LocalPlatformAdapter : PlatformAdapter {
             ciPlatform = CIPlatform.LOCAL,
             environment = environment,
             workspace = workspace,
-            artifacts = artifacts
+            artifacts = artifacts,
         )
     }
 }
@@ -183,19 +186,22 @@ class GenericPlatformAdapter : PlatformAdapter {
 
     override fun createContext(
         environment: Map<String, String>,
-        artifacts: ArtifactManager
+        artifacts: ArtifactManager,
     ): ExecutionContext {
-        val branch = environment["CI_BRANCH"]
-            ?: environment["BRANCH_NAME"]
-            ?: environment["GIT_BRANCH"]
-            ?: "unknown"
-        val commitSha = environment["CI_COMMIT_SHA"]
-            ?: environment["GIT_COMMIT"]
-            ?: environment["COMMIT_SHA"]
-            ?: "unknown"
-        val workspace = environment["CI_WORKSPACE"]
-            ?.let { Paths.get(it) }
-            ?: Paths.get(".")
+        val branch =
+            environment["CI_BRANCH"]
+                ?: environment["BRANCH_NAME"]
+                ?: environment["GIT_BRANCH"]
+                ?: "unknown"
+        val commitSha =
+            environment["CI_COMMIT_SHA"]
+                ?: environment["GIT_COMMIT"]
+                ?: environment["COMMIT_SHA"]
+                ?: "unknown"
+        val workspace =
+            environment["CI_WORKSPACE"]
+                ?.let { Paths.get(it) }
+                ?: Paths.get(".")
 
         return ExecutionContext(
             branch = branch,
@@ -206,7 +212,7 @@ class GenericPlatformAdapter : PlatformAdapter {
             ciPlatform = CIPlatform.GENERIC,
             environment = environment,
             workspace = workspace,
-            artifacts = artifacts
+            artifacts = artifacts,
         )
     }
 }
@@ -215,12 +221,13 @@ class GenericPlatformAdapter : PlatformAdapter {
  * Platform detector that selects the appropriate adapter.
  */
 object PlatformDetector {
-    private val adapters = listOf(
-        GitLabCIPlatformAdapter(),
-        GitHubActionsPlatformAdapter(),
-        GenericPlatformAdapter(),
-        LocalPlatformAdapter() // Local is always last (fallback)
-    )
+    private val adapters =
+        listOf(
+            GitLabCIPlatformAdapter(),
+            GitHubActionsPlatformAdapter(),
+            GenericPlatformAdapter(),
+            LocalPlatformAdapter(), // Local is always last (fallback)
+        )
 
     /**
      * Detects the current platform and returns the appropriate adapter.

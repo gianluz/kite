@@ -1,12 +1,6 @@
 package io.kite.cli
 
 import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.clikt.core.context
-import com.github.ajalt.clikt.core.subcommands
-import com.github.ajalt.clikt.output.MordantHelpFormatter
-import com.github.ajalt.clikt.parameters.options.flag
-import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.options.versionOption
 import com.github.ajalt.mordant.rendering.TextColors.cyan
 import com.github.ajalt.mordant.rendering.TextColors.green
 import com.github.ajalt.mordant.rendering.TextColors.red
@@ -15,11 +9,6 @@ import com.github.ajalt.mordant.rendering.TextColors.yellow
 import com.github.ajalt.mordant.rendering.TextStyles.bold
 import com.github.ajalt.mordant.rendering.TextStyles.dim
 import com.github.ajalt.mordant.terminal.Terminal
-import io.kite.cli.commands.GraphCommand
-import io.kite.cli.commands.RideCommand
-import io.kite.cli.commands.RidesCommand
-import io.kite.cli.commands.RunCommand
-import io.kite.cli.commands.SegmentsCommand
 
 // ... existing KiteCli class code ...
 
@@ -153,10 +142,10 @@ object Output {
                     "  Time saved: ${formatDuration(saved)} (${
                         String.format(
                             "%.1f",
-                            efficiency
+                            efficiency,
                         )
-                    }% faster)"
-                )
+                    }% faster)",
+                ),
             )
         }
 

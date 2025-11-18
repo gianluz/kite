@@ -9,7 +9,7 @@ import io.kite.core.Segment
  * and provides methods for analyzing and traversing the graph.
  */
 class SegmentGraph(
-    private val segments: List<Segment>
+    private val segments: List<Segment>,
 ) {
     private val nodes: Map<String, GraphNode>
     private val adjacencyList: Map<String, Set<String>>
@@ -70,7 +70,7 @@ class SegmentGraph(
         for (segment in segments) {
             for (dependency in segment.dependsOn) {
                 if (!nodes.containsKey(dependency)) {
-                    errors.add("Segment '${segment.name}' depends on '${dependency}' which does not exist")
+                    errors.add("Segment '${segment.name}' depends on '$dependency' which does not exist")
                 }
             }
         }
@@ -97,7 +97,7 @@ class SegmentGraph(
 
         return GraphValidationResult(
             isValid = errors.isEmpty(),
-            errors = errors
+            errors = errors,
         )
     }
 
@@ -111,7 +111,10 @@ class SegmentGraph(
         val recursionStack = mutableSetOf<String>()
         val cycles = mutableListOf<Cycle>()
 
-        fun dfs(segmentName: String, path: List<String>) {
+        fun dfs(
+            segmentName: String,
+            path: List<String>,
+        ) {
             if (segmentName in recursionStack) {
                 // Found a cycle
                 val cycleStart = path.indexOf(segmentName)
@@ -197,7 +200,7 @@ class SegmentGraph(
             totalEdges = segments.sumOf { it.dependsOn.size },
             maxDependencies = maxDependencies,
             maxDependents = maxDependents,
-            isolatedSegments = isolatedSegments
+            isolatedSegments = isolatedSegments,
         )
     }
 
@@ -210,14 +213,14 @@ class SegmentGraph(
  * A node in the segment graph.
  */
 private data class GraphNode(
-    val segment: Segment
+    val segment: Segment,
 )
 
 /**
  * Represents a cycle in the dependency graph.
  */
 data class Cycle(
-    val path: List<String>
+    val path: List<String>,
 ) {
     override fun toString(): String = path.joinToString(" -> ")
 }
@@ -227,7 +230,7 @@ data class Cycle(
  */
 data class GraphValidationResult(
     val isValid: Boolean,
-    val errors: List<String>
+    val errors: List<String>,
 ) {
     override fun toString(): String {
         return if (isValid) {
@@ -246,5 +249,5 @@ data class GraphStats(
     val totalEdges: Int,
     val maxDependencies: Int,
     val maxDependents: Int,
-    val isolatedSegments: Int
+    val isolatedSegments: Int,
 )

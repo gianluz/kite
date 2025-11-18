@@ -7,7 +7,6 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class GitLabCIPlatformAdapterTest {
-
     @Test
     fun `detects GitLab CI environment`() {
         val adapter = GitLabCIPlatformAdapter()
@@ -22,14 +21,15 @@ class GitLabCIPlatformAdapterTest {
     @Test
     fun `creates context from GitLab CI environment`() {
         val adapter = GitLabCIPlatformAdapter()
-        val env = mapOf(
-            "GITLAB_CI" to "true",
-            "CI_COMMIT_REF_NAME" to "feature/test",
-            "CI_COMMIT_SHA" to "abc123def456",
-            "CI_MERGE_REQUEST_IID" to "42",
-            "CI_MERGE_REQUEST_LABELS" to "bug,release,hotfix",
-            "CI_PROJECT_DIR" to "/builds/project"
-        )
+        val env =
+            mapOf(
+                "GITLAB_CI" to "true",
+                "CI_COMMIT_REF_NAME" to "feature/test",
+                "CI_COMMIT_SHA" to "abc123def456",
+                "CI_MERGE_REQUEST_IID" to "42",
+                "CI_MERGE_REQUEST_LABELS" to "bug,release,hotfix",
+                "CI_PROJECT_DIR" to "/builds/project",
+            )
 
         val context = adapter.createContext(env)
 
@@ -73,7 +73,6 @@ class GitLabCIPlatformAdapterTest {
 }
 
 class GitHubActionsPlatformAdapterTest {
-
     @Test
     fun `detects GitHub Actions environment`() {
         val adapter = GitHubActionsPlatformAdapter()
@@ -88,12 +87,13 @@ class GitHubActionsPlatformAdapterTest {
     @Test
     fun `creates context from GitHub Actions environment`() {
         val adapter = GitHubActionsPlatformAdapter()
-        val env = mapOf(
-            "GITHUB_ACTIONS" to "true",
-            "GITHUB_REF" to "refs/heads/feature/test",
-            "GITHUB_SHA" to "abc123def456",
-            "GITHUB_WORKSPACE" to "/home/runner/work/project"
-        )
+        val env =
+            mapOf(
+                "GITHUB_ACTIONS" to "true",
+                "GITHUB_REF" to "refs/heads/feature/test",
+                "GITHUB_SHA" to "abc123def456",
+                "GITHUB_WORKSPACE" to "/home/runner/work/project",
+            )
 
         val context = adapter.createContext(env)
 
@@ -106,11 +106,12 @@ class GitHubActionsPlatformAdapterTest {
     @Test
     fun `extracts branch from pull request ref`() {
         val adapter = GitHubActionsPlatformAdapter()
-        val env = mapOf(
-            "GITHUB_ACTIONS" to "true",
-            "GITHUB_REF" to "refs/pull/42/merge",
-            "GITHUB_SHA" to "abc123"
-        )
+        val env =
+            mapOf(
+                "GITHUB_ACTIONS" to "true",
+                "GITHUB_REF" to "refs/pull/42/merge",
+                "GITHUB_SHA" to "abc123",
+            )
 
         val context = adapter.createContext(env)
 
@@ -120,12 +121,13 @@ class GitHubActionsPlatformAdapterTest {
     @Test
     fun `extracts PR number from pull request event`() {
         val adapter = GitHubActionsPlatformAdapter()
-        val env = mapOf(
-            "GITHUB_ACTIONS" to "true",
-            "GITHUB_REF" to "refs/pull/42/merge",
-            "GITHUB_EVENT_NAME" to "pull_request",
-            "GITHUB_SHA" to "abc123"
-        )
+        val env =
+            mapOf(
+                "GITHUB_ACTIONS" to "true",
+                "GITHUB_REF" to "refs/pull/42/merge",
+                "GITHUB_EVENT_NAME" to "pull_request",
+                "GITHUB_SHA" to "abc123",
+            )
 
         val context = adapter.createContext(env)
 
@@ -146,7 +148,6 @@ class GitHubActionsPlatformAdapterTest {
 }
 
 class LocalPlatformAdapterTest {
-
     @Test
     fun `detects local environment`() {
         val adapter = LocalPlatformAdapter()
@@ -185,7 +186,6 @@ class LocalPlatformAdapterTest {
 }
 
 class GenericPlatformAdapterTest {
-
     @Test
     fun `detects generic CI environment`() {
         val adapter = GenericPlatformAdapter()
@@ -200,12 +200,13 @@ class GenericPlatformAdapterTest {
     @Test
     fun `creates context from common CI variables`() {
         val adapter = GenericPlatformAdapter()
-        val env = mapOf(
-            "CI" to "true",
-            "CI_BRANCH" to "main",
-            "CI_COMMIT_SHA" to "abc123",
-            "CI_WORKSPACE" to "/workspace"
-        )
+        val env =
+            mapOf(
+                "CI" to "true",
+                "CI_BRANCH" to "main",
+                "CI_COMMIT_SHA" to "abc123",
+                "CI_WORKSPACE" to "/workspace",
+            )
 
         val context = adapter.createContext(env)
 
@@ -258,7 +259,6 @@ class GenericPlatformAdapterTest {
 }
 
 class PlatformDetectorTest {
-
     @Test
     fun `detects GitLab CI platform`() {
         val env = mapOf("GITLAB_CI" to "true")

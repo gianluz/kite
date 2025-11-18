@@ -12,17 +12,17 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 class SegmentDslTest {
-
     @Test
     fun `segments function creates segments list`() {
-        val segmentsList = segments {
-            segment("build") {
-                execute { }
+        val segmentsList =
+            segments {
+                segment("build") {
+                    execute { }
+                }
+                segment("test") {
+                    execute { }
+                }
             }
-            segment("test") {
-                execute { }
-            }
-        }
 
         assertEquals(2, segmentsList.size)
         assertEquals("build", segmentsList[0].name)
@@ -31,11 +31,12 @@ class SegmentDslTest {
 
     @Test
     fun `segment with minimal properties`() {
-        val segmentsList = segments {
-            segment("simple") {
-                execute { }
+        val segmentsList =
+            segments {
+                segment("simple") {
+                    execute { }
+                }
             }
-        }
 
         val segment = segmentsList[0]
         assertEquals("simple", segment.name)
@@ -47,22 +48,23 @@ class SegmentDslTest {
 
     @Test
     fun `segment with all properties`() {
-        val segmentsList = segments {
-            segment("complex") {
-                description = "Complex segment"
-                timeout = 10.minutes
-                maxRetries = 3
-                retryDelay = 5.seconds
-                dependsOn("build")
-                retryOn("IOException")
+        val segmentsList =
+            segments {
+                segment("complex") {
+                    description = "Complex segment"
+                    timeout = 10.minutes
+                    maxRetries = 3
+                    retryDelay = 5.seconds
+                    dependsOn("build")
+                    retryOn("IOException")
 
-                condition { it.isLocal }
+                    condition { it.isLocal }
 
-                execute {
-                    // Execution logic
+                    execute {
+                        // Execution logic
+                    }
                 }
             }
-        }
 
         val segment = segmentsList[0]
         assertEquals("complex", segment.name)
@@ -88,89 +90,96 @@ class SegmentDslTest {
 
     @Test
     fun `dependsOn can add single dependency`() {
-        val segmentsList = segments {
-            segment("test") {
-                dependsOn("build")
-                execute { }
+        val segmentsList =
+            segments {
+                segment("test") {
+                    dependsOn("build")
+                    execute { }
+                }
             }
-        }
 
         assertEquals(listOf("build"), segmentsList[0].dependsOn)
     }
 
     @Test
     fun `dependsOn can add multiple dependencies vararg`() {
-        val segmentsList = segments {
-            segment("deploy") {
-                dependsOn("build", "test", "lint")
-                execute { }
+        val segmentsList =
+            segments {
+                segment("deploy") {
+                    dependsOn("build", "test", "lint")
+                    execute { }
+                }
             }
-        }
 
         assertEquals(listOf("build", "test", "lint"), segmentsList[0].dependsOn)
     }
 
     @Test
     fun `dependsOn can be called multiple times`() {
-        val segmentsList = segments {
-            segment("deploy") {
-                dependsOn("build")
-                dependsOn("test")
-                execute { }
+        val segmentsList =
+            segments {
+                segment("deploy") {
+                    dependsOn("build")
+                    dependsOn("test")
+                    execute { }
+                }
             }
-        }
 
         assertEquals(listOf("build", "test"), segmentsList[0].dependsOn)
     }
 
     @Test
     fun `retryOn can add single exception`() {
-        val segmentsList = segments {
-            segment("flaky") {
-                retryOn("IOException")
-                execute { }
+        val segmentsList =
+            segments {
+                segment("flaky") {
+                    retryOn("IOException")
+                    execute { }
+                }
             }
-        }
 
         assertEquals(listOf("IOException"), segmentsList[0].retryOn)
     }
 
     @Test
     fun `retryOn can add multiple exceptions vararg`() {
-        val segmentsList = segments {
-            segment("flaky") {
-                retryOn("IOException", "TimeoutException", "NetworkException")
-                execute { }
+        val segmentsList =
+            segments {
+                segment("flaky") {
+                    retryOn("IOException", "TimeoutException", "NetworkException")
+                    execute { }
+                }
             }
-        }
 
         assertEquals(
             listOf("IOException", "TimeoutException", "NetworkException"),
-            segmentsList[0].retryOn
+            segmentsList[0].retryOn,
         )
     }
 
     @Test
     fun `retryOn can be called multiple times`() {
-        val segmentsList = segments {
-            segment("flaky") {
-                retryOn("IOException")
-                retryOn("TimeoutException")
-                execute { }
+        val segmentsList =
+            segments {
+                segment("flaky") {
+                    retryOn("IOException")
+                    retryOn("TimeoutException")
+                    execute { }
+                }
             }
-        }
 
         assertEquals(listOf("IOException", "TimeoutException"), segmentsList[0].retryOn)
     }
 
     @Test
     fun `condition lambda is stored`() {
-        val segmentsList = segments {
-            segment("conditional") {
-                condition { context -> context.isLocal }
-                execute { }
+        val segmentsList =
+            segments {
+                segment("conditional") {
+                    condition { context -> context.isLocal }
+                    execute { }
+                }
             }
-        }
 
         val segment = segmentsList[0]
         assertNotNull(segment.condition)
@@ -185,13 +194,14 @@ class SegmentDslTest {
     @Test
     fun `execute lambda is stored`() {
         var executed = false
-        val segmentsList = segments {
-            segment("exec") {
-                execute {
-                    executed = true
+        val segmentsList =
+            segments {
+                segment("exec") {
+                    execute {
+                        executed = true
+                    }
                 }
             }
-        }
 
         val segment = segmentsList[0]
         assertNotNull(segment.execute)
@@ -203,19 +213,20 @@ class SegmentDslTest {
 
     @Test
     fun `multiple segments can be defined`() {
-        val segmentsList = segments {
-            segment("build") {
-                execute { }
+        val segmentsList =
+            segments {
+                segment("build") {
+                    execute { }
+                }
+                segment("test") {
+                    dependsOn("build")
+                    execute { }
+                }
+                segment("deploy") {
+                    dependsOn("test")
+                    execute { }
+                }
             }
-            segment("test") {
-                dependsOn("build")
-                execute { }
-            }
-            segment("deploy") {
-                dependsOn("test")
-                execute { }
-            }
-        }
 
         assertEquals(3, segmentsList.size)
         assertEquals("build", segmentsList[0].name)
@@ -225,17 +236,18 @@ class SegmentDslTest {
 
     @Test
     fun `segment names are preserved`() {
-        val segmentsList = segments {
-            segment("first-segment") {
-                execute { }
+        val segmentsList =
+            segments {
+                segment("first-segment") {
+                    execute { }
+                }
+                segment("second_segment") {
+                    execute { }
+                }
+                segment("ThirdSegment") {
+                    execute { }
+                }
             }
-            segment("second_segment") {
-                execute { }
-            }
-            segment("ThirdSegment") {
-                execute { }
-            }
-        }
 
         assertEquals("first-segment", segmentsList[0].name)
         assertEquals("second_segment", segmentsList[1].name)

@@ -24,7 +24,7 @@ interface SegmentScheduler {
      */
     suspend fun execute(
         segments: List<Segment>,
-        context: ExecutionContext
+        context: ExecutionContext,
     ): SchedulerResult
 }
 
@@ -35,10 +35,9 @@ interface SegmentScheduler {
  * respecting their dependencies.
  */
 class SequentialScheduler : SegmentScheduler {
-
     override suspend fun execute(
         segments: List<Segment>,
-        context: ExecutionContext
+        context: ExecutionContext,
     ): SchedulerResult {
         if (segments.isEmpty()) {
             return SchedulerResult(emptyMap())
@@ -50,30 +49,35 @@ class SequentialScheduler : SegmentScheduler {
 
         if (!validation.isValid) {
             return SchedulerResult(
-                segmentResults = segments.associate {
-                    it.name to SegmentResult(
-                        segment = it,
-                        status = SegmentStatus.SKIPPED,
-                        error = "Graph validation failed: ${validation.errors.first()}"
-                    )
-                }
+                segmentResults =
+                    segments.associate {
+                        it.name to
+                            SegmentResult(
+                                segment = it,
+                                status = SegmentStatus.SKIPPED,
+                                error = "Graph validation failed: ${validation.errors.first()}",
+                            )
+                    },
             )
         }
 
         val sorter = TopologicalSort(graph)
-        val sorted = try {
-            sorter.sort()
-        } catch (e: Exception) {
-            return SchedulerResult(
-                segmentResults = segments.associate {
-                    it.name to SegmentResult(
-                        segment = it,
-                        status = SegmentStatus.FAILURE,
-                        error = e.message
-                    )
-                }
-            )
-        }
+        val sorted =
+            try {
+                sorter.sort()
+            } catch (e: Exception) {
+                return SchedulerResult(
+                    segmentResults =
+                        segments.associate {
+                            it.name to
+                                SegmentResult(
+                                    segment = it,
+                                    status = SegmentStatus.FAILURE,
+                                    error = e.message,
+                                )
+                        },
+                )
+            }
 
         // Track execution time
         val executionStartTime = System.currentTimeMillis()
@@ -84,27 +88,30 @@ class SequentialScheduler : SegmentScheduler {
         for (segment in sorted) {
             // Check if segment should execute based on condition
             if (!segment.shouldExecute(context)) {
-                results[segment.name] = SegmentResult(
-                    segment = segment,
-                    status = SegmentStatus.SKIPPED,
-                    message = "Skipped due to condition"
-                )
+                results[segment.name] =
+                    SegmentResult(
+                        segment = segment,
+                        status = SegmentStatus.SKIPPED,
+                        message = "Skipped due to condition",
+                    )
                 continue
             }
 
             // Check if dependencies succeeded
             // Segments skip if dependencies failed OR were skipped (cascading skips)
-            val dependenciesFailed = segment.dependsOn.any { depName ->
-                val depResult = results[depName]
-                depResult?.status?.isFailed == true || depResult?.status == SegmentStatus.SKIPPED
-            }
+            val dependenciesFailed =
+                segment.dependsOn.any { depName ->
+                    val depResult = results[depName]
+                    depResult?.status?.isFailed == true || depResult?.status == SegmentStatus.SKIPPED
+                }
 
             if (dependenciesFailed) {
-                results[segment.name] = SegmentResult(
-                    segment = segment,
-                    status = SegmentStatus.SKIPPED,
-                    message = "Skipped due to failed or skipped dependencies"
-                )
+                results[segment.name] =
+                    SegmentResult(
+                        segment = segment,
+                        status = SegmentStatus.SKIPPED,
+                        message = "Skipped due to failed or skipped dependencies",
+                    )
                 continue
             }
 
@@ -124,7 +131,7 @@ class SequentialScheduler : SegmentScheduler {
      */
     private suspend fun executeSegment(
         segment: Segment,
-        context: ExecutionContext
+        context: ExecutionContext,
     ): SegmentResult {
         val startTime = System.currentTimeMillis()
 
@@ -160,7 +167,7 @@ class SequentialScheduler : SegmentScheduler {
                     segment = segment,
                     status = SegmentStatus.SUCCESS,
                     durationMs = duration,
-                    logOutput = logger.getOutput()
+                    logOutput = logger.getOutput(),
                 )
             } finally {
                 // Clean up logging
@@ -183,7 +190,7 @@ class SequentialScheduler : SegmentScheduler {
                 error = e.message,
                 exception = e,
                 durationMs = duration,
-                logOutput = logger?.getOutput()
+                logOutput = logger?.getOutput(),
             )
         }
     }
@@ -199,7 +206,7 @@ data class SegmentResult(
     val error: String? = null,
     val exception: Throwable? = null,
     val durationMs: Long = 0,
-    val logOutput: String? = null
+    val logOutput: String? = null,
 ) {
     val isSuccess: Boolean get() = status.isSuccessful
     val isFailed: Boolean get() = status.isFailed
@@ -221,7 +228,7 @@ data class SegmentResult(
  */
 data class SchedulerResult(
     val segmentResults: Map<String, SegmentResult>,
-    val executionTimeMs: Long = 0 // Actual wall-clock time for execution
+    val executionTimeMs: Long = 0, // Actual wall-clock time for execution
 ) {
     val totalSegments: Int get() = segmentResults.size
     val successCount: Int get() = segmentResults.values.count { it.isSuccess }
@@ -241,17 +248,15 @@ data class SchedulerResult(
     /**
      * Gets all failed segments.
      */
-    fun failedSegments(): List<SegmentResult> =
-        segmentResults.values.filter { it.isFailed }
+    fun failedSegments(): List<SegmentResult> = segmentResults.values.filter { it.isFailed }
 
     /**
      * Gets all successful segments.
      */
-    fun successfulSegments(): List<SegmentResult> =
-        segmentResults.values.filter { it.isSuccess }
+    fun successfulSegments(): List<SegmentResult> = segmentResults.values.filter { it.isSuccess }
 
     override fun toString(): String {
         return "SchedulerResult(total=$totalSegments, success=$successCount, " +
-                "failed=$failureCount, skipped=$skippedCount, duration=${totalDurationMs}ms, executionTime=${executionTimeMs}ms)"
+            "failed=$failureCount, skipped=$skippedCount, duration=${totalDurationMs}ms, executionTime=${executionTimeMs}ms)"
     }
 }

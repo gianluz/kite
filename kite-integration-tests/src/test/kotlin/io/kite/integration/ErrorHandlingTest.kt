@@ -8,7 +8,6 @@ import kotlin.test.assertTrue
  * Integration tests for error handling and failure scenarios.
  */
 class ErrorHandlingTest : IntegrationTestBase() {
-
     @Test
     fun `exception in segment marks it as failed`() {
         createSegmentFile(
@@ -22,7 +21,7 @@ class ErrorHandlingTest : IntegrationTestBase() {
                     }
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         createRideFile(
@@ -34,7 +33,7 @@ class ErrorHandlingTest : IntegrationTestBase() {
                     segment("throws-exception")
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = executeRide("Exception")
@@ -58,7 +57,7 @@ class ErrorHandlingTest : IntegrationTestBase() {
                     }
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         createRideFile(
@@ -70,7 +69,7 @@ class ErrorHandlingTest : IntegrationTestBase() {
                     segment("calls-error")
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = executeRide("Error Call")
@@ -111,7 +110,7 @@ class ErrorHandlingTest : IntegrationTestBase() {
                     }
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         createRideFile(
@@ -126,7 +125,7 @@ class ErrorHandlingTest : IntegrationTestBase() {
                     segment("deploy")
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = executeRide("Cascade Failure")
@@ -169,7 +168,7 @@ class ErrorHandlingTest : IntegrationTestBase() {
                     }
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         createRideFile(
@@ -185,7 +184,7 @@ class ErrorHandlingTest : IntegrationTestBase() {
                     segment("step-4")
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = executeRide("Partial")
@@ -222,7 +221,7 @@ class ErrorHandlingTest : IntegrationTestBase() {
                     }
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         createRideFile(
@@ -237,7 +236,7 @@ class ErrorHandlingTest : IntegrationTestBase() {
                     segment("success-2")
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = executeRide("Parallel Failure")

@@ -10,7 +10,6 @@ import kotlin.time.Duration
  * Executes external processes with timeout and output capture support.
  */
 class ProcessExecutor {
-
     /**
      * Executes a command and returns the result.
      *
@@ -26,7 +25,7 @@ class ProcessExecutor {
         vararg args: String,
         workingDir: File = File(System.getProperty("user.dir")),
         env: Map<String, String> = emptyMap(),
-        timeout: Duration? = null
+        timeout: Duration? = null,
     ): ProcessResult {
         return executeInternal(
             command = command,
@@ -34,7 +33,7 @@ class ProcessExecutor {
             workingDir = workingDir,
             env = env,
             timeout = timeout,
-            throwOnError = true
+            throwOnError = true,
         ) as ProcessResult.Success
     }
 
@@ -47,7 +46,7 @@ class ProcessExecutor {
         vararg args: String,
         workingDir: File = File(System.getProperty("user.dir")),
         env: Map<String, String> = emptyMap(),
-        timeout: Duration? = null
+        timeout: Duration? = null,
     ): ProcessResult? {
         return try {
             executeInternal(
@@ -56,7 +55,7 @@ class ProcessExecutor {
                 workingDir = workingDir,
                 env = env,
                 timeout = timeout,
-                throwOnError = false
+                throwOnError = false,
             ).takeIf { it is ProcessResult.Success }
         } catch (e: Exception) {
             null
@@ -70,7 +69,7 @@ class ProcessExecutor {
         command: String,
         workingDir: File = File(System.getProperty("user.dir")),
         env: Map<String, String> = emptyMap(),
-        timeout: Duration? = null
+        timeout: Duration? = null,
     ): ProcessResult {
         val isWindows = System.getProperty("os.name").lowercase().contains("windows")
         return if (isWindows) {
@@ -89,109 +88,117 @@ class ProcessExecutor {
         workingDir: File,
         env: Map<String, String>,
         timeout: Duration?,
-        throwOnError: Boolean
-    ): ProcessResult = withContext(Dispatchers.IO) {
-        val fullCommand = listOf(command) + args
-        val commandString = fullCommand.joinToString(" ")
+        throwOnError: Boolean,
+    ): ProcessResult =
+        withContext(Dispatchers.IO) {
+            val fullCommand = listOf(command) + args
+            val commandString = fullCommand.joinToString(" ")
 
-        // Build process
-        val processBuilder = ProcessBuilder(fullCommand)
-            .directory(workingDir)
-            .redirectErrorStream(true) // Merge stderr into stdout
+            // Build process
+            val processBuilder =
+                ProcessBuilder(fullCommand)
+                    .directory(workingDir)
+                    .redirectErrorStream(true) // Merge stderr into stdout
 
-        // Set environment variables
-        if (env.isNotEmpty()) {
-            processBuilder.environment().putAll(env)
-        }
+            // Set environment variables
+            if (env.isNotEmpty()) {
+                processBuilder.environment().putAll(env)
+            }
 
-        val startTime = System.currentTimeMillis()
-        val process = try {
-            processBuilder.start()
-        } catch (e: IOException) {
-            val duration = System.currentTimeMillis() - startTime
-            
-            throw ProcessExecutionException(
-                command = commandString,
-                exitCode = -1,
-                stdout = "",
-                stderr = e.message ?: "Failed to start process",
-                duration = duration,
-                cause = e
-            )
-        }
+            val startTime = System.currentTimeMillis()
+            val process =
+                try {
+                    processBuilder.start()
+                } catch (e: IOException) {
+                    val duration = System.currentTimeMillis() - startTime
 
-        // Read output in a separate coroutine
-        val outputJob = async {
-            process.inputStream.bufferedReader().use { it.readText() }
-        }
-
-        // Wait for process with timeout
-        val exitCode = try {
-            if (timeout != null) {
-                withTimeout(timeout) {
-                    waitForProcess(process)
+                    throw ProcessExecutionException(
+                        command = commandString,
+                        exitCode = -1,
+                        stdout = "",
+                        stderr = e.message ?: "Failed to start process",
+                        duration = duration,
+                        cause = e,
+                    )
                 }
-            } else {
-                waitForProcess(process)
-            }
-        } catch (e: TimeoutCancellationException) {
-            // Kill process on timeout
-            process.destroy()
-            process.waitFor(5, TimeUnit.SECONDS) // Give it time to die
-            if (process.isAlive) {
-                process.destroyForcibly()
-            }
+
+            // Read output in a separate coroutine
+            val outputJob =
+                async {
+                    process.inputStream.bufferedReader().use { it.readText() }
+                }
+
+            // Wait for process with timeout
+            val exitCode =
+                try {
+                    if (timeout != null) {
+                        withTimeout(timeout) {
+                            waitForProcess(process)
+                        }
+                    } else {
+                        waitForProcess(process)
+                    }
+                } catch (e: TimeoutCancellationException) {
+                    // Kill process on timeout
+                    process.destroy()
+                    process.waitFor(5, TimeUnit.SECONDS) // Give it time to die
+                    if (process.isAlive) {
+                        process.destroyForcibly()
+                    }
+
+                    val duration = System.currentTimeMillis() - startTime
+                    val output = outputJob.getCompleted()
+
+                    throw ProcessExecutionException(
+                        command = commandString,
+                        exitCode = -1,
+                        stdout = output,
+                        stderr = "Process timed out after $timeout",
+                        duration = duration,
+                        cause = e,
+                    )
+                }
 
             val duration = System.currentTimeMillis() - startTime
-            val output = outputJob.getCompleted()
+            val output = outputJob.await()
 
-            throw ProcessExecutionException(
-                command = commandString,
-                exitCode = -1,
-                stdout = output,
-                stderr = "Process timed out after $timeout",
-                duration = duration,
-                cause = e
-            )
+            return@withContext when {
+                exitCode == 0 ->
+                    ProcessResult.Success(
+                        command = commandString,
+                        exitCode = exitCode,
+                        stdout = output,
+                        duration = duration,
+                    )
+
+                throwOnError -> throw ProcessExecutionException(
+                    command = commandString,
+                    exitCode = exitCode,
+                    stdout = output,
+                    stderr = "",
+                    duration = duration,
+                )
+
+                else ->
+                    ProcessResult.Failure(
+                        command = commandString,
+                        exitCode = exitCode,
+                        stdout = output,
+                        duration = duration,
+                    )
+            }
         }
-
-        val duration = System.currentTimeMillis() - startTime
-        val output = outputJob.await()
-
-        return@withContext when {
-            exitCode == 0 -> ProcessResult.Success(
-                command = commandString,
-                exitCode = exitCode,
-                stdout = output,
-                duration = duration
-            )
-
-            throwOnError -> throw ProcessExecutionException(
-                command = commandString,
-                exitCode = exitCode,
-                stdout = output,
-                stderr = "",
-                duration = duration
-            )
-
-            else -> ProcessResult.Failure(
-                command = commandString,
-                exitCode = exitCode,
-                stdout = output,
-                duration = duration
-            )
-        }
-    }
 
     /**
      * Suspending wait for process completion.
      */
-    private suspend fun waitForProcess(process: Process): Int = withContext(Dispatchers.IO) {
-        while (process.isAlive) {
-            delay(50)
+    private suspend fun waitForProcess(process: Process): Int =
+        withContext(Dispatchers.IO) {
+            while (process.isAlive) {
+                delay(50)
+            }
+            process.exitValue()
         }
-        process.exitValue()
-    }
 }
 
 /**
@@ -207,7 +214,7 @@ sealed class ProcessResult {
         override val command: String,
         override val exitCode: Int,
         override val stdout: String,
-        override val duration: Long
+        override val duration: Long,
     ) : ProcessResult() {
         val output: String get() = stdout
     }
@@ -216,7 +223,7 @@ sealed class ProcessResult {
         override val command: String,
         override val exitCode: Int,
         override val stdout: String,
-        override val duration: Long
+        override val duration: Long,
     ) : ProcessResult()
 }
 
@@ -229,8 +236,8 @@ class ProcessExecutionException(
     val stdout: String,
     val stderr: String,
     val duration: Long,
-    cause: Throwable? = null
+    cause: Throwable? = null,
 ) : RuntimeException(
-    "Command failed: $command (exit code: $exitCode)\nOutput: $stdout\nError: $stderr",
-    cause
-)
+        "Command failed: $command (exit code: $exitCode)\nOutput: $stdout\nError: $stderr",
+        cause,
+    )

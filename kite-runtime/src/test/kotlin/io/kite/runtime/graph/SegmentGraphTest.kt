@@ -4,17 +4,18 @@ import io.kite.core.Segment
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class SegmentGraphTest {
-
-    private fun createSegment(name: String, dependsOn: List<String> = emptyList()): Segment {
+    private fun createSegment(
+        name: String,
+        dependsOn: List<String> = emptyList(),
+    ): Segment {
         return Segment(
             name = name,
             dependsOn = dependsOn,
-            execute = {}
+            execute = {},
         )
     }
 
@@ -253,10 +254,11 @@ class SegmentGraphTest {
 
     @Test
     fun `GraphValidationResult toString for invalid graph`() {
-        val result = GraphValidationResult(
-            isValid = false,
-            errors = listOf("Error 1", "Error 2")
-        )
+        val result =
+            GraphValidationResult(
+                isValid = false,
+                errors = listOf("Error 1", "Error 2"),
+            )
 
         val str = result.toString()
         assertTrue(str.contains("validation failed"))

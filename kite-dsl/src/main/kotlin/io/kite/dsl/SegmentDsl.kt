@@ -35,7 +35,10 @@ class SegmentsBuilder {
      * @param name Unique name for this segment
      * @param block Configuration block for the segment
      */
-    fun segment(name: String, block: SegmentBuilder.() -> Unit) {
+    fun segment(
+        name: String,
+        block: SegmentBuilder.() -> Unit,
+    ) {
         val builder = SegmentBuilder(name)
         builder.block()
         segments.add(builder.build())
@@ -186,7 +189,7 @@ class SegmentBuilder(private val name: String) {
             retryOn = retryExceptions.toList(),
             inputs = inputArtifacts.toList(),
             outputs = outputArtifacts.toMap(),
-            execute = executeFn!!
+            execute = executeFn!!,
         )
     }
 }
@@ -223,7 +226,10 @@ class ArtifactOutputsBuilder {
      * @param name Name of the artifact
      * @param path Path to the artifact file or directory (relative to workspace)
      */
-    fun artifact(name: String, path: String) {
+    fun artifact(
+        name: String,
+        path: String,
+    ) {
         artifacts[name] = path
     }
 

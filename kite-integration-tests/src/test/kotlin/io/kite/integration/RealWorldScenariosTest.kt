@@ -8,7 +8,6 @@ import kotlin.test.assertTrue
  * Integration tests simulating real-world CI/CD scenarios.
  */
 class RealWorldScenariosTest : IntegrationTestBase() {
-
     @Test
     fun `typical CI pipeline workflow`() {
         createSegmentFile(
@@ -71,7 +70,7 @@ class RealWorldScenariosTest : IntegrationTestBase() {
                     }
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         createRideFile(
@@ -93,7 +92,7 @@ class RealWorldScenariosTest : IntegrationTestBase() {
                     segment("deploy-staging")
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = executeRide("CI Pipeline")
@@ -162,7 +161,7 @@ class RealWorldScenariosTest : IntegrationTestBase() {
                     }
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         createRideFile(
@@ -183,7 +182,7 @@ class RealWorldScenariosTest : IntegrationTestBase() {
                     segment("package")
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = executeRide("Multi-Module Build")
@@ -253,7 +252,7 @@ class RealWorldScenariosTest : IntegrationTestBase() {
                     }
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         createRideFile(
@@ -272,7 +271,7 @@ class RealWorldScenariosTest : IntegrationTestBase() {
                     segment("deploy-production")
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = executeRide("Release")
@@ -351,7 +350,7 @@ class RealWorldScenariosTest : IntegrationTestBase() {
                     }
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         createRideFile(
@@ -374,7 +373,7 @@ class RealWorldScenariosTest : IntegrationTestBase() {
                     segment("aggregate-results")
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = executeRide("Matrix Build")

@@ -12,15 +12,15 @@ import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.minutes
 
 class RideDslTest {
-
     @Test
     fun `ride function creates ride`() {
-        val myRide = ride {
-            name = "Test Ride"
-            flow {
-                segment("build")
+        val myRide =
+            ride {
+                name = "Test Ride"
+                flow {
+                    segment("build")
+                }
             }
-        }
 
         assertEquals("Test Ride", myRide.name)
         assertNotNull(myRide.flow)
@@ -48,12 +48,13 @@ class RideDslTest {
 
     @Test
     fun `ride with minimal properties`() {
-        val myRide = ride {
-            name = "Minimal"
-            flow {
-                segment("build")
+        val myRide =
+            ride {
+                name = "Minimal"
+                flow {
+                    segment("build")
+                }
             }
-        }
 
         assertEquals("Minimal", myRide.name)
         assertEquals(emptyMap(), myRide.environment)
@@ -64,17 +65,18 @@ class RideDslTest {
     @Test
     fun `ride with all properties`() {
         val onFailure: suspend (Throwable) -> Unit = {}
-        val myRide = ride {
-            name = "Complete Ride"
-            maxConcurrency = 4
-            env("KEY", "value")
-            env("NUM", "42")
-            onFailure(onFailure)
+        val myRide =
+            ride {
+                name = "Complete Ride"
+                maxConcurrency = 4
+                env("KEY", "value")
+                env("NUM", "42")
+                onFailure(onFailure)
 
-            flow {
-                segment("build")
+                flow {
+                    segment("build")
+                }
             }
-        }
 
         assertEquals("Complete Ride", myRide.name)
         assertEquals(4, myRide.maxConcurrency)
@@ -84,12 +86,13 @@ class RideDslTest {
 
     @Test
     fun `flow with single segment`() {
-        val myRide = ride {
-            name = "Single Segment"
-            flow {
-                segment("build")
+        val myRide =
+            ride {
+                name = "Single Segment"
+                flow {
+                    segment("build")
+                }
             }
-        }
 
         assertTrue(myRide.flow is FlowNode.SegmentRef)
         assertEquals("build", (myRide.flow as FlowNode.SegmentRef).segmentName)
@@ -97,14 +100,15 @@ class RideDslTest {
 
     @Test
     fun `flow with multiple sequential segments`() {
-        val myRide = ride {
-            name = "Sequential"
-            flow {
-                segment("build")
-                segment("test")
-                segment("deploy")
+        val myRide =
+            ride {
+                name = "Sequential"
+                flow {
+                    segment("build")
+                    segment("test")
+                    segment("deploy")
+                }
             }
-        }
 
         assertTrue(myRide.flow is FlowNode.Sequential)
         val sequential = myRide.flow as FlowNode.Sequential
@@ -113,16 +117,17 @@ class RideDslTest {
 
     @Test
     fun `flow with parallel block`() {
-        val myRide = ride {
-            name = "Parallel"
-            flow {
-                segment("build")
-                parallel {
-                    segment("test1")
-                    segment("test2")
+        val myRide =
+            ride {
+                name = "Parallel"
+                flow {
+                    segment("build")
+                    parallel {
+                        segment("test1")
+                        segment("test2")
+                    }
                 }
             }
-        }
 
         assertTrue(myRide.flow is FlowNode.Sequential)
         val sequential = myRide.flow as FlowNode.Sequential
@@ -132,16 +137,17 @@ class RideDslTest {
 
     @Test
     fun `parallel block with multiple segments`() {
-        val myRide = ride {
-            name = "Test"
-            flow {
-                parallel {
-                    segment("test1")
-                    segment("test2")
-                    segment("test3")
+        val myRide =
+            ride {
+                name = "Test"
+                flow {
+                    parallel {
+                        segment("test1")
+                        segment("test2")
+                        segment("test3")
+                    }
                 }
             }
-        }
 
         assertTrue(myRide.flow is FlowNode.Parallel)
         val parallel = myRide.flow as FlowNode.Parallel
@@ -150,18 +156,19 @@ class RideDslTest {
 
     @Test
     fun `nested sequential and parallel blocks`() {
-        val myRide = ride {
-            name = "Nested"
-            flow {
-                segment("lint")
-                segment("build")
-                parallel {
-                    segment("unitTest")
-                    segment("integrationTest")
+        val myRide =
+            ride {
+                name = "Nested"
+                flow {
+                    segment("lint")
+                    segment("build")
+                    parallel {
+                        segment("unitTest")
+                        segment("integrationTest")
+                    }
+                    segment("deploy")
                 }
-                segment("deploy")
             }
-        }
 
         assertTrue(myRide.flow is FlowNode.Sequential)
         val sequential = myRide.flow as FlowNode.Sequential
@@ -175,16 +182,17 @@ class RideDslTest {
 
     @Test
     fun `segment with overrides`() {
-        val myRide = ride {
-            name = "Overrides"
-            flow {
-                segment("test") {
-                    dependsOn("lint")
-                    timeout = 5.minutes
-                    enabled = false
+        val myRide =
+            ride {
+                name = "Overrides"
+                flow {
+                    segment("test") {
+                        dependsOn("lint")
+                        timeout = 5.minutes
+                        enabled = false
+                    }
                 }
             }
-        }
 
         assertTrue(myRide.flow is FlowNode.SegmentRef)
         val segmentRef = myRide.flow as FlowNode.SegmentRef
@@ -197,14 +205,15 @@ class RideDslTest {
 
     @Test
     fun `segment override dependsOn single`() {
-        val myRide = ride {
-            name = "Test"
-            flow {
-                segment("deploy") {
-                    dependsOn("test")
+        val myRide =
+            ride {
+                name = "Test"
+                flow {
+                    segment("deploy") {
+                        dependsOn("test")
+                    }
                 }
             }
-        }
 
         val segmentRef = myRide.flow as FlowNode.SegmentRef
         assertEquals(listOf("test"), segmentRef.overrides.dependsOn)
@@ -212,14 +221,15 @@ class RideDslTest {
 
     @Test
     fun `segment override dependsOn multiple`() {
-        val myRide = ride {
-            name = "Test"
-            flow {
-                segment("deploy") {
-                    dependsOn("build", "test", "lint")
+        val myRide =
+            ride {
+                name = "Test"
+                flow {
+                    segment("deploy") {
+                        dependsOn("build", "test", "lint")
+                    }
                 }
             }
-        }
 
         val segmentRef = myRide.flow as FlowNode.SegmentRef
         assertEquals(listOf("build", "test", "lint"), segmentRef.overrides.dependsOn)
@@ -227,41 +237,45 @@ class RideDslTest {
 
     @Test
     fun `segment override condition`() {
-        val myRide = ride {
-            name = "Test"
-            flow {
-                segment("deploy") {
-                    condition { it.isRelease }
+        val myRide =
+            ride {
+                name = "Test"
+                flow {
+                    segment("deploy") {
+                        condition { it.isRelease }
+                    }
                 }
             }
-        }
 
         val segmentRef = myRide.flow as FlowNode.SegmentRef
         assertNotNull(segmentRef.overrides.condition)
 
-        val releaseContext = ExecutionContext(
-            branch = "main",
-            commitSha = "abc",
-            isRelease = true
-        )
+        val releaseContext =
+            ExecutionContext(
+                branch = "main",
+                commitSha = "abc",
+                isRelease = true,
+            )
         assertTrue(segmentRef.overrides.condition!!.invoke(releaseContext))
 
-        val nonReleaseContext = ExecutionContext(
-            branch = "main",
-            commitSha = "abc",
-            isRelease = false
-        )
+        val nonReleaseContext =
+            ExecutionContext(
+                branch = "main",
+                commitSha = "abc",
+                isRelease = false,
+            )
         assertFalse(segmentRef.overrides.condition!!.invoke(nonReleaseContext))
     }
 
     @Test
     fun `segment without overrides has default values`() {
-        val myRide = ride {
-            name = "Test"
-            flow {
-                segment("build")
+        val myRide =
+            ride {
+                name = "Test"
+                flow {
+                    segment("build")
+                }
             }
-        }
 
         val segmentRef = myRide.flow as FlowNode.SegmentRef
         assertNull(segmentRef.overrides.dependsOn)
@@ -272,14 +286,15 @@ class RideDslTest {
 
     @Test
     fun `env adds environment variables`() {
-        val myRide = ride {
-            name = "Test"
-            env("KEY1", "value1")
-            env("KEY2", "value2")
-            flow {
-                segment("build")
+        val myRide =
+            ride {
+                name = "Test"
+                env("KEY1", "value1")
+                env("KEY2", "value2")
+                flow {
+                    segment("build")
+                }
             }
-        }
 
         assertEquals("value1", myRide.environment["KEY1"])
         assertEquals("value2", myRide.environment["KEY2"])
@@ -287,31 +302,32 @@ class RideDslTest {
 
     @Test
     fun `complex real-world example`() {
-        val myRide = ride {
-            name = "MR Ride"
-            maxConcurrency = 3
-            env("GRADLE_OPTS", "-Xmx4g")
+        val myRide =
+            ride {
+                name = "MR Ride"
+                maxConcurrency = 3
+                env("GRADLE_OPTS", "-Xmx4g")
 
-            flow {
-                segment("lint")
-                segment("build")
+                flow {
+                    segment("lint")
+                    segment("build")
 
-                parallel {
-                    segment("unitTest")
-                    segment("integrationTest") {
-                        timeout = 10.minutes
-                        condition { it.isRelease }
+                    parallel {
+                        segment("unitTest")
+                        segment("integrationTest") {
+                            timeout = 10.minutes
+                            condition { it.isRelease }
+                        }
+                        segment("screenshotTest")
                     }
-                    segment("screenshotTest")
-                }
 
-                segment("deploy") {
-                    dependsOn("lint", "build")
-                    condition { it.branch == "main" }
-                    enabled = false
+                    segment("deploy") {
+                        dependsOn("lint", "build")
+                        condition { it.branch == "main" }
+                        enabled = false
+                    }
                 }
             }
-        }
 
         assertEquals("MR Ride", myRide.name)
         assertEquals(3, myRide.maxConcurrency)

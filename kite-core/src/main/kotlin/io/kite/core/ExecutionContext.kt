@@ -30,7 +30,7 @@ data class ExecutionContext(
     val environment: Map<String, String> = emptyMap(),
     val workspace: Path = Paths.get("."),
     val artifacts: ArtifactManager = InMemoryArtifactManager(),
-    val logger: SegmentLoggerInterface = NoOpLogger
+    val logger: SegmentLoggerInterface = NoOpLogger,
 ) {
     /**
      * Gets an environment variable value.
@@ -40,14 +40,15 @@ data class ExecutionContext(
     /**
      * Gets an environment variable value or throws if not found.
      */
-    fun requireEnv(key: String): String =
-        environment[key] ?: error("Required environment variable not found: $key")
+    fun requireEnv(key: String): String = environment[key] ?: error("Required environment variable not found: $key")
 
     /**
      * Gets an environment variable value or returns a default.
      */
-    fun envOrDefault(key: String, default: String): String =
-        environment[key] ?: default
+    fun envOrDefault(
+        key: String,
+        default: String,
+    ): String = environment[key] ?: default
 
     /**
      * Returns true if this is a merge/pull request build.
@@ -63,7 +64,7 @@ data class ExecutionContext(
 
     override fun toString(): String {
         return "ExecutionContext(branch='$branch', commitSha='${commitSha.take(8)}', " +
-                "mrNumber=$mrNumber, isRelease=$isRelease, isLocal=$isLocal, ciPlatform=$ciPlatform)"
+            "mrNumber=$mrNumber, isRelease=$isRelease, isLocal=$isLocal, ciPlatform=$ciPlatform)"
     }
 }
 
@@ -81,16 +82,19 @@ enum class CIPlatform {
     LOCAL,
 
     /** Generic/unknown CI platform */
-    GENERIC;
+    GENERIC,
+
+    ;
 
     /**
      * Returns a human-readable name for this platform.
      */
     val displayName: String
-        get() = when (this) {
-            GITLAB -> "GitLab CI"
-            GITHUB -> "GitHub Actions"
-            LOCAL -> "Local"
-            GENERIC -> "Generic CI"
-        }
+        get() =
+            when (this) {
+                GITLAB -> "GitLab CI"
+                GITHUB -> "GitHub Actions"
+                LOCAL -> "Local"
+                GENERIC -> "Generic CI"
+            }
 }

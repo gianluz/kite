@@ -1,14 +1,11 @@
 package io.kite.integration
 
 import org.junit.jupiter.api.Test
-import java.io.File
-import kotlin.test.assertTrue
 
 /**
  * Integration tests for artifact management between segments.
  */
 class ArtifactManagementTest : IntegrationTestBase() {
-
     @Test
     fun `segment produces artifact consumed by dependent segment`() {
         createSegmentFile(
@@ -44,7 +41,7 @@ class ArtifactManagementTest : IntegrationTestBase() {
                     }
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         createRideFile(
@@ -57,7 +54,7 @@ class ArtifactManagementTest : IntegrationTestBase() {
                     segment("consumer")
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = executeRide("Artifacts Test")
@@ -107,7 +104,7 @@ class ArtifactManagementTest : IntegrationTestBase() {
                     }
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         createRideFile(
@@ -120,7 +117,7 @@ class ArtifactManagementTest : IntegrationTestBase() {
                     segment("verify")
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = executeRide("Multi Artifacts")
@@ -172,7 +169,7 @@ class ArtifactManagementTest : IntegrationTestBase() {
                     }
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         createRideFile(
@@ -189,7 +186,7 @@ class ArtifactManagementTest : IntegrationTestBase() {
                     }
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = executeRide("Shared Artifacts")
@@ -235,7 +232,7 @@ class ArtifactManagementTest : IntegrationTestBase() {
                     }
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         createRideFile(
@@ -248,7 +245,7 @@ class ArtifactManagementTest : IntegrationTestBase() {
                     segment("read-dir")
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = executeRide("Directory Artifacts")

@@ -19,7 +19,7 @@ class RidesCommand : CliktCommand(
 ) {
     private val json by option(
         "--json",
-        help = "Output in JSON format"
+        help = "Output in JSON format",
     ).flag()
 
     override fun run() {
@@ -38,9 +38,10 @@ class RidesCommand : CliktCommand(
 
             // Discover and load rides
             val discovery = FileDiscovery()
-            val loadResult = runBlocking {
-                discovery.loadAll()
-            }
+            val loadResult =
+                runBlocking {
+                    discovery.loadAll()
+                }
 
             if (!loadResult.success) {
                 if (!json) {
@@ -89,7 +90,6 @@ class RidesCommand : CliktCommand(
 
                 terminal.println((dim)("Total: ${rides.size} rides"))
             }
-
         } catch (e: Exception) {
             if (opts.debug) {
                 Output.error("Exception: ${e.message}")
@@ -114,25 +114,26 @@ class RidesCommand : CliktCommand(
     }
 
     private fun outputJson(rides: List<io.kite.core.Ride>) {
-        val json = buildString {
-            appendLine("{")
-            appendLine("  \"rides\": [")
-            rides.forEachIndexed { index, ride ->
-                appendLine("    {")
-                appendLine("      \"name\": \"${ride.name}\",")
-                appendLine("      \"segmentCount\": ${countSegments(ride.flow)},")
-                appendLine("      \"maxConcurrency\": ${ride.maxConcurrency ?: "null"}")
-                append("    }")
-                if (index < rides.size - 1) {
-                    appendLine(",")
-                } else {
-                    appendLine()
+        val json =
+            buildString {
+                appendLine("{")
+                appendLine("  \"rides\": [")
+                rides.forEachIndexed { index, ride ->
+                    appendLine("    {")
+                    appendLine("      \"name\": \"${ride.name}\",")
+                    appendLine("      \"segmentCount\": ${countSegments(ride.flow)},")
+                    appendLine("      \"maxConcurrency\": ${ride.maxConcurrency ?: "null"}")
+                    append("    }")
+                    if (index < rides.size - 1) {
+                        appendLine(",")
+                    } else {
+                        appendLine()
+                    }
                 }
+                appendLine("  ],")
+                appendLine("  \"total\": ${rides.size}")
+                appendLine("}")
             }
-            appendLine("  ],")
-            appendLine("  \"total\": ${rides.size}")
-            appendLine("}")
-        }
         println(json)
     }
 }

@@ -8,7 +8,6 @@ import kotlin.test.assertTrue
  * Integration tests for parallel segment execution.
  */
 class ParallelExecutionTest : IntegrationTestBase() {
-
     @Test
     fun `parallel segments execute faster than sequential`() {
         createSegmentFile(
@@ -40,7 +39,7 @@ class ParallelExecutionTest : IntegrationTestBase() {
                     }
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         createRideFile(
@@ -56,7 +55,7 @@ class ParallelExecutionTest : IntegrationTestBase() {
                     segment("slow-4")
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = executeRide("Parallel")
@@ -67,7 +66,7 @@ class ParallelExecutionTest : IntegrationTestBase() {
         // Allow generous timeout for CI/test overhead
         assertTrue(
             result.duration.inWholeMilliseconds < 500,
-            "Parallel execution should be faster than sequential. Duration: ${result.duration}"
+            "Parallel execution should be faster than sequential. Duration: ${result.duration}",
         )
     }
 
@@ -106,7 +105,7 @@ class ParallelExecutionTest : IntegrationTestBase() {
                     }
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         createRideFile(
@@ -122,7 +121,7 @@ class ParallelExecutionTest : IntegrationTestBase() {
                     segment("task-4")
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = executeRide("Limited")
@@ -173,7 +172,7 @@ class ParallelExecutionTest : IntegrationTestBase() {
                     }
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         createRideFile(
@@ -192,7 +191,7 @@ class ParallelExecutionTest : IntegrationTestBase() {
                     segment("finish")
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = executeRide("Parallel DSL")
@@ -236,7 +235,7 @@ class ParallelExecutionTest : IntegrationTestBase() {
                     }
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         createRideFile(
@@ -252,7 +251,7 @@ class ParallelExecutionTest : IntegrationTestBase() {
                     segment("deploy")
                 }
             }
-            """.trimIndent()
+            """.trimIndent(),
         )
 
         val result = executeRide("With Dependencies")
