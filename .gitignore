@@ -29,6 +29,7 @@ Thumbs.db
 
 # Logs
 *.log
+.kite/logs/
 
 # Temporary files
 *.tmp

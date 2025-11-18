@@ -1,49 +1,41 @@
 segments {
     segment("test-core") {
-        description = "Run kite-core unit tests"
+        description = "Run kite-core module tests"
         dependsOn("compile")
         execute {
-            println("Starting test-core tests...")
             exec("./gradlew", ":kite-core:test")
-            println("test-core completed ✓")
         }
     }
 
     segment("test-dsl") {
-        description = "Run kite-dsl unit tests"
+        description = "Run kite-dsl module tests"
         dependsOn("compile")
         execute {
-            println("Starting test-dsl tests...")
             exec("./gradlew", ":kite-dsl:test")
-            println("test-dsl completed ✓")
         }
     }
 
     segment("test-runtime") {
-        description = "Run kite-runtime unit tests"
+        description = "Run kite-runtime module tests"
         dependsOn("compile")
         execute {
-            println("Starting test-runtime tests...")
             exec("./gradlew", ":kite-runtime:test")
-            println("test-runtime completed ✓")
         }
     }
 
     segment("test-cli") {
-        description = "Run kite-cli unit tests"
+        description = "Run kite-cli module tests"
         dependsOn("compile")
         execute {
-            println("Starting test-cli tests...")
             exec("./gradlew", ":kite-cli:test")
-            println("test-cli completed ✓")
         }
     }
 
-    segment("test-all") {
-        description = "Run all unit tests"
-        dependsOn("test-core", "test-dsl", "test-runtime", "test-cli")
+    segment("test-integration") {
+        description = "Run integration tests"
+        dependsOn("compile")
         execute {
-            println("✅ All unit tests passed!")
+            exec("./gradlew", ":kite-integration-tests:test")
         }
     }
 }

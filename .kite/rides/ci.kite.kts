@@ -13,6 +13,7 @@ ride {
             segment("test-dsl")
             segment("test-runtime")
             segment("test-cli")
+            segment("test-integration")
         }
 
         // Final build step

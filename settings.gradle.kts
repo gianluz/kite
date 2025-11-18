@@ -4,9 +4,6 @@ include(
     ":kite-core",
     ":kite-dsl",
     ":kite-runtime",
-    ":kite-cli"
+    ":kite-cli",
+    ":kite-integration-tests"
 )
-
-plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
-}
