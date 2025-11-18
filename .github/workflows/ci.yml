@@ -1,10 +1,12 @@
-name: CI
+name: CI Build
 
 on:
   push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
+  workflow_dispatch:  # Allow manual triggering
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -14,28 +16,33 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
           distribution: 'temurin'
-          cache: gradle
+          java-version: '17'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Build Kite CLI
-        run: ./gradlew :kite-cli:installDist --no-daemon
+        run: ./gradlew :kite-cli:installDist
 
-      - name: Run CI with Kite 🪁 (Parallel)
+      - name: Run CI Build
         run: kite-cli/build/install/kite-cli/bin/kite-cli ride CI
 
-      - name: Upload build artifacts
+      - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: build-reports
-          path: |
-            **/build/reports/
-            **/build/test-results/
-          retention-days: 7
+          name: test-results-ci
+          path: .kite/artifacts/
+          retention-days: 30  # Keep longer for main branch
+
+      - name: Upload Build Artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kite-cli
+          path: kite-cli/build/install/kite-cli/
+          retention-days: 30
