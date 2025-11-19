@@ -2,13 +2,40 @@
 
 ## Overview
 
-This directory contains the detailed development plan for Kite, organized by phases.
+This directory contains the detailed development plan for Kite, organized by phase. Each phase contains epics with
+detailed tasks, story points, and deliverables.
 
-## Project Information
+## Quick Status
 
-- **Project**: Kite - Kotlin-based CI/CD Ride Runner
-- **Goal**: Replace Fastlane with a type-safe, testable, Kotlin-based CI/CD tool
-- **Target**: v1.0.0 MVP in ~10 weeks
+| Phase | Status | Completion |
+|-------|--------|------------|
+| [Phase 1: Foundation & Core DSL](phase-1-foundation.md) | ✅ Complete | 100% |
+| [Phase 2: Graph & Execution Engine](phase-2-execution.md) | ✅ Complete | 100% |
+| [Phase 3: CLI & File Discovery](phase-3-cli.md) | ✅ Complete | 100% |
+| [Phase 4: Platform Adapters](phase-4-platform.md) | ⏭️ Skipped | N/A |
+| [Phase 5: Built-in Features](phase-5-features.md) | ✅ Complete | 100% |
+| [Phase 6: Documentation](phase-6-documentation.md) | 🔄 In Progress | 90% |
+| [Phase 7: Testing & Refinement](phase-7-testing.md) | 🔄 In Progress | 70% |
+| [Phase 8: Plugin System](phase-8-plugins.md) | ⏳ Optional | 0% |
+
+**Additional**: [Security Roadmap](security-roadmap.md) - Cross-phase security features
+
+## Overall Progress
+
+**Target MVP**: Phases 1-7 (10 weeks)  
+**Current Status**: Phase 5 Complete, Phase 6 at 90%, Phase 7 at 70%  
+**Production Code**: 6,850+ lines  
+**Test Code**: 5,900+ lines  
+**Documentation**: 7,350+ lines  
+**Tests Passing**: 64 tests ✅
+
+## Next Steps
+
+1. Complete Phase 7 (Bug Fixes & Polish) - 1-2 days
+2. Complete Phase 6 (Documentation) - 2-3 days
+3. Release v1.0.0 - 1 day
+
+**Estimated Time to v1.0.0**: ~1 week 🚀
 
 ## Terminology
 
@@ -16,95 +43,71 @@ This directory contains the detailed development plan for Kite, organized by pha
 - **Segment**: A unit of work in a ride (formerly "task")
 - **Flow**: The execution order of segments within a ride
 
-## Phase Overview
+## Project Structure
 
-| Phase | Status | Duration | Description |
-|-------|--------|----------|-------------|
-| [Phase 1](phase-1-foundation.md) | ✅ COMPLETE | 2 weeks | Foundation & Core DSL |
-| [Phase 2](phase-2-execution.md) | ✅ COMPLETE | 2 weeks | Segment Graph & Execution Engine |
-| [Phase 3](phase-3-cli.md) | ✅ COMPLETE | 2 weeks | CLI & File Discovery |
-| [Phase 4](phase-4-platform.md) | ⏭️ SKIPPED | 1 week | Platform Adapters (CI-agnostic approach) |
-| [Phase 5](phase-5-features.md) | ✅ COMPLETE | 1 week | Built-in Helpers & Features |
-| [Phase 6](phase-6-documentation.md) | 🔄 90% | 1 week | Documentation & Examples |
-| [Phase 7](phase-7-testing.md) | 🔄 70% | 1 week | Testing & Refinement |
-| [Phase 8](phase-8-plugins.md) | ⏳ OPTIONAL | 2 weeks | Plugin System (post-MVP) |
-
-## Current Status
-
-**Overall Progress**: 5 of 8 phases complete (62.5%)
-
-**Production Code**: 6,850+ lines
-**Test Code**: 5,900+ lines (0.86:1 ratio)
-**Documentation**: 7,350+ lines (12 guides)
-**Tests**: 64 tests - ALL PASSING ✅
-
-## Next Steps
-
-1. **Complete Phase 7** - Bug fixes & polish (1-2 days)
-2. **Complete Phase 6** - CLI/DSL reference docs (2-3 days)
-3. **Release v1.0.0** - Tag and publish (1 day)
-
-**Estimated time to v1.0.0**: ~1 week
+```
+kite/
+├── devplan/                       # This directory - development plans
+├── specs/                         # Complete specifications (9 documents)
+├── docs/                          # User documentation (12 guides)
+├── kite-core/                     # Core domain models
+├── kite-dsl/                      # Kotlin DSL and scripting
+├── kite-runtime/                  # Execution runtime
+├── kite-cli/                      # CLI interface
+├── kite-integration-tests/        # Integration tests
+├── .kite/                         # Kite's own CI/CD
+│   ├── segments/                  # Reusable segments
+│   └── rides/                     # CI and MR rides
+├── DEVELOPMENT_PLAN.md            # Legacy - see devplan/
+└── CHANGELOG.md                   # Version history
+```
 
 ## Key Achievements
 
-✅ Type-safe Kotlin DSL for segments and rides
-✅ Complete graph theory implementation (DAG, topological sort, cycle detection)
-✅ Sequential AND parallel execution with configurable concurrency
-✅ Real process execution with timeout support
-✅ Beautiful CLI with colors and emojis
-✅ Full IDE support with autocomplete
-✅ @DependsOn working everywhere (IDE + runtime)
-✅ 20+ file operation helpers
-✅ Artifact management with cross-ride sharing
-✅ Lifecycle hooks (onSuccess/onFailure/onComplete)
-✅ Secret masking for security
-✅ GitHub Actions integration
-✅ Comprehensive documentation
+✅ **Core Infrastructure** (Phases 1-3)
 
-**Kite is production-ready!** 🚀
+- Type-safe Kotlin DSL for segments and rides
+- Complete graph theory (DAG, topological sort, cycle detection)
+- Sequential AND parallel execution engines
+- Real process execution with timeout
+- Beautiful CLI with colors and emojis
+- File discovery and script compilation
 
-## Recent Updates (November 2025)
+✅ **Built-in Features** (Phase 5)
 
-- ✅ Phase 5 Complete - All built-in features implemented
-- ✅ Artifact Management with manifest system
-- ✅ Lifecycle Hooks for segments and rides
-- ✅ Secret Masking for compliance (GDPR, PCI-DSS, SOC 2)
-- ✅ GitHub Actions workflows (PR validation + CI build)
-- ✅ Fixed flaky tests (ParallelExecutionTest, ProcessExecutorTest)
+- 20+ file operation helpers
+- Process execution helpers
+- Artifact management with cross-ride sharing
+- Per-segment logging system
+- Lifecycle hooks (onSuccess/onFailure/onComplete)
+- Secret masking and security features
 
-## Success Criteria
+✅ **Testing & Integration** (Phase 7)
 
-### MVP (Phases 1-7)
+- 64 tests (43 unit + 21 integration)
+- Integration test framework
+- GitHub Actions workflows
+- Kite managing its own CI/CD
 
-- [x] Define segments in `.kite.kts` files
-- [x] Define rides with sequential and parallel flows
-- [x] Execute rides locally and in CI
-- [x] GitHub Actions integration works
-- [x] Built-in helpers (exec, file ops, artifacts, hooks) functional
-- [x] Artifact passing between segments works
-- [ ] Documentation complete (90%)
-- [ ] Example projects available
-- [x] Performance: <1s startup, <100ms overhead per segment
-- [x] Test coverage: >80%
+✅ **Documentation** (Phase 6)
 
-## Documentation
+- 12 comprehensive guides (7,350+ lines)
+- IDE setup and troubleshooting
+- External dependencies guide
+- Artifact management guides
+- CI integration guides
+- Security documentation
 
-For detailed information on each phase, see the individual phase files:
+## Recent Achievements (November 2025)
 
-- [Phase 1: Foundation & Core DSL](phase-1-foundation.md)
-- [Phase 2: Segment Graph & Execution Engine](phase-2-execution.md)
-- [Phase 3: CLI & File Discovery](phase-3-cli.md)
-- [Phase 4: Platform Adapters](phase-4-platform.md) (SKIPPED)
-- [Phase 5: Built-in Helpers & Features](phase-5-features.md)
-- [Phase 6: Documentation & Examples](phase-6-documentation.md)
-- [Phase 7: Testing & Refinement](phase-7-testing.md)
-- [Phase 8: Plugin System MVP](phase-8-plugins.md) (OPTIONAL)
+- ✅ **Phase 5 Complete!** All built-in features
+- ✅ **Artifact Management** - Thread-safe with manifest system
+- ✅ **Lifecycle Hooks** - Full DSL support and integration
+- ✅ **Secret Masking** - Automatic security for compliance
+- ✅ **GitHub Actions** - PR and CI workflows working
+- ✅ **Integration Tests** - 21 comprehensive tests passing
+- ✅ **@DependsOn Fixed** - Works everywhere (IDE + runtime)
 
-## Contributing
+## Contact
 
-See [CONTRIBUTING.md](../CONTRIBUTING.md) for contribution guidelines.
-
-## License
-
-See [LICENSE](../LICENSE) for license information.
+For questions or contributions, see the main README.md.

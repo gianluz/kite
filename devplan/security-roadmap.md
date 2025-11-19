@@ -1,476 +1,428 @@
 # Security Roadmap
 
-This document outlines Kite's security features - implemented and planned.
+This document outlines Kite's security features - implemented and planned. Security is a cross-phase concern that
+evolves with the project.
 
-## Kite's Security Philosophy
+## Security Philosophy
 
-**Kite is designed for internal CI/CD pipelines** - not for running untrusted code.
+**Kite's Trust Model:**
 
-**Trust Model:**
+- Designed for **internal pipelines** (YOUR code, YOUR team)
+- Not designed for untrusted/community code
+- CI platform provides trust boundaries (secrets, network isolation)
+- Kite provides **defense-in-depth** (masking, auditing, validation)
 
-- Kite runs **YOUR code** in **YOUR CI environment**
-- CI platform (GitHub Actions, GitLab CI) handles trust boundaries
-- Kite provides **defense-in-depth**: masking, auditing, validation
-
-**Not Designed For:**
-
-- Running community-contributed segments from marketplace
-- Executing code from untrusted sources (fork PRs)
-- Multi-tenant environments with hostile users
-
-**Designed For:**
-
-- Internal development teams
-- Private CI/CD pipelines
-- Replacing Fastlane/custom scripts
-- Full flexibility with security guardrails
+**Key Principle**: Security should be **easy to do right** and **hard to do wrong**.
 
 ---
 
-## Phase 1: Foundation (v1.0.0) ✅ COMPLETE
+## Phase 1: Foundation Security (v1.0.0)
 
-### Epic S1: Secret Masking ✅ COMPLETE
+### Epic 5.6: Secret Management ✅ COMPLETE
 
-**Status**: ✅ Implemented (November 2025)
+**Status**: ✅ Complete (November 2025)  
+**Story Points**: 8 | **Duration**: 2 days
 
-**What We Have:**
+#### Tasks
 
-- `SecretMasker` singleton - thread-safe secret tracking
-- Automatic masking of plain text, URL-encoded, and Base64 secrets
-- `secret()` and `requireSecret()` API in ExecutionContext
-- Automatic masking in all logs (SegmentLogger integration)
-- Hint system: `[API_KEY:***]` for debugging
-- 15 comprehensive tests
-- 550+ lines of documentation
+- [x] **Task 5.6.1**: Implement SecretMasker ✅
+    - Created thread-safe `SecretMasker` singleton (111 lines)
+    - Uses `ConcurrentHashMap` for thread safety
+    - Supports plain text, URL-encoded, Base64-encoded secrets
+    - Hint system for debugging: `[API_KEY:***]`
+    - Zero configuration required
+    - **Deliverable**: `kite-core/src/main/kotlin/io/kite/core/SecretMasker.kt`
+    - **Tests**: 15 comprehensive tests in `SecretMaskerTest.kt`
 
-**Files:**
+- [x] **Task 5.6.2**: Add Secret API to ExecutionContext ✅
+    - Added `secret(key)` - Get env var and auto-register as secret
+    - Added `requireSecret(key)` - Required secret with validation
+    - Integrated with existing `env()` method
+    - **Deliverable**: Updated `ExecutionContext.kt`
+    - **Tests**: Integrated in SecretMaskerTest
 
-- `kite-core/src/main/kotlin/io/kite/core/SecretMasker.kt`
-- `kite-core/src/main/kotlin/io/kite/core/ExecutionContext.kt`
-- `kite-runtime/src/main/kotlin/io/kite/runtime/logging/SegmentLogger.kt`
-- `docs/SECURITY.md`
+- [x] **Task 5.6.3**: Integrate with Logging System ✅
+    - Updated `SegmentLogger` to automatically mask all messages
+    - Masks command execution logs
+    - Masks command output
+    - Masks error messages
+    - **Deliverable**: Updated `SegmentLogger.kt`
+    - **Tests**: Verified in integration tests
 
-**Prevents:**
+- [x] **Task 5.6.4**: Document Security Best Practices ✅
+    - Comprehensive security guide (550+ lines)
+    - Real-world examples (GitHub, Docker, Database)
+    - Common pitfalls and how to avoid them
+    - CI/CD integration patterns
+    - Compliance considerations (GDPR, PCI-DSS, SOC 2)
+    - **Deliverable**: `docs/SECURITY.md`
 
-- ✅ Secrets in log messages
-- ✅ Secrets in command execution logs
-- ✅ Secrets in command output
-- ✅ Secrets in error messages
-- ✅ Secrets in CI artifacts
+#### Deliverables
 
-**Example:**
+✅ **Production Code**:
 
-```kotlin
-val apiKey = secret("API_KEY")
-exec("curl", "-H", "Authorization: Bearer $apiKey")
-// Logs: curl -H Authorization: Bearer [API_KEY:***]
-```
+- `SecretMasker.kt` - 111 lines
+- Updated `ExecutionContext.kt`
+- Updated `SegmentLogger.kt`
+- **Total**: ~350 lines
 
-**Compliance:** GDPR, PCI-DSS, SOC 2 ready
+✅ **Tests**: 15 tests in `SecretMaskerTest.kt` - all passing
 
----
+✅ **Documentation**: `docs/SECURITY.md` - 550+ lines
 
-## Phase 2: Defense in Depth (v1.1.0) ⏳ PLANNED
+✅ **Features**:
 
-### Epic S2: Selective Auto-Masking
+- Automatic secret masking in all logs
+- Simple API: `secret("KEY")` instead of `env("KEY")`
+- Zero-config security
+- Thread-safe and performant
+- Prevents leaks in:
+    - Log messages
+    - Command execution
+    - Command output
+    - Error messages
 
-**Status**: ⏳ Planned for v1.1.0
-**Estimate**: 1 day
+#### What This Protects Against
 
-**Goal**: Automatically detect and mask secrets even if developer forgets to use `secret()`
-
-**Implementation:**
-
-```kotlin
-fun ExecutionContext.env(key: String): String? {
-    val value = environment[key]
-    
-    if (value != null && looksLikeSecret(key)) {
-        logger.warn("⚠️  '$key' looks like a secret - auto-masking. Use secret('$key') to suppress this warning.")
-        SecretMasker.registerSecret(value, hint = key)
-    }
-    
-    return value
-}
-
-private fun looksLikeSecret(key: String): Boolean {
-    val patterns = listOf(
-        Regex(".*KEY$", RegexOption.IGNORE_CASE),
-        Regex(".*SECRET.*", RegexOption.IGNORE_CASE),
-        Regex(".*TOKEN.*", RegexOption.IGNORE_CASE),
-        Regex(".*PASSWORD.*", RegexOption.IGNORE_CASE),
-        Regex(".*CREDENTIAL.*", RegexOption.IGNORE_CASE),
-        Regex(".*AUTH.*", RegexOption.IGNORE_CASE),
-    )
-    return patterns.any { it.matches(key) }
-}
-
-// Explicit opt-out for false positives
-fun ExecutionContext.envPlaintext(key: String): String? {
-    return environment[key]  // No masking
-}
-```
-
-**Benefits:**
-
-- Catches ~95% of secrets automatically
-- Educates developers with warnings
-- Non-breaking change
-- Escape hatch for false positives
-
-**Example:**
-
-```kotlin
-// Developer forgets to use secret()
-val apiKey = env("GITHUB_TOKEN")  // ⚠️  Auto-masked + warning
-
-// False positive (PATH, HOME, etc.)
-val path = envPlaintext("PATH")    // Explicitly not masked
-```
+✅ **Accidental leaks** - Secrets automatically masked in logs  
+✅ **Copy-paste errors** - Can't copy secret from logs  
+✅ **CI artifacts** - Log files don't contain secrets  
+✅ **Compliance violations** - Audit-ready logs
 
 ---
 
-### Epic S3: Execution Audit Logging
+## Phase 2: Enhanced Security (v1.1.0) - PLANNED
 
-**Status**: ⏳ Planned for v1.1.0
-**Estimate**: 1-2 days
+### Epic: Selective Auto-Masking 🔄 PLANNED
 
-**Goal**: Create forensic audit trail of what each segment did
+**Status**: 🔄 Planned for v1.1.0  
+**Story Points**: 5 | **Duration**: 1 day
 
-**Implementation:**
+#### Tasks
 
-Create `.kite/execution-audit.json` after each ride:
+- [ ] **Task: Pattern-based auto-detection**
+    - Detect secret-like environment variables automatically
+    - Patterns: `*KEY*`, `*SECRET*`, `*TOKEN*`, `*PASSWORD*`, `*CREDENTIAL*`, `*AUTH*`
+    - Auto-mask + warn when accessed via `env()`
+    - Add `envPlaintext()` for explicit opt-out
+    - **Goal**: Catch 95% of secrets without explicit registration
+
+- [ ] **Task: Update documentation**
+    - Document auto-masking behavior
+    - Explain pattern matching
+    - Show how to opt-out for false positives
+
+#### Why This Matters
+
+**Problem**: Developers might forget to use `secret()` and use `env()` directly
+
+```kotlin
+val apiKey = env("API_KEY")  // ❌ Could leak!
+```
+
+**Solution**: Auto-detect and mask automatically
+
+```kotlin
+val apiKey = env("API_KEY")  // ✅ Auto-masked + warning logged
+// Output: ⚠️  Auto-masking 'API_KEY' - use secret() to suppress this warning
+```
+
+#### Deliverables
+
+- Pattern-based detection in `env()`
+- Warning messages for auto-masked variables
+- `envPlaintext()` escape hatch
+- Updated `docs/SECURITY.md`
+
+---
+
+### Epic: Execution Audit Log 🔄 PLANNED
+
+**Status**: 🔄 Planned for v1.1.0  
+**Story Points**: 3 | **Duration**: 1 day
+
+#### Tasks
+
+- [ ] **Task: Implement audit log**
+    - Create `.kite/execution-audit.json` after each ride
+    - Record per-segment:
+        - Segment name, start/end time, duration
+        - Secrets accessed (names only, not values)
+        - Commands executed
+        - Exit codes
+    - Thread-safe append-only log
+    - **Goal**: Full provenance tracking for compliance
+
+- [ ] **Task: Add audit log documentation**
+    - Document audit log format
+    - Show how to use for compliance
+    - Integration with SIEM systems
+
+#### Example Audit Log
 
 ```json
 {
-  "rideId": "ci-2025-11-18-17:30:45",
-  "rideName": "CI",
-  "startTime": "2025-11-18T17:30:45Z",
-  "endTime": "2025-11-18T17:31:12Z",
-  "success": true,
+  "rideId": "ci-2025-11-18-001",
+  "startTime": "2025-11-18T17:00:00Z",
+  "endTime": "2025-11-18T17:05:23Z",
   "segments": [
     {
       "name": "build",
-      "startTime": "2025-11-18T17:30:46Z",
-      "endTime": "2025-11-18T17:30:52Z",
-      "exitCode": 0,
-      "secretsAccessed": ["GITHUB_TOKEN"],
+      "startTime": "2025-11-18T17:00:00Z",
+      "endTime": "2025-11-18T17:02:15Z",
+      "duration": 135.4,
+      "secretsAccessed": [],
       "commandsExecuted": ["./gradlew", "build"],
-      "filesCreated": ["app/build/outputs/apk/app-release.apk"],
-      "artifactsProduced": ["apk"],
-      "duration": 6.2
+      "exitCode": 0
     },
     {
       "name": "deploy",
-      "startTime": "2025-11-18T17:30:53Z",
-      "endTime": "2025-11-18T17:31:12Z",
-      "exitCode": 0,
-      "secretsAccessed": ["GITHUB_TOKEN", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"],
+      "startTime": "2025-11-18T17:02:15Z",
+      "endTime": "2025-11-18T17:05:23Z",
+      "duration": 188.2,
+      "secretsAccessed": ["GITHUB_TOKEN", "AWS_SECRET_KEY"],
       "commandsExecuted": ["gh", "release", "create", "aws", "s3", "sync"],
-      "networkHosts": ["api.github.com", "s3.amazonaws.com"],
-      "duration": 19.0
+      "exitCode": 0
     }
   ]
 }
 ```
 
-**Benefits:**
+#### Why This Matters
 
-- Forensic analysis after incidents
-- Compliance auditing (who accessed what secrets)
-- Performance monitoring
-- Security incident response
-- Can be uploaded to CI as artifact
+✅ **Compliance**: Proves what secrets were accessed when  
+✅ **Forensics**: Investigate security incidents  
+✅ **Auditing**: Track all command executions  
+✅ **Monitoring**: Detect unusual patterns
 
-**What Gets Logged:**
+#### Deliverables
 
-- ✅ Segment name and timestamps
-- ✅ Secrets accessed (names only, NOT values)
-- ✅ Commands executed (with args, masked)
-- ✅ Files created/modified
-- ✅ Artifacts produced
-- ✅ Exit codes and durations
-- ✅ Network hosts accessed (future)
+- `ExecutionAuditLog.kt` class
+- JSON audit log generation
+- Integration with schedulers
+- Documentation in `docs/SECURITY.md`
 
 ---
 
-### Epic S4: Static Analysis
+## Phase 3: Static Analysis (v1.2.0) - PLANNED
 
-**Status**: ⏳ Planned for v1.1.0  
-**Estimate**: 2-3 days
+### Epic: Script Validation 🔄 PLANNED
 
-**Goal**: Detect dangerous patterns during script compilation
+**Status**: 🔄 Planned for v1.2.0  
+**Story Points**: 8 | **Duration**: 2-3 days
 
-**Implementation:**
+#### Tasks
 
-Add validation during KTS compilation:
+- [ ] **Task: AST-based script scanning**
+    - Scan compiled KTS scripts for dangerous patterns
+    - Check during script compilation phase
+    - Provide warnings or errors before execution
+    - **Integration Point**: `KiteScriptCompiler`
 
-```kotlin
-class SecurityValidator {
-    fun validateScript(scriptContent: String): List<SecurityWarning> {
-        val warnings = mutableListOf<SecurityWarning>()
-        
-        // Pattern 1: Direct ProcessBuilder usage
-        if (scriptContent.contains("ProcessBuilder")) {
-            warnings.add(SecurityWarning(
-                level = Level.WARN,
-                message = "Direct ProcessBuilder usage detected. Consider using exec() instead for better logging and security."
-            ))
-        }
-        
-        // Pattern 2: Runtime.exec()
-        if (scriptContent.contains("Runtime.getRuntime().exec")) {
-            warnings.add(SecurityWarning(
-                level = Level.WARN,
-                message = "Runtime.exec() detected. Use exec() helper for consistent behavior."
-            ))
-        }
-        
-        // Pattern 3: System.exit()
-        if (scriptContent.contains("System.exit")) {
-            warnings.add(SecurityWarning(
-                level = Level.ERROR,
-                message = "System.exit() kills the entire Kite process. Use error() to fail segment."
-            ))
-        }
-        
-        // Pattern 4: Suspicious exfiltration patterns
-        val exfiltrationPatterns = listOf(
-            "curl.*\\$.*KEY",      // Sending env var in URL
-            "wget.*\\$.*TOKEN",    // Sending token
-            "nc.*\\$.*SECRET",     // Netcat exfiltration
-        )
-        
-        exfiltrationPatterns.forEach { pattern ->
-            if (Regex(pattern).containsMatchIn(scriptContent)) {
-                warnings.add(SecurityWarning(
-                    level = Level.WARN,
-                    message = "Suspicious pattern detected that might leak secrets. Review carefully."
-                ))
-            }
-        }
-        
-        return warnings
-    }
-}
-```
+- [ ] **Task: Dangerous pattern detection**
+    - Detect: `System.exit()` - crashes entire process
+    - Detect: `Runtime.exec()` - suggest `exec()` instead
+    - Detect: Direct `ProcessBuilder` usage
+    - Detect: Reflection accessing private fields
+    - Detect: File writes outside workspace
+    - Detect: Network calls bypassing allowed hosts
 
-**What It Detects:**
+- [ ] **Task: Configurable validation rules**
+    - Allow projects to define custom rules
+    - Configuration in `.kite/security.yml`
+    - Severity levels: `error`, `warn`, `info`
 
-- ⚠️ Direct `ProcessBuilder` usage (suggest `exec()`)
-- ⚠️  `Runtime.exec()` usage
-- ❌  `System.exit()` calls (kills Kite)
-- ⚠️ Suspicious exfiltration patterns
-- ⚠️ Accessing `env()` with secret-like names
-
-**Configurable:**
+#### Example Validation
 
 ```kotlin
-// .kite/security-rules.kts
-security {
-    rules {
-        blockSystemExit = true
-        warnOnProcessBuilder = true
-        warnOnRuntimeExec = true
-        warnOnSecretPatterns = true
-    }
-    
-    allowList {
-        // Specific patterns to ignore
-        ignorePattern("ProcessBuilder.*docker")
-    }
-}
-```
-
-**Benefits:**
-
-- Catch mistakes before execution
-- Educate developers
-- Prevent accidental security issues
-- Non-breaking (warnings, not errors)
-
----
-
-## Phase 3: Advanced Features (v2.0.0) ⏳ OPTIONAL
-
-### Epic S5: Capability System
-
-**Status**: ⏳ Optional - Only if Kite adds marketplace/third-party segments  
-**Estimate**: 2-3 weeks
-
-**Goal**: Sandbox untrusted segments with fine-grained permissions
-
-**Only Implement If:**
-
-- Kite adds a segment marketplace
-- Running community-contributed code
-- Multi-tenant environment
-
-**Current Assessment:** NOT NEEDED for internal CI/CD tool
-
-**Design:**
-
-```kotlin
-segment("community-plugin") {
-    // Declare what this segment can do
-    capabilities {
-        network = false          // No outbound network
-        secrets = emptyList()    // No secret access
-        filesystem = readOnly()  // Read-only file access
-        exec = allowList("grep", "sed", "awk")  // Only specific commands
-    }
-    
+// ❌ Detected: Direct ProcessBuilder usage
+segment("deploy") {
     execute {
-        // Kite enforces capabilities at runtime
+        ProcessBuilder("rm", "-rf", "/").start()  // ERROR
+    }
+}
+
+// ✅ Suggested: Use safe exec() wrapper
+segment("deploy") {
+    execute {
+        exec("rm", "-rf", workspaceRoot)  // OK - validated path
     }
 }
 ```
 
+#### Why This Matters
+
+✅ **Catch mistakes early** - Before execution  
+✅ **Educate developers** - Suggest better patterns  
+✅ **Prevent accidents** - Block dangerous operations
+
+#### Deliverables
+
+- `ScriptValidator.kt` with AST scanning
+- Pattern detection rules
+- Integration with compiler
+- Configuration system
+- Documentation
+
 ---
 
-### Epic S6: Network Allowlisting
+## Phase 4: Enterprise Features (v2.0.0) - FUTURE
 
-**Status**: ⏳ Optional  
-**Estimate**: 1 week
+These features are **not planned for v1.x** but could be added if there's enterprise demand.
 
-**Goal**: Restrict which hosts segments can contact
+### Epic: Capability System 🚫 NOT PLANNED
 
-**Only Implement If:** Strong security requirements or untrusted code
+**Status**: 🚫 Deferred - only if Kite becomes a marketplace  
+**Story Points**: 20+ | **Duration**: 2-3 weeks
 
-**Design:**
+**What it would include:**
+
+- Capability declarations: `capabilities = [network, secrets, fileWrite]`
+- Sandbox enforcement (restricted file access, network allowlist)
+- Trusted vs untrusted mode (for PRs from forks)
+- Signed segment bundles for third-party code
+
+**Why we're NOT doing this now:**
+
+- Kite is for **internal pipelines**, not hostile code
+- CI platform already provides trust boundaries
+- Would significantly complicate the architecture
+- No user demand yet
+
+---
+
+### Epic: Safe Command Wrappers 🚫 NOT PLANNED
+
+**Status**: 🚫 Won't implement - conflicts with Kite's philosophy
+
+**What others suggest:**
+
+- Replace `exec()` with safe wrappers: `SafeCLI.runGradle()`, `SafeCLI.runGit()`
+- Sanitize all arguments automatically
+- Block arbitrary command execution
+
+**Why we're NOT doing this:**
+
+- **Flexibility is a feature** - Users need to run ANY command
+- CI pipelines need `docker`, `kubectl`, `terraform`, custom tools
+- Wrappers would be incomplete and frustrating
+- Kite is NOT GitHub Actions (doesn't run community code)
+
+**Our approach instead:** Provide good security primitives (masking, auditing) and let users be flexible.
+
+---
+
+## Security Checklist
+
+### ✅ v1.0.0 (November 2025)
+
+- [x] Secret masking in all logs
+- [x] `secret()` and `requireSecret()` API
+- [x] Thread-safe secret storage
+- [x] Multiple encoding support (plain, URL, Base64)
+- [x] Comprehensive security documentation
+- [x] 15 security tests
+
+### 🔄 v1.1.0 (Planned)
+
+- [ ] Pattern-based auto-masking
+- [ ] Execution audit log
+- [ ] Warning for likely secrets accessed via `env()`
+- [ ] `envPlaintext()` escape hatch
+
+### 🔄 v1.2.0 (Planned)
+
+- [ ] Static analysis of scripts
+- [ ] Dangerous pattern detection
+- [ ] Configurable validation rules
+- [ ] Pre-execution security checks
+
+### 🚫 v2.0.0+ (Not Planned Unless Needed)
+
+- [ ] Capability system
+- [ ] Safe command wrappers
+- [ ] Sandbox enforcement
+- [ ] Signed bundles
+
+---
+
+## Comparison: Kite vs GitHub Actions Security
+
+| Feature | GitHub Actions | Kite (v1.0) | Kite (v1.1) | Kite (v2.0+) |
+|---------|----------------|-------------|-------------|--------------|
+| **Trust Model** | Untrusted code | Internal only | Internal only | Configurable |
+| **Secret Masking** | ✅ Automatic | ✅ Automatic | ✅ Enhanced | ✅ Enhanced |
+| **Audit Logging** | ✅ Built-in | ❌ None | ✅ Added | ✅ Enhanced |
+| **Static Analysis** | ❌ None | ❌ None | ✅ Added | ✅ Enhanced |
+| **Capabilities** | ✅ Strict | ❌ None | ❌ None | 🔄 Optional |
+| **Sandbox** | ✅ VM-level | ❌ None | ❌ None | 🔄 Optional |
+
+---
+
+## Recommendations
+
+### For v1.0.0 Users (Now)
+
+✅ **Use `secret()` for all sensitive data**
 
 ```kotlin
-security {
-    networkPolicy {
-        defaultDeny = true
-        
-        allowList {
-            host("api.github.com")
-            host("*.amazonaws.com")
-            host("registry.npmjs.org")
-        }
-        
-        blockList {
-            host("pastebin.com")  // Common exfiltration site
-        }
-    }
-}
+val apiKey = secret("API_KEY")  // ✅ Masked automatically
 ```
 
----
-
-### Epic S7: Signed Segment Bundles
-
-**Status**: ⏳ Optional  
-**Estimate**: 2 weeks
-
-**Goal**: Verify segment authenticity and integrity
-
-**Only Implement If:** Running third-party segments
-
-**Design:**
+✅ **Check logs to verify masking**
 
 ```
-segment-bundle/
-├── segments/
-│   └── build.kite.kts
-├── MANIFEST.json
-└── SIGNATURE.sig
-
-MANIFEST.json:
-{
-  "name": "android-build-tools",
-  "version": "1.0.0",
-  "publisher": "acme-corp",
-  "segments": [
-    {
-      "name": "build.kite.kts",
-      "sha256": "abc123..."
-    }
-  ]
-}
+[10:23:45.123] [deploy] $ curl -H Authorization: Bearer [GITHUB_TOKEN:***]
 ```
 
----
+✅ **Review `docs/SECURITY.md` for best practices**
 
-## What We're NOT Implementing
+### For v1.1.0 Users (Soon)
 
-### ❌ Safe Command Wrappers (e.g., SafeCLI.runGradle())
+✅ **Leverage auto-masking** - Most secrets caught automatically  
+✅ **Review audit logs** - Track secret access for compliance  
+✅ **Fix warnings** - Address auto-masking warnings
 
-**Why Not:**
+### For v1.2.0 Users (Future)
 
-- Kills flexibility - CI pipelines need to run ANY command
-- Kite is for YOUR code, not hostile code
-- Command sanitization would be overly restrictive
-
-### ❌ Blocking Arbitrary Execution
-
-**Why Not:**
-
-- Defeats the purpose of a CI/CD tool
-- Users need docker, kubectl, terraform, etc.
-- Too restrictive for internal pipelines
-
-### ❌ Untrusted vs Trusted Mode
-
-**Why Not:**
-
-- CI platform (GitHub Actions, GitLab CI) already handles this
-- Fork PRs can't access secrets (GitHub's responsibility)
-- Duplicating CI platform features adds complexity
-
-### ❌ Dependency Signature Verification
-
-**Why Not:**
-
-- Maven Central already has protections
-- Supply chain security is better handled with SBOMs
-- Adds significant complexity for marginal benefit
+✅ **Enable static analysis** - Catch mistakes before execution  
+✅ **Configure custom rules** - Project-specific security policies
 
 ---
 
-## Security Documentation
+## Key Insights
 
-### Current Documentation
+### What Makes Sense for Kite
 
-- ✅ `docs/SECURITY.md` (550 lines) - Complete secret masking guide
-- ✅ `docs/ARTIFACTS_CROSS_RIDE.md` - Secure artifact sharing
-- ✅ `docs/CI_INTEGRATION.md` - CI security best practices
+✅ **Secret masking** - Easy win, huge value  
+✅ **Audit logging** - Compliance and forensics  
+✅ **Static analysis** - Catch mistakes early  
+✅ **Good documentation** - Help users do it right
 
-### Planned Documentation (v1.1.0)
+### What Doesn't Fit
 
-- ⏳ `docs/SECURITY_MODEL.md` - Kite's trust model and boundaries
-- ⏳ `docs/AUDIT_LOGGING.md` - How to use execution audit logs
-- ⏳ `docs/STATIC_ANALYSIS.md` - Security validation rules
+❌ **Capability system** - Over-engineered for internal use  
+❌ **Safe wrappers** - Kills flexibility  
+❌ **Sandbox** - CI platform's job  
+❌ **Trust modes** - Not Kite's concern
+
+### Bottom Line
+
+**Kite provides defense-in-depth for internal pipelines, not a security fortress for hostile code.**
+
+The goal is to make it **easy to be secure** without sacrificing the **flexibility** that makes Kite useful.
 
 ---
 
-## Summary
+## References
 
-### ✅ Implemented (v1.0.0)
+- **Documentation**: `docs/SECURITY.md` - Complete security guide
+- **Implementation**: `kite-core/src/main/kotlin/io/kite/core/SecretMasker.kt`
+- **Tests**: `kite-core/src/test/kotlin/io/kite/core/SecretMaskerTest.kt`
+- **Examples**: See `docs/SECURITY.md` for real-world patterns
 
-- Secret masking (automatic, thread-safe, multi-encoding)
-- `secret()` and `requireSecret()` API
-- Integration with logging system
-- Comprehensive documentation
+---
 
-### ⏳ Planned (v1.1.0)
-
-- Selective auto-masking (defense-in-depth)
-- Execution audit logging (forensics)
-- Static analysis (catch mistakes early)
-
-### ⏳ Optional (v2.0.0+)
-
-- Capability system (only if marketplace)
-- Network allowlisting (only if high security req)
-- Signed bundles (only if third-party code)
-
-### ❌ Not Implementing
-
-- Safe command wrappers (too restrictive)
-- Execution sandboxing (CI platform's job)
-- Trust modes (duplicate CI platform)
-- Dependency signing (unnecessary complexity)
-
-**Kite's security model balances flexibility with safety** - perfect for internal CI/CD! 🔒
+**Last Updated**: November 18, 2025  
+**Version**: v1.0.0  
+**Status**: Phase 1 Complete, Phase 2-3 Planned
