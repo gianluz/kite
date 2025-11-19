@@ -70,6 +70,7 @@ ride {
 - [Phase 1: Foundation & Core DSL](./devplan/phase-1-foundation.md) ✅ Complete
 - [Phase 2: Graph & Execution Engine](./devplan/phase-2-execution.md) ✅ Complete
 - [Phase 3: CLI & File Discovery](./devplan/phase-3-cli.md) ✅ Complete
+- [Phase 4: Platform Adapters](./devplan/phase-4-platform-adapters.md) ⏭️ Skipped
 - [Phase 5: Built-in Features](./devplan/phase-5-features.md) ✅ Complete
 - [Phase 6: Documentation](./devplan/phase-6-documentation.md) 🔄 90% Complete
 - [Phase 7: Testing & Refinement](./devplan/phase-7-testing.md) 🔄 70% Complete

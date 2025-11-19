@@ -7,16 +7,16 @@ detailed tasks, story points, and deliverables.
 
 ## Quick Status
 
-| Phase | Status | Completion |
-|-------|--------|------------|
-| [Phase 1: Foundation & Core DSL](phase-1-foundation.md) | ✅ Complete | 100% |
-| [Phase 2: Graph & Execution Engine](phase-2-execution.md) | ✅ Complete | 100% |
-| [Phase 3: CLI & File Discovery](phase-3-cli.md) | ✅ Complete | 100% |
-| [Phase 4: Platform Adapters](phase-4-platform.md) | ⏭️ Skipped | N/A |
-| [Phase 5: Built-in Features](phase-5-features.md) | ✅ Complete | 100% |
-| [Phase 6: Documentation](phase-6-documentation.md) | 🔄 In Progress | 90% |
-| [Phase 7: Testing & Refinement](phase-7-testing.md) | 🔄 In Progress | 70% |
-| [Phase 8: Plugin System](phase-8-plugins.md) | ⏳ Optional | 0% |
+| Phase                                                      | Status         | Completion |
+|------------------------------------------------------------|----------------|------------|
+| [Phase 1: Foundation & Core DSL](phase-1-foundation.md)    | ✅ Complete     | 100%       |
+| [Phase 2: Graph & Execution Engine](phase-2-execution.md)  | ✅ Complete     | 100%       |
+| [Phase 3: CLI & File Discovery](phase-3-cli.md)            | ✅ Complete     | 100%       |
+| [Phase 4: Platform Adapters](phase-4-platform-adapters.md) | ⏭️ Skipped     | N/A        |
+| [Phase 5: Built-in Features](phase-5-features.md)          | ✅ Complete     | 100%       |
+| [Phase 6: Documentation](phase-6-documentation.md)         | 🔄 In Progress | 90%        |
+| [Phase 7: Testing & Refinement](phase-7-testing.md)        | 🔄 In Progress | 70%        |
+| [Phase 8: Plugin System](phase-8-plugins.md)               | ⏳ Optional     | 0%         |
 
 **Additional**: [Security Roadmap](security-roadmap.md) - Cross-phase security features
 
