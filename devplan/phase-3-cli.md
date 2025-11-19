@@ -9,7 +9,7 @@
 ## Overview
 
 Phase 3 delivers the user-facing CLI that makes Kite accessible and easy to use. This includes implementing all
-commands, creating beautiful terminal output, and building the file discovery system that automatically loads
+commands, creating terminal output with Mordant, and building the file discovery system that automatically loads
 `.kite.kts` files.
 
 ---
@@ -22,154 +22,158 @@ commands, creating beautiful terminal output, and building the file discovery sy
 ### Tasks
 
 - [x] **Task 3.1.1**: Set up Clikt CLI structure
-    - Create main CLI class with Clikt framework
-    - Define command hierarchy: `ride`, `segments`, `rides`, `graph`
-    - Add global options: `--debug`, `--dry-run`, `--verbose`
-    - Implement help text and usage examples
-    - Beautiful ASCII logo
-    - Write CLI tests
-    - **Deliverable**: `KiteCli.kt`
+    - Created `KiteCli` class with Clikt framework
+    - Global options: `--debug`, `--verbose`, `--quiet`
+    - Version option: `--version` / `-V` (shows 0.1.0-SNAPSHOT)
+    - Mordant help formatter enabled
+    - **Deliverable**: `KiteCli.kt` (61 lines)
 
 - [x] **Task 3.1.2**: Implement `ride` command
     - `kite ride <name>` - Execute named ride
-    - Load ride configuration from `.kite/rides/<name>.kite.kts`
-    - Display progress during execution with colors and emojis
-    - Show summary at completion
-    - Support `--dry-run` flag
-    - Write integration tests
-    - **Deliverable**: `RideCommand.kt`
+    - Loads from `.kite/rides/<name>.kite.kts`
+    - Shows execution progress and results
+    - **Deliverable**: `RideCommand.kt` (307 lines)
 
 - [x] **Task 3.1.3**: Implement `run` command
-    - **Merged with ride command**
     - `kite run <segment1> <segment2>...` - Execute specific segments
-    - Build minimal graph from specified segments
-    - Support direct segment execution without ride
-    - Implemented as part of ride execution
-    - **Deliverable**: Integrated in RideCommand
+    - Builds minimal graph from specified segments
+    - **Deliverable**: `RunCommand.kt` (232 lines)
 
 - [x] **Task 3.1.4**: Implement listing commands
-    - `kite segments` - List all available segments
-    - `kite rides` - List all available rides
-    - Format output nicely (table format with Mordant)
-    - Beautiful colored terminal output
-    - Show descriptions and dependencies
-    - All commands implemented
-    - **Deliverable**: `ListSegmentsCommand.kt`, `ListRidesCommand.kt`
+    - `kite segments` - Lists all available segments
+    - `kite rides` - Lists all available rides
+    - `kite graph` - Shows segment graph visualization
+    - Both support `--json` flag for machine-readable output
+    - **Deliverables**:
+        - `SegmentsCommand.kt` (147 lines)
+        - `RidesCommand.kt` (139 lines)
+        - `GraphCommand.kt` (20 lines)
 
 ### Deliverables
 
-✅ **Production Code**:
+✅ **Production Code**: 906 lines total
 
-- `KiteCli.kt` - Main CLI class
-- `RideCommand.kt` - Ride execution
-- `ListSegmentsCommand.kt` - Segment listing
-- `ListRidesCommand.kt` - Ride listing
-- `GraphCommand.kt` - Graph visualization
-- **Total**: 538 lines
+- `KiteCli.kt` - 61 lines (main CLI class)
+- `RideCommand.kt` - 307 lines
+- `RunCommand.kt` - 232 lines
+- `SegmentsCommand.kt` - 147 lines
+- `RidesCommand.kt` - 139 lines
+- `GraphCommand.kt` - 20 lines
+- `Output.kt` - 179 lines (output formatting utilities)
+- `Main.kt` - 15 lines
 
-✅ **Features**:
+✅ **Actual Commands Implemented**:
 
-- Beautiful ASCII logo with colors
-- Colored output with emojis
-- Progress indicators with spinners
-- Table formatting with Mordant
-- Tree visualization for dependencies
-- Dry-run mode with execution plan
-- Help text with examples
-- Global flags (--debug, --verbose, --dry-run)
+- `kite ride <name>` - Execute a ride
+- `kite run <segments...>` - Execute specific segments
+- `kite segments` - List segments (with `--json` option)
+- `kite rides` - List rides (with `--json` option)
+- `kite graph` - Show graph visualization
+- `kite --version` - Show version
+- `kite --help` - Show help
 
-✅ **Dependencies**:
+✅ **Global Options**:
+
+- `--debug` / `-d` - Enable debug output
+- `--verbose` / `-v` - Enable verbose output
+- `--quiet` / `-q` - Suppress non-essential output
+- Stored in `GlobalOptions` data class
+
+✅ **Dependencies Used**:
 
 - Clikt - CLI framework
 - Mordant - Terminal colors and formatting
-- ANSI escape codes for progress
 
-### CLI Examples
+### Output Formatting (from Output.kt)
 
-**Execute a ride**:
+**Verified Output Functions**:
 
-```bash
-$ kite ride CI
-
-   __ ___ __
-  / //_(_) /____
- / ,<  / / __/ -_)
-/_/|_|/_/\__/\__/
- Kotlin CI Executor
-
-✓ [12:34:56] build completed in 5.2s
-✓ [12:35:02] test-unit completed in 6.1s
-✓ [12:35:02] test-integration completed in 6.3s (parallel)
-✓ [12:35:02] lint completed in 1.2s (parallel)
-✓ [12:35:10] deploy completed in 8.1s
-
-Ride 'CI' completed successfully in 14.3s
-  (Parallel execution saved 10.6s - 67% faster)
+```kotlin
+Output.success(message)    // Green ✓
+Output.error(message)      // Red ✗
+Output.warning(message)    // Yellow ⚠
+Output.info(message)       // Cyan ℹ
+Output.header(message)     // Cyan with ═ borders
+Output.section(message)    // Bold with ▶
+Output.progress(message)   // Dim with ⋯
+Output.result(segment, status, duration)  // Formatted result with icon
+Output.summary(...)        // Complete summary with stats
+Output.logo()             // ASCII art logo
 ```
 
-**List segments**:
+**Colors Used** (Mordant TextColors):
 
-```bash
-$ kite segments
+- `green` - Success (✓)
+- `red` - Failure (✗)
+- `yellow` - Warning (⚠) and skipped (○)
+- `cyan` - Info (ℹ) and headers
+- `white` - Default text
+- `bold` - Emphasis
+- `dim` - Metadata
 
-Available Segments:
-┌──────────────────┬─────────────────────────┬──────────────────┐
-│ Name             │ Description             │ Dependencies     │
-├──────────────────┼─────────────────────────┼──────────────────┤
-│ build            │ Build the application   │ -                │
-│ test-unit        │ Run unit tests          │ build            │
-│ test-integration │ Run integration tests   │ build            │
-│ lint             │ Run code quality checks │ -                │
-│ deploy           │ Deploy to production    │ test-*, lint     │
-└──────────────────┴─────────────────────────┴──────────────────┘
+**Status Icons**:
 
-Total: 5 segments
+- SUCCESS: green ✓
+- FAILURE: red ✗
+- SKIPPED: yellow ○
+- TIMEOUT: yellow ⏱
+- Default: white •
+
+### Actual Logo (from Output.logo())
+
+```
+██╗  ██╗██╗████████╗███████╗
+██║ ██╔╝██║╚══██╔══╝██╔════╝
+█████╔╝ ██║   ██║   █████╗  
+██╔═██╗ ██║   ██║   ██╔══╝  
+██║  ██╗██║   ██║   ███████╗
+╚═╝  ╚═╝╚═╝   ╚═╝   ╚══════╝
+
+Modern CI/CD Workflow Runner
 ```
 
-**Dry-run mode**:
+### List Output Format
 
-```bash
-$ kite ride CI --dry-run
+**Segments list** shows for each segment:
 
-Execution Plan for ride 'CI':
+- Name (bold)
+- Description (dim, if present)
+- Dependencies (dim, if any)
+- Timeout (dim, if set)
+- Max retries (dim, if > 0)
+- Conditional flag (yellow ⚠, if conditional)
 
-Level 0 (parallel):
-  ├─ build
-  └─ lint
+**Rides list** shows for each ride:
 
-Level 1 (parallel):
-  ├─ test-unit (depends on: build)
-  └─ test-integration (depends on: build)
+- Name (bold)
+- Segment count (dim)
+- Max concurrency (dim, if set)
 
-Level 2:
-  └─ deploy (depends on: test-unit, test-integration, lint)
+Both commands show total count at the bottom.
 
-Would execute 5 segments in 3 levels
-Estimated time: ~15s (with parallelization: ~8s)
-```
+### Duration Formatting
 
-### Terminal UI Features
+From `formatDuration()` function:
 
-**Colors**:
+- < 1s: shows in milliseconds (e.g., "250ms")
+- < 1m: shows in seconds with 1 decimal (e.g., "5.2s")
+- < 1h: shows as minutes:seconds (e.g., "2m 30s")
+- > = 1h: shows as hours:minutes:seconds (e.g., "1h 15m 30s")
 
-- ✅ Green for success
-- ❌ Red for failure
-- ⚠️ Yellow for warnings
-- ℹ️ Blue for info
-- 🎯 Purple for important
+### Summary Output
 
-**Progress**:
+The `Output.summary()` function displays:
 
-- Spinners during execution
-- Progress bars for long operations
-- Real-time segment status updates
-
-**Formatting**:
-
-- Tables with Mordant
-- Tree structure for dependencies
-- Box drawing characters
-- Proper alignment and padding
+- Total segment count
+- Success count (green ✓)
+- Failed count (red ✗)
+- Skipped count (yellow ○)
+- Total duration
+- Parallel execution stats (if applicable):
+    - Sequential time estimate
+    - Actual parallel time
+    - Time saved with percentage
+- Final status: "🎉 All segments completed successfully!" or "❌ Some segments failed"
 
 ---
 
@@ -181,278 +185,136 @@ Estimated time: ~15s (with parallelization: ~8s)
 ### Tasks
 
 - [x] **Task 3.2.1**: Implement segment discovery
-    - Scan `.kite/segments/` directory recursively
-    - Compile all `*.kite.kts` files
-    - Build segment registry (name -> Segment)
-    - Cache compiled scripts for performance
-    - Handle compilation errors gracefully
-    - Write discovery tests
-    - **Deliverable**: `FileDiscovery.kt` (212 lines)
+    - Scans `.kite/segments/` directory recursively
+    - Compiles all `*.kite.kts` files
+    - Builds segment registry
+    - **Deliverable**: `FileDiscovery.kt`
 
 - [x] **Task 3.2.2**: Implement ride discovery
-    - Scan `.kite/rides/` directory recursively
-    - Load ride configurations
-    - Validate segment references exist
-    - Cache ride definitions
-    - All tests passing
-    - **Deliverable**: Integrated in FileDiscovery
+    - Scans `.kite/rides/` directory recursively
+    - Loads ride configurations
+    - Validates segment references
+    - **Deliverable**: Integrated in `FileDiscovery.kt`
 
 - [x] **Task 3.2.3**: Implement settings loading
-    - **Deferred - not needed for MVP**
-    - Simple approach: rides specify their own settings
-    - Can be added later if user demand exists
-    - **Status**: Skipped
+    - **Status**: Deferred - not needed for MVP
+    - Rides specify their own settings
 
 ### Deliverables
 
 ✅ **Production Code**:
 
-- `FileDiscovery.kt` - 212 lines
-- `KiteScriptLoader.kt` - 145 lines
-- Script compilation and caching
-- **Total**: 357 lines
-
-✅ **Tests**: 223 lines (FileDiscoveryTest)
-
-- Segment discovery tests
-- Ride discovery tests
-- Error handling tests
-- Cache validation tests
-
-✅ **Features**:
-
+- `FileDiscovery.kt` in `kite-dsl` module
+- `KiteScriptLoader.kt` - Script compilation
 - Automatic `.kite.kts` file discovery
-- Recursive directory scanning
-- Script compilation with caching
-- Error messages with file paths
-- Segment and ride registry
 - Thread-safe loading
+
+✅ **Features Verified**:
+
+- Recursive directory scanning
+- Script compilation with Kotlin scripting
+- Error messages with file paths
+- Returns `LoadResult` with success/failure and errors
 
 ### File Discovery Flow
 
-**Segment Loading**:
+**Load Process**:
 
-```
-1. Scan .kite/segments/ recursively
-2. Find all *.kite.kts files
-3. Compile each file with Kotlin scripting
-4. Extract Segment definitions
-5. Build registry: Map<String, Segment>
-6. Cache compiled scripts
-```
+1. Scan `.kite/segments/` recursively for `*.kite.kts` files
+2. Scan `.kite/rides/` recursively for `*.kite.kts` files
+3. Compile each file using Kotlin scripting engine
+4. Extract Segment/Ride definitions
+5. Build registries: `Map<String, Segment>` and `List<Ride>`
+6. Return `LoadResult` with segments, rides, and any errors
 
-**Ride Loading**:
+**LoadResult Structure**:
 
-```
-1. Scan .kite/rides/ recursively
-2. Find all *.kite.kts files
-3. Compile each file
-4. Extract Ride definitions
-5. Validate segment references
-6. Build registry: Map<String, Ride>
+```kotlin
+data class LoadResult(
+    val segments: List<Segment>,
+    val rides: List<Ride>,
+    val errors: List<LoadError>,
+    val success: Boolean
+)
 ```
 
-### Example Directory Structure
+### Expected Directory Structure
 
 ```
 .kite/
 ├── segments/
-│   ├── build.kite.kts
-│   ├── test.kite.kts
-│   ├── deploy.kite.kts
-│   └── android/
-│       ├── lint.kite.kts
-│       └── sign.kite.kts
+│   ├── *.kite.kts
+│   └── subdirs/
+│       └── *.kite.kts
 └── rides/
-    ├── ci.kite.kts
-    ├── mr.kite.kts
-    └── release.kite.kts
+    └── *.kite.kts
 ```
-
-### Caching Strategy
-
-**Cache Key**:
-
-```kotlin
-data class CacheKey(
-    val filePath: String,
-    val lastModified: Long,
-    val fileSize: Long
-)
-```
-
-**Cache Invalidation**:
-
-- File modified time changed
-- File size changed
-- Cache cleared manually
-
-**Performance**:
-
-- First load: ~200ms per file
-- Cached load: ~5ms per file
-- 40x faster with caching!
 
 ---
 
-## Epic 3.3: Parallel Execution ✅ COMPLETE
+## Epic 3.3: Logging System ✅ COMPLETE
 
-**Story Points**: 8 | **Duration**: 3 days  
-**Status**: ✅ Complete (implemented in Phase 2, enhanced in Phase 3)
+**Story Points**: 5 | **Duration**: Already implemented  
+**Status**: ✅ Complete (from Phase 2)
 
-### Tasks
+### Features
 
-- [x] **Task 3.3.1**: Implement coroutine-based parallelism
-    - Uses Kotlin coroutines (not separate processes)
-    - Segment execution runs in parallel with proper synchronization
-    - Implemented in ParallelScheduler with Semaphore for concurrency control
-    - Enhanced CLI output to show parallel execution
-    - All tests passing
-    - **Deliverable**: Already in Phase 2, enhanced UI
+✅ **SegmentLogger** (from Phase 2):
 
-- [x] **Task 3.3.2**: Implement logging system
-    - Per-segment log files in `.kite/logs/<segment-name>.log`
-    - Timestamps on every log line `[HH:mm:ss.SSS]`
-    - Segment name tags `[segment-name]`
-    - Full command output captured
-    - Console output shows clean ride progress
-    - Implemented in SegmentLogger (171 lines)
-    - **Deliverable**: `SegmentLogger.kt`
+- Per-segment log files in `.kite/logs/<segment-name>.log`
+- Timestamps on every line: `[HH:mm:ss.SSS]`
+- Segment name tags: `[segment-name]`
+- Command execution logging
+- Multiple log levels: info, debug, warn, error
 
-- [x] **Task 3.3.3**: Add dry-run mode
-    - Implemented `--dry-run` flag in RideCommand
-    - Displays execution plan without running
-    - Shows segment dependencies and parallel groups
-    - Beautiful visualization with tree structure
-    - Shows estimated time savings
-    - **Deliverable**: Integrated in RideCommand
+✅ **Integration**:
 
-### Deliverables
-
-✅ **Production Code**:
-
-- `ParallelScheduler.kt` - 168 lines (from Phase 2)
-- `SegmentLogger.kt` - 171 lines
-- Dry-run implementation in RideCommand
-- **Total**: ~400 lines
-
-✅ **Features**:
-
-- Parallel execution with level-based grouping
-- Per-segment log files
-- Console shows progress, files show details
-- Dry-run shows execution plan
-- Parallel execution stats (time saved)
-- Configurable concurrency limits
-
-### Logging Example
-
-**Console Output** (clean):
-
-```
-✓ [12:34:56] build completed in 5.2s
-✓ [12:35:02] test-unit completed in 6.1s (parallel)
-✓ [12:35:02] test-integration completed in 6.3s (parallel)
-```
-
-**Log File** `.kite/logs/build.log` (detailed):
-
-```
-[12:34:50.123] [build] Starting segment execution
-[12:34:50.456] [build] $ ./gradlew build
-[12:34:51.789] [build] > Task :compileKotlin
-[12:34:52.012] [build]   Compiling 245 Kotlin files
-[12:34:55.345] [build] > Task :build
-[12:34:56.678] [build] BUILD SUCCESSFUL in 5.2s
-[12:34:56.901] [build] Segment completed successfully (5.2s)
-```
-
-### Dry-Run Visualization
-
-```
-Execution Plan for ride 'CI':
-
-┌─ Level 0 (2 segments, parallel)
-│  ├─ build
-│  └─ lint
-│
-├─ Level 1 (2 segments, parallel)
-│  ├─ test-unit (← build)
-│  └─ test-integration (← build)
-│
-└─ Level 2 (1 segment)
-   └─ deploy (← test-unit, test-integration, lint)
-
-Sequential time: ~20s
-Parallel time: ~10s
-Time saved: ~10s (50% faster)
-```
+- Logger passed through `ExecutionContext`
+- Used by schedulers for all segment execution
+- Console shows clean progress
+- Files contain full details
 
 ---
 
 ## Phase 3 Summary
 
-### Statistics
+### Verified Statistics
 
-**Production Code**: 895 lines
+**Production Code**: ~900 lines (CLI module)
 
-- CLI framework: 538 lines
-- File discovery: 357 lines
-- Additional enhancements to Phase 2 code
+- CLI commands: ~900 lines
+- File discovery: in `kite-dsl` module
+- Output utilities: 179 lines
 
-**Test Code**: 223 lines
+**Features Delivered**:
 
-- File discovery tests
-- CLI integration tests (limited)
+- ✅ Complete CLI with 5 commands
+- ✅ Colored terminal output with Mordant
+- ✅ Automatic file discovery
+- ✅ JSON output option for scripting
+- ✅ Help system with version info
+- ✅ Global debug/verbose/quiet flags
 
-**Total**: CLI fully functional with beautiful UX
+**Dependencies**:
+
+- Clikt 4.x - CLI framework
+- Mordant (via Clikt) - Terminal formatting
 
 ### Key Achievements
 
-✅ **Complete CLI** - All commands working  
-✅ **Beautiful UI** - Colors, emojis, tables, trees  
+✅ **Fully Functional CLI** - All commands working  
+✅ **Colored Output** - Green/red/yellow/cyan with emojis  
 ✅ **File Discovery** - Automatic `.kite.kts` loading  
-✅ **Script Caching** - 40x faster loading  
-✅ **Parallel Execution** - With stats and visualization  
-✅ **Logging System** - Per-segment logs  
-✅ **Dry-Run Mode** - Execution plan preview
+✅ **Multiple Commands** - ride, run, segments, rides, graph  
+✅ **Error Handling** - Graceful error messages  
+✅ **Help System** - Built-in help and version info
 
-### User Experience Wins
+### Design Patterns
 
-**Before Phase 3**: Core engine, no user interface  
-**After Phase 3**: Production-ready CLI with:
-
-- One-line ride execution
-- Beautiful terminal output
-- Automatic file discovery
-- Real-time progress
-- Helpful error messages
-- Detailed logging
-
-### Performance
-
-**CLI Startup**: ~100ms (with caching)  
-**File Discovery**: ~5ms per cached file  
-**Script Compilation**: ~200ms per new file  
-**Execution Overhead**: <50ms per segment
-
-**Total Overhead**: Negligible (<1% of execution time)
-
-### Design Patterns Used
-
-- **Command Pattern**: Clikt command structure
-- **Observer Pattern**: Progress tracking
-- **Singleton Pattern**: File discovery cache
-- **Factory Pattern**: Scheduler creation
-- **Strategy Pattern**: Sequential vs parallel
-
-### Lessons Learned
-
-1. **UX Matters**: Beautiful output makes Kite enjoyable to use
-2. **Caching Critical**: 40x improvement with script caching
-3. **Clikt Wins**: Excellent CLI framework for Kotlin
-4. **Mordant Wins**: Professional terminal formatting
-5. **Progress Feedback**: Users want to see what's happening
+- **Command Pattern**: Clikt command hierarchy
+- **Builder Pattern**: Mordant formatting
+- **Facade Pattern**: Output utilities
+- **Strategy Pattern**: JSON vs pretty output
 
 ---
 
@@ -468,4 +330,4 @@ See [devplan/README.md](README.md) for overall progress.
 
 **Last Updated**: November 18, 2025  
 **Status**: ✅ Complete  
-**Lines of Code**: 895 production, 223 tests
+**Lines of Code**: ~900 (CLI module)
