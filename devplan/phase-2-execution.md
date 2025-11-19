@@ -8,9 +8,8 @@
 
 ## Overview
 
-Phase 2 implements the core execution engine of Kite. This includes building dependency graphs, implementing topological
-sort, creating schedulers for sequential and parallel execution, and providing basic runtime capabilities like process
-execution.
+Phase 2 implements the core execution engine: dependency graphs, topological sort, schedulers for sequential and
+parallel execution, and runtime capabilities.
 
 ---
 
@@ -19,137 +18,39 @@ execution.
 **Story Points**: 8 | **Duration**: 3 days  
 **Status**: ✅ Complete
 
-### Tasks
+### Actual Implementation
 
-- [x] **Task 2.1.1**: Implement DAG builder
-    - Create `SegmentGraph` class
-    - Implement dependency resolution algorithm
-    - Detect and report circular dependencies using DFS
-    - Build adjacency list representation
-    - Calculate reachability for validation
-    - Write unit tests with various graph topologies
-    - **Deliverable**: `SegmentGraph.kt`
+✅ **Graph Files** (kite-runtime/graph/):
 
-- [x] **Task 2.1.2**: Implement topological sort
-    - Implement Kahn's algorithm for topological sorting
-    - Handle parallel execution groups (same level)
-    - Calculate execution levels for visualization
-    - Return sorted segments with level information
-    - Write unit tests
-    - **Deliverable**: Topological sort in `SegmentGraph.kt`
+- `SegmentGraph.kt` - 253 lines
+- `TopologicalSort.kt` - 192 lines
+- **Total**: 445 lines
 
-- [x] **Task 2.1.3**: Implement graph validation
-    - **Merged with Task 2.1.1**
-    - Validate all segment references exist
-    - Check for unreachable segments
-    - Verify no self-dependencies
-    - Validate parallel block constraints
-    - Write validation tests
-    - **Deliverable**: Validation logic in `SegmentGraph.kt`
+### Verified Features
 
-### Deliverables
+From `SegmentGraph.kt`:
 
-✅ **Production Code**:
-
-- `SegmentGraph.kt` - 440 lines
-- Complete graph theory implementation
-
-✅ **Tests**: 614 lines (45 tests)
-
-- Circular dependency detection
-- Topological sort verification
+- DAG (Directed Acyclic Graph) construction
+- Dependency resolution
+- Cycle detection using DFS
 - Unreachable segment detection
 - Self-dependency validation
-- Complex graph topologies
+- Adjacency list representation
 
-✅ **Algorithms Implemented**:
+From `TopologicalSort.kt`:
 
-- **Kahn's Algorithm**: Topological sorting
-- **DFS**: Cycle detection
-- **Reachability Analysis**: Validate all segments reachable
-- **Level Calculation**: For parallel execution grouping
+- Kahn's algorithm implementation
+- Execution level calculation
+- Parallel execution grouping
+- In-degree calculation
 
-✅ **Features**:
+### Algorithms Implemented
 
-- Detects circular dependencies
-- Reports missing segment references
-- Identifies unreachable segments
-- Groups segments by execution level
-- Thread-safe immutable graph
+**Cycle Detection**: Depth-first search with recursion stack
 
-### Example Usage
+**Topological Sort**: Kahn's algorithm with queue
 
-```kotlin
-val graph = SegmentGraph(
-    segments = listOf(
-        segment("build"),
-        segment("test") { dependsOn("build") },
-        segment("deploy") { dependsOn("test") }
-    )
-)
-
-// Validate graph
-val errors = graph.validate()
-if (errors.isNotEmpty()) {
-    println("Graph validation failed: $errors")
-}
-
-// Get topological order
-val sorted = graph.topologicalSort()
-// Returns: [build, test, deploy]
-
-// Get execution levels (for parallel execution)
-val levels = graph.getExecutionLevels()
-// Returns: [[build], [test], [deploy]]
-```
-
-### Graph Theory Implementation
-
-**Adjacency List Representation**:
-
-```kotlin
-private val adjacencyList: Map<String, List<String>>
-```
-
-**Cycle Detection (DFS)**:
-
-```kotlin
-fun detectCycles(): List<String> {
-    val visited = mutableSetOf<String>()
-    val recursionStack = mutableSetOf<String>()
-    
-    for (segment in segments) {
-        if (hasCycle(segment, visited, recursionStack)) {
-            return buildCyclePath(segment)
-        }
-    }
-    return emptyList()
-}
-```
-
-**Topological Sort (Kahn's Algorithm)**:
-
-```kotlin
-fun topologicalSort(): List<Segment> {
-    val inDegree = calculateInDegree()
-    val queue = segments.filter { inDegree[it.name] == 0 }
-    val result = mutableListOf<Segment>()
-    
-    while (queue.isNotEmpty()) {
-        val current = queue.removeFirst()
-        result.add(current)
-        
-        for (dependent in adjacencyList[current.name] ?: emptyList()) {
-            inDegree[dependent]--
-            if (inDegree[dependent] == 0) {
-                queue.add(getSegment(dependent))
-            }
-        }
-    }
-    
-    return result
-}
-```
+**Level Calculation**: For parallel execution grouping
 
 ---
 
@@ -158,146 +59,48 @@ fun topologicalSort(): List<Segment> {
 **Story Points**: 10 | **Duration**: 4 days  
 **Status**: ✅ Complete
 
-### Tasks
+### Actual Implementation
 
-- [x] **Task 2.2.1**: Implement sequential scheduler
-    - Create `SegmentScheduler` interface
-    - Implement `SequentialScheduler`
-    - Execute segments in topological order
-    - Handle segment skipping (conditions)
-    - Track execution state
-    - Integrate artifact management
-    - Execute lifecycle hooks
-    - Write tests
-    - **Deliverable**: `SequentialScheduler.kt` (212 lines)
+✅ **Scheduler Files** (kite-runtime/scheduler/):
 
-- [x] **Task 2.2.2**: Implement parallel scheduler
-    - Implement `ParallelScheduler` using Kotlin coroutines
-    - Add `maxConcurrency` support with Semaphore
-    - Implement parallel block execution (same-level segments)
-    - Handle failure modes (fail-fast vs continue)
-    - Respect dependencies across levels
-    - Integrate artifact management
-    - Execute lifecycle hooks
-    - Write concurrency tests
-    - **Deliverable**: `ParallelScheduler.kt` (168 lines)
+- `SegmentScheduler.kt` - 294 lines (includes sequential scheduler)
+- `ParallelScheduler.kt` - 248 lines
+- **Total**: 542 lines
 
-- [x] **Task 2.2.3**: Implement execution tracking
-    - **Merged with Tasks 2.2.1 & 2.2.2**
-    - Create `ExecutionTracker` for monitoring progress
-    - Track segment states (pending, running, complete, failed)
-    - Implement execution time measurement
-    - Add segment result aggregation in `SchedulerResult`
-    - Write tests
-    - **Deliverable**: Integrated in schedulers
+### Verified Features
 
-### Deliverables
+From `SegmentScheduler.kt`:
 
-✅ **Production Code**:
-
-- `SequentialScheduler.kt` - 212 lines
-- `ParallelScheduler.kt` - 168 lines
-- `SegmentScheduler.kt` - Interface
-- `SchedulerResult.kt` - Result aggregation
-- **Total**: 450 lines
-
-✅ **Tests**: 710 lines (33 tests)
-
-- Sequential execution tests
-- Parallel execution tests
-- Dependency ordering tests
-- Failure handling tests
-- Concurrency limit tests
-- Lifecycle hook execution tests
-
-✅ **Features**:
-
-- Sequential execution (simple, predictable)
-- Parallel execution (fast, efficient)
-- Configurable concurrency limits
-- Fail-fast or continue-on-error modes
-- Artifact passing between segments
+- `SegmentScheduler` interface
+- Sequential scheduler implementation
+- Execution tracking
+- Artifact integration (inputs/outputs)
 - Lifecycle hook execution
-- Execution time tracking
-- Thread-safe with coroutines
+- Conditional segment skipping
 
-### Sequential Scheduler
+From `ParallelScheduler.kt`:
 
-**Execution Flow**:
+- Kotlin coroutines-based parallelism
+- Semaphore for concurrency control
+- Level-based parallel execution
+- Dependency respect across levels
+- Failure handling
+- Artifact passing between segments
 
-1. Get topological order from graph
-2. Execute each segment in order
-3. Check conditions (skip if false)
-4. Run execute {} block
-5. Run outputs {} block (artifacts)
-6. Execute lifecycle hooks
-7. Track results
+### Scheduler Capabilities
 
-**Example**:
+✅ **Sequential Execution**:
 
-```kotlin
-val scheduler = SequentialScheduler(graph, artifactManager, logger)
-val result = scheduler.execute(context)
+- Topological order execution
+- One segment at a time
+- Simple and predictable
 
-// Segments execute: A -> B -> C (in order)
-```
+✅ **Parallel Execution**:
 
-### Parallel Scheduler
-
-**Execution Flow**:
-
-1. Get execution levels from graph
-2. For each level:
-    - Launch coroutines for all segments in level
-    - Apply concurrency limit with Semaphore
-    - Wait for all to complete
-3. Move to next level
-4. Aggregate results
-
-**Concurrency Control**:
-
-```kotlin
-val semaphore = Semaphore(maxConcurrency)
-
-coroutineScope {
-    for (segment in level) {
-        launch {
-            semaphore.acquire()
-            try {
-                executeSegment(segment)
-            } finally {
-                semaphore.release()
-            }
-        }
-    }
-}
-```
-
-**Example**:
-
-```kotlin
-val scheduler = ParallelScheduler(
-    graph = graph,
-    artifactManager = artifactManager,
-    maxConcurrency = 4,
-    logger = logger
-)
-
-val result = scheduler.execute(context)
-
-// Level 0: [A] executes
-// Level 1: [B, C, D] execute in parallel (max 4)
-// Level 2: [E] executes
-```
-
-### Performance Benefits
-
-**Parallel execution stats** are calculated and displayed:
-
-```
-✓ Parallel execution completed in 5.2s
-  (Sequential would take ~15.8s, saved 10.6s - 67% faster)
-```
+- Level-based grouping
+- Configurable max concurrency
+- Semaphore-based control
+- Respects dependencies
 
 ---
 
@@ -306,215 +109,99 @@ val result = scheduler.execute(context)
 **Story Points**: 8 | **Duration**: 3 days  
 **Status**: ✅ Complete
 
-### Tasks
+### Actual Implementation
 
-- [x] **Task 2.3.1**: Implement process executor
-    - Create `ProcessExecutor` class in `kite-runtime`
-    - Implement `exec()` function with command execution
-    - Add timeout support using ProcessHandle and coroutines
-    - Capture stdout/stderr with stream readers
-    - Cross-platform support (Windows/Unix)
-    - Write tests with real processes
-    - **Deliverable**: `ProcessExecutor.kt` (234 lines)
+✅ **Process Execution** (kite-runtime/process/):
 
-- [x] **Task 2.3.2**: Implement segment execution context
-    - Populate `ExecutionContext` from environment
-    - Add Git information detection (deferred to Phase 4)
-    - Implement context isolation per segment
-    - Add helper methods: `exec()`, `env()`, `secret()`
-    - Write tests
-    - **Deliverable**: `ExecutionContextExtensions.kt` (116 lines)
+- `ProcessExecutor.kt` - 243 lines
+- `ProcessExecutionProviderImpl.kt` - 83 lines
+- **Total**: 326 lines
 
-- [x] **Task 2.3.3**: Implement basic error handling
-    - Add try-catch around segment execution
-    - Implement retry logic (basic support in Segment model)
-    - Add `onFailure` callback support (lifecycle hooks)
-    - Propagate errors with detailed messages
-    - Write error handling tests
-    - **Deliverable**: Integrated in schedulers
+✅ **Logging** (kite-runtime/logging/):
 
-### Deliverables
+- `SegmentLogger.kt` - 287 lines
 
-✅ **Production Code**:
+### Verified Features
 
-- `ProcessExecutor.kt` - 234 lines
-- `ExecutionContextExtensions.kt` - 116 lines
-- **Total**: 350 lines
+From `ProcessExecutor.kt`:
 
-✅ **Tests**: 198 lines (19 tests)
-
-- Command execution tests
-- Timeout tests (fixed flaky tests)
-- Error handling tests
-- Stream capture tests
-- Cross-platform tests
-
-✅ **Features**:
-
-- Cross-platform process execution
-- Timeout support with proper cancellation
-- Stdout/stderr capture
+- Cross-platform command execution (Windows/Unix)
+- Timeout support with coroutines
+- Stream capture (stdout/stderr)
+- Exit code handling
 - Working directory support
 - Environment variable passing
-- Exit code handling
-- Proper error messages
+- Proper process cleanup
 
-### Process Execution
+From `SegmentLogger.kt`:
 
-**Simple Command**:
+- Per-segment log files (`.kite/logs/<segment>.log`)
+- Timestamp formatting `[HH:mm:ss.SSS]`
+- Segment name prefixes `[segment-name]`
+- Multiple log levels (info, debug, warn, error)
+- Command execution logging
+- Output capture
+- Secret masking integration
 
-```kotlin
-segment("build") {
-    execute {
-        exec("./gradlew", "build")
-    }
-}
-```
+### Runtime Integration
 
-**With Timeout**:
+✅ **ExecutionContext Extensions** (kite-core):
 
-```kotlin
-segment("long-test") {
-    timeout = 30.minutes
-    
-    execute {
-        exec("./gradlew", "integrationTest", timeout = 30.minutes)
-    }
-}
-```
-
-**With Working Directory**:
-
-```kotlin
-segment("frontend-build") {
-    execute {
-        exec("npm", "install", workingDir = "frontend/")
-        exec("npm", "run", "build", workingDir = "frontend/")
-    }
-}
-```
-
-**With Environment Variables**:
-
-```kotlin
-segment("deploy") {
-    execute {
-        exec("kubectl", "apply", "-f", "k8s/",
-            env = mapOf("KUBECONFIG" -> "/path/to/config"))
-    }
-}
-```
-
-### ProcessExecutor Implementation
-
-**Key Features**:
-
-```kotlin
-class ProcessExecutor(
-    private val logger: SegmentLogger
-) {
-    suspend fun exec(
-        command: String,
-        vararg args: String,
-        workingDir: String? = null,
-        env: Map<String, String> = emptyMap(),
-        timeout: Duration = Duration.INFINITE
-    ): String {
-        val process = startProcess(command, args, workingDir, env)
-        
-        // Capture streams in parallel
-        val stdout = captureStream(process.inputStream)
-        val stderr = captureStream(process.errorStream)
-        
-        // Wait with timeout
-        val completed = withTimeoutOrNull(timeout) {
-            process.waitFor()
-        }
-        
-        if (completed == null) {
-            process.destroyForcibly()
-            throw TimeoutException("Command timed out after $timeout")
-        }
-        
-        // Check exit code
-        if (process.exitValue() != 0) {
-            throw CommandFailedException(stderr)
-        }
-        
-        return stdout
-    }
-}
-```
+- `exec()` - Execute command
+- `execOrNull()` - Execute with null on failure
+- File operations (20+ helpers)
+- Secret management
+- Environment variable access
 
 ---
 
 ## Phase 2 Summary
 
-### Statistics
+### Verified Statistics
 
-**Production Code**: 1,240 lines
+**Production Code**: 1,600 lines (kite-runtime)
 
-- Segment graph: 440 lines
-- Schedulers: 450 lines
-- Process executor: 350 lines
+- Graph: 445 lines (SegmentGraph + TopologicalSort)
+- Schedulers: 542 lines (Sequential + Parallel)
+- Process: 326 lines (ProcessExecutor + Provider)
+- Logging: 287 lines (SegmentLogger)
 
-**Test Code**: 1,522 lines
+**Test Code**: 1,632 lines (kite-runtime tests)
 
-- Graph tests: 614 lines (45 tests)
-- Scheduler tests: 710 lines (33 tests)
-- Executor tests: 198 lines (19 tests)
-
-**Total Tests**: 97 tests - all passing ✅
-
-**Test-to-Code Ratio**: 1.23:1 (excellent)
+**Test-to-Code Ratio**: 1.02:1 (excellent)
 
 ### Key Achievements
 
-✅ **Complete Graph Theory** - DAG, topological sort, cycle detection  
-✅ **Two Schedulers** - Sequential and parallel execution  
-✅ **Coroutine-based** - Efficient parallel execution  
+✅ **Complete Graph Theory** - DAG with cycle detection  
+✅ **Dual Schedulers** - Sequential and parallel  
+✅ **Coroutine-Based** - Efficient parallelism  
 ✅ **Process Execution** - Cross-platform with timeout  
-✅ **Artifact Integration** - Passing artifacts between segments  
-✅ **Lifecycle Hooks** - Integrated in execution flow  
-✅ **Thread-safe** - All concurrent operations safe
+✅ **Logging System** - Per-segment logs with masking  
+✅ **Artifact Integration** - inputs/outputs support  
+✅ **Lifecycle Hooks** - Integrated in execution
+
+### Design Patterns
+
+- **Strategy Pattern**: SegmentScheduler interface
+- **Coroutines**: Structured concurrency
+- **Semaphore**: Concurrency control
+- **Observer Pattern**: Execution tracking
+- **Builder Pattern**: Graph construction
 
 ### Performance Characteristics
 
-**Sequential Scheduler**:
-
-- Predictable execution order
-- Simple debugging
-- No concurrency overhead
-- Best for small pipelines
-
-**Parallel Scheduler**:
-
-- Up to 67% faster (measured in tests)
-- Configurable concurrency
-- Respects dependencies
-- Best for large pipelines
-
 **Process Execution**:
 
-- Startup overhead: ~10-50ms per process
-- Timeout accuracy: ±10ms
-- Stream capture: Real-time
+- Timeout accuracy with coroutines
+- Proper stream handling
+- No resource leaks
 
-### Design Patterns Used
+**Parallel Execution**:
 
-- **Strategy Pattern**: SegmentScheduler interface
-- **Observer Pattern**: Execution tracking
-- **Coroutines**: Parallel execution
-- **Semaphore**: Concurrency control
-- **Builder Pattern**: Graph construction
-- **Template Method**: Scheduler base logic
-
-### Lessons Learned
-
-1. **Flaky Tests**: Timing-based tests are unreliable - use behavior testing
-2. **Coroutines Win**: Much simpler than thread pools
-3. **Graph Theory**: Topological sort is essential for dependency resolution
-4. **Timeout Handling**: ProcessHandle + coroutines = reliable timeouts
+- Level-based grouping
+- Configurable concurrency
+- Respects dependencies
+- Efficient with Semaphore
 
 ---
 
@@ -530,4 +217,4 @@ See [devplan/README.md](README.md) for overall progress.
 
 **Last Updated**: November 18, 2025  
 **Status**: ✅ Complete  
-**Lines of Code**: 1,240 production, 1,522 tests
+**Lines of Code**: 1,600 production, 1,632 tests
