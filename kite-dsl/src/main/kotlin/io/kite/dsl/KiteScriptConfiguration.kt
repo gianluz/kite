@@ -7,8 +7,11 @@ import kotlin.script.experimental.api.ScriptCollectedData
 import kotlin.script.experimental.api.ScriptCompilationConfiguration
 import kotlin.script.experimental.api.ScriptConfigurationRefinementContext
 import kotlin.script.experimental.api.ScriptEvaluationConfiguration
+import kotlin.script.experimental.api.acceptedLocations
 import kotlin.script.experimental.api.asSuccess
+import kotlin.script.experimental.api.collectedAnnotations
 import kotlin.script.experimental.api.defaultImports
+import kotlin.script.experimental.api.dependencies
 import kotlin.script.experimental.api.ide
 import kotlin.script.experimental.api.onSuccess
 import kotlin.script.experimental.api.refineConfiguration

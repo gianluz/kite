@@ -11,6 +11,8 @@ import io.kite.core.FlowNode
 import io.kite.core.PlatformDetector
 import io.kite.core.Segment
 import io.kite.core.SegmentOverrides
+import io.kite.core.restoreFromManifest
+import io.kite.core.saveManifest
 import io.kite.dsl.FileDiscovery
 import io.kite.runtime.scheduler.ParallelScheduler
 import io.kite.runtime.scheduler.SequentialScheduler

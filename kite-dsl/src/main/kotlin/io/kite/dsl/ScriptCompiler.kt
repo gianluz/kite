@@ -4,10 +4,10 @@ import java.io.File
 import kotlin.script.experimental.api.CompiledScript
 import kotlin.script.experimental.api.EvaluationResult
 import kotlin.script.experimental.api.ResultWithDiagnostics
-import kotlin.script.experimental.api.ScriptDiagnostic
 import kotlin.script.experimental.api.SourceCode
 import kotlin.script.experimental.host.toScriptSource
 import kotlin.script.experimental.jvmhost.BasicJvmScriptingHost
+import kotlin.script.experimental.api.ScriptDiagnostic as KotlinScriptDiagnostic
 
 /**
  * Compiles and evaluates Kite scripts (.kite.kts files).
@@ -131,11 +131,12 @@ fun <T> ResultWithDiagnostics<T>.toScriptResult(): ScriptResult<T> {
                         message = report.message,
                         severity =
                             when (report.severity) {
-                                kotlin.script.experimental.api.ScriptDiagnostic.Severity.ERROR ->
+                                KotlinScriptDiagnostic.Severity.ERROR ->
                                     ScriptDiagnostic.Severity.ERROR
 
-                                kotlin.script.experimental.api.ScriptDiagnostic.Severity.WARNING ->
+                                KotlinScriptDiagnostic.Severity.WARNING ->
                                     ScriptDiagnostic.Severity.WARNING
+
                                 else -> ScriptDiagnostic.Severity.INFO
                             },
                         location = report.location,

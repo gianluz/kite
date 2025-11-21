@@ -3,6 +3,7 @@ package io.kite.core
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
+import java.io.FileNotFoundException
 import java.nio.file.FileAlreadyExistsException
 import java.nio.file.NotDirectoryException
 import java.nio.file.Path
@@ -29,7 +30,7 @@ class FileOperationsTest {
         val context = createContext(tempDir)
 
         // File.readText() throws FileNotFoundException, not NoSuchFileException
-        assertFailsWith<java.io.FileNotFoundException> {
+        assertFailsWith<FileNotFoundException> {
             context.readFile("nonexistent.txt")
         }
     }

@@ -2,6 +2,7 @@ package io.kite.core
 
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
+import java.util.Base64
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -71,7 +72,7 @@ class SecretMaskerTest {
         SecretMasker.registerSecret(secret, hint = "PASSWORD")
 
         // Base64 version should also be masked
-        val base64 = java.util.Base64.getEncoder().encodeToString(secret.toByteArray())
+        val base64 = Base64.getEncoder().encodeToString(secret.toByteArray())
         val text = "Authorization: Basic $base64"
         val masked = SecretMasker.mask(text, showHints = true)
 
