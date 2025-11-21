@@ -104,7 +104,8 @@ class GitHubActionsPlatformAdapter : PlatformAdapter {
             environment["GITHUB_EVENT_NAME"]?.takeIf { it == "pull_request" }?.let {
                 ref.split("/").getOrNull(2)
             }
-        // TODO: Detect release label from PR event payload
+        // Detect release label from PR event payload
+        // TODO: Implement PR event payload parsing
         val isRelease = false
         val workspace = environment["GITHUB_WORKSPACE"]?.let { Paths.get(it) } ?: Paths.get(".")
 
@@ -226,7 +227,8 @@ object PlatformDetector {
             GitLabCIPlatformAdapter(),
             GitHubActionsPlatformAdapter(),
             GenericPlatformAdapter(),
-            LocalPlatformAdapter(), // Local is always last (fallback)
+            // Local is always last (fallback)
+            LocalPlatformAdapter(),
         )
 
     /**

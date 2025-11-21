@@ -26,8 +26,10 @@ data class ArtifactManifestData(
 @Serializable
 data class ArtifactEntry(
     val name: String,
-    val relativePath: String, // Relative to artifacts directory
-    val type: String, // "file" or "directory"
+    // Relative to artifacts directory
+    val relativePath: String,
+    // "file" or "directory"
+    val type: String,
     val sizeBytes: Long,
     val createdAt: Long,
 )

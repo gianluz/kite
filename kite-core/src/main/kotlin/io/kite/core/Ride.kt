@@ -21,7 +21,8 @@ data class Ride(
     val maxConcurrency: Int? = null,
     val onSuccess: (suspend () -> Unit)? = null,
     val onFailure: (suspend (Throwable) -> Unit)? = null,
-    val onComplete: (suspend (Boolean) -> Unit)? = null, // Boolean = success
+    // Boolean = success
+    val onComplete: (suspend (Boolean) -> Unit)? = null,
 ) {
     init {
         require(name.isNotBlank()) { "Ride name cannot be blank" }

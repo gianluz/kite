@@ -1,7 +1,12 @@
 package io.kite.core
 
 import java.io.File
-import java.nio.file.*
+import java.nio.file.FileSystems
+import java.nio.file.FileVisitResult
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.SimpleFileVisitor
+import java.nio.file.StandardCopyOption
 import java.nio.file.attribute.BasicFileAttributes
 
 /**
@@ -9,9 +14,7 @@ import java.nio.file.attribute.BasicFileAttributes
  *
  * These functions provide convenient file manipulation capabilities
  * within segment execution blocks.
- */
-
-/**
+ *
  * Reads the entire contents of a file as a string.
  *
  * @param path Path to the file (relative to workspace or absolute)

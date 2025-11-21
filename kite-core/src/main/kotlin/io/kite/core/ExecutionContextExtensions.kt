@@ -8,9 +8,7 @@ import kotlin.time.Duration
  *
  * These functions will be implemented by the runtime module.
  * This file defines the API that segments can use.
- */
-
-/**
+ *
  * Placeholder for process execution.
  * The actual implementation will be provided by kite-runtime.
  */

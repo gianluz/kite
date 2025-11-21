@@ -31,9 +31,12 @@ data class Segment(
     val timeout: Duration? = null,
     val maxRetries: Int = 0,
     val retryDelay: Duration = Duration.ZERO,
-    val retryOn: List<String> = emptyList(), // Exception class names
-    val inputs: List<String> = emptyList(), // Input artifact names
-    val outputs: Map<String, String> = emptyMap(), // Output artifact name -> path
+    // Exception class names
+    val retryOn: List<String> = emptyList(),
+    // Input artifact names
+    val inputs: List<String> = emptyList(),
+    // Output artifact name -> path
+    val outputs: Map<String, String> = emptyMap(),
     val onSuccess: (suspend ExecutionContext.() -> Unit)? = null,
     val onFailure: (suspend ExecutionContext.(Throwable) -> Unit)? = null,
     val onComplete: (suspend ExecutionContext.(SegmentStatus) -> Unit)? = null,
