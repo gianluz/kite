@@ -1,8 +1,23 @@
 package io.kite.dsl
 
 import kotlinx.coroutines.runBlocking
-import kotlin.script.experimental.api.*
-import kotlin.script.experimental.dependencies.*
+import kotlin.script.experimental.api.ResultWithDiagnostics
+import kotlin.script.experimental.api.ScriptAcceptedLocation
+import kotlin.script.experimental.api.ScriptCollectedData
+import kotlin.script.experimental.api.ScriptCompilationConfiguration
+import kotlin.script.experimental.api.ScriptConfigurationRefinementContext
+import kotlin.script.experimental.api.ScriptEvaluationConfiguration
+import kotlin.script.experimental.api.asSuccess
+import kotlin.script.experimental.api.defaultImports
+import kotlin.script.experimental.api.ide
+import kotlin.script.experimental.api.onSuccess
+import kotlin.script.experimental.api.refineConfiguration
+import kotlin.script.experimental.api.with
+import kotlin.script.experimental.dependencies.CompoundDependenciesResolver
+import kotlin.script.experimental.dependencies.DependsOn
+import kotlin.script.experimental.dependencies.FileSystemDependenciesResolver
+import kotlin.script.experimental.dependencies.Repository
+import kotlin.script.experimental.dependencies.resolveFromScriptSourceAnnotations
 import kotlin.script.experimental.jvm.JvmDependency
 import kotlin.script.experimental.jvm.dependenciesFromCurrentContext
 import kotlin.script.experimental.jvm.jvm
@@ -121,7 +136,8 @@ object KiteScriptEvaluationConfiguration : ScriptEvaluationConfiguration({
 private val resolver by lazy {
     CompoundDependenciesResolver(
         FileSystemDependenciesResolver(),
-        IvyDependenciesResolver(), // Java 17 compatible!
+        // Java 17 compatible!
+        IvyDependenciesResolver(),
     )
 }
 

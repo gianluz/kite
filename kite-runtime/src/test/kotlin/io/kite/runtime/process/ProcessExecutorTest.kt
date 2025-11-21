@@ -95,7 +95,7 @@ class ProcessExecutorTest {
                     // Windows timeout command: timeout /t 1 = wait 1 second
                     executor.execute("timeout", "/t", "1", timeout = 0.5.seconds)
                 } else {
-                    // Unix sleep: sleep 1 = wait 1 second  
+                    // Unix sleep: sleep 1 = wait 1 second
                     executor.execute("sleep", "1", timeout = 0.5.seconds)
                 }
                 // If we reach here, the timeout didn't work
@@ -105,8 +105,8 @@ class ProcessExecutorTest {
                 // Verify it's a timeout error, not some other error
                 assertTrue(
                     e.message?.contains("timed out") == true ||
-                            e.message?.contains("timeout") == true,
-                    "Expected timeout error but got: ${e.message}"
+                        e.message?.contains("timeout") == true,
+                    "Expected timeout error but got: ${e.message}",
                 )
             } catch (e: Exception) {
                 // Catch any other exceptions (like coroutine cancellation issues)

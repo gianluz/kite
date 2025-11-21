@@ -260,7 +260,8 @@ data class SegmentResult(
  */
 data class SchedulerResult(
     val segmentResults: Map<String, SegmentResult>,
-    val executionTimeMs: Long = 0, // Actual wall-clock time for execution
+    // Actual wall-clock time for execution
+    val executionTimeMs: Long = 0,
 ) {
     val totalSegments: Int get() = segmentResults.size
     val successCount: Int get() = segmentResults.values.count { it.isSuccess }

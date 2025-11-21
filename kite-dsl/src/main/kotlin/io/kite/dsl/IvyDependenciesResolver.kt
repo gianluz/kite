@@ -11,8 +11,12 @@ import org.apache.ivy.plugins.resolver.IBiblioResolver
 import org.apache.ivy.util.DefaultMessageLogger
 import org.apache.ivy.util.Message
 import java.io.File
-import kotlin.script.experimental.api.*
-import kotlin.script.experimental.dependencies.*
+import kotlin.script.experimental.api.ResultWithDiagnostics
+import kotlin.script.experimental.api.SourceCode
+import kotlin.script.experimental.api.asSuccess
+import kotlin.script.experimental.api.makeFailureResult
+import kotlin.script.experimental.dependencies.ExternalDependenciesResolver
+import kotlin.script.experimental.dependencies.RepositoryCoordinates
 
 /**
  * Ivy-based dependency resolver that works with Java 17+.

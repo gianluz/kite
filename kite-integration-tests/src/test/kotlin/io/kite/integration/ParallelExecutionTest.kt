@@ -1,14 +1,12 @@
 package io.kite.integration
 
 import org.junit.jupiter.api.Test
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
  * Integration tests for parallel segment execution.
- * 
+ *
  * Uses deterministic approaches instead of timing-based assertions to avoid flakiness.
  */
 class ParallelExecutionTest : IntegrationTestBase() {
@@ -66,7 +64,7 @@ class ParallelExecutionTest : IntegrationTestBase() {
 
         result.assertSuccess()
         assertEquals(4, result.totalSegments)
-        
+
         // Verify all segments completed successfully
         result.assertOutputContains("Slow 1 done")
         result.assertOutputContains("Slow 2 done")
@@ -82,7 +80,7 @@ class ParallelExecutionTest : IntegrationTestBase() {
     fun `maxConcurrency limits parallel execution`() {
         // Use file-based tracking instead of timing to avoid flakiness
         val trackingFile = workspaceRoot.resolve("concurrent.txt")
-        
+
         createSegmentFile(
             "limited.kite.kts",
             """
@@ -178,28 +176,29 @@ class ParallelExecutionTest : IntegrationTestBase() {
 
         result.assertSuccess()
         assertEquals(4, result.totalSegments)
-        
+
         // Verify all tasks completed
         result.assertOutputContains("Task 1 done")
         result.assertOutputContains("Task 2 done")
         result.assertOutputContains("Task 3 done")
         result.assertOutputContains("Task 4 done")
-        
+
         // Parse output to verify max concurrency was never exceeded
         val output = result.output
-        val concurrentLines = output.lines()
-            .filter { it.contains("concurrent:") }
-            .mapNotNull { line ->
-                line.substringAfter("concurrent: ")
-                    .substringBefore(")")
-                    .toIntOrNull()
-            }
-        
+        val concurrentLines =
+            output.lines()
+                .filter { it.contains("concurrent:") }
+                .mapNotNull { line ->
+                    line.substringAfter("concurrent: ")
+                        .substringBefore(")")
+                        .toIntOrNull()
+                }
+
         // Verify we never had more than 2 concurrent
         val maxConcurrent = concurrentLines.maxOrNull() ?: 0
         assertTrue(
             maxConcurrent <= 2,
-            "Max concurrency should be <= 2, but was $maxConcurrent. Concurrent counts: $concurrentLines"
+            "Max concurrency should be <= 2, but was $maxConcurrent. Concurrent counts: $concurrentLines",
         )
     }
 

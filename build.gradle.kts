@@ -8,7 +8,7 @@ plugins {
 
 allprojects {
     group = "io.kite"
-    version = "0.1.0-SNAPSHOT"
+    version = "0.1.0-alpha"
 
     repositories {
         mavenCentral()

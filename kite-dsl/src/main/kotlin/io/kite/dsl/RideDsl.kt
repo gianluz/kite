@@ -1,6 +1,9 @@
 package io.kite.dsl
 
-import io.kite.core.*
+import io.kite.core.ExecutionContext
+import io.kite.core.FlowNode
+import io.kite.core.Ride
+import io.kite.core.SegmentOverrides
 
 /**
  * DSL marker for ride definitions.
