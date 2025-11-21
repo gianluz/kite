@@ -74,6 +74,10 @@ style:
     active: false  # Disable - sometimes parameters are for future use
   WildcardImport:
     active: false  # Disable - already handled by ktlint
+  ForbiddenMethodCall:
+    active: false  # Disable - we allow any method calls
+  UnnecessaryAbstractClass:
+    active: false  # Disable - sometimes abstract classes are for future extension
 
 empty-blocks:
   EmptyFunctionBlock:

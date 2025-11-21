@@ -4,6 +4,7 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
 
@@ -19,7 +20,7 @@ import kotlin.io.path.isDirectory
  */
 class FileSystemArtifactManager(private val artifactsDir: Path) : ArtifactManager {
     // Track artifacts in memory for fast lookups
-    private val artifacts = java.util.concurrent.ConcurrentHashMap<String, Path>()
+    private val artifacts = ConcurrentHashMap<String, Path>()
 
     init {
         // Ensure artifacts directory exists

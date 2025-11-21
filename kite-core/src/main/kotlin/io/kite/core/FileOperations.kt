@@ -1,12 +1,8 @@
 package io.kite.core
 
 import java.io.File
-import java.nio.file.FileSystems
-import java.nio.file.FileVisitResult
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.SimpleFileVisitor
-import java.nio.file.StandardCopyOption
+import java.io.IOException
+import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
 
 /**
@@ -154,7 +150,7 @@ fun ExecutionContext.deleteFile(
 
                 override fun postVisitDirectory(
                     dir: Path,
-                    exc: java.io.IOException?,
+                    exc: IOException?,
                 ): FileVisitResult {
                     Files.delete(dir)
                     return FileVisitResult.CONTINUE

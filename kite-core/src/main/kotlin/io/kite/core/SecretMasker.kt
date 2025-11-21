@@ -1,5 +1,7 @@
 package io.kite.core
 
+import java.net.URLEncoder
+import java.util.Base64
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -42,7 +44,7 @@ object SecretMasker {
         }
 
         // Also mask base64-encoded version (common in headers)
-        val base64 = java.util.Base64.getEncoder().encodeToString(value.toByteArray())
+        val base64 = Base64.getEncoder().encodeToString(value.toByteArray())
         if (base64 != value) {
             secrets[base64] = hint?.let { "${it}_BASE64" } ?: "SECRET_BASE64"
         }
@@ -105,7 +107,7 @@ object SecretMasker {
     fun isSecret(value: String): Boolean = secrets.containsKey(value)
 
     private fun urlEncode(value: String): String {
-        return java.net.URLEncoder.encode(value, "UTF-8")
+        return URLEncoder.encode(value, "UTF-8")
     }
 }
 
