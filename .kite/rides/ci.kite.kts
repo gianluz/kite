@@ -7,8 +7,13 @@ ride {
         segment("clean")
         segment("compile")
 
-        // Run all tests in parallel
+        // Run quality checks and tests in parallel
         parallel {
+            // Code quality checks
+            segment("ktlint")
+            segment("detekt")
+
+            // Tests
             segment("test-core")
             segment("test-dsl")
             segment("test-runtime")

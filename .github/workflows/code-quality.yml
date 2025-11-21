@@ -1,0 +1,133 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '**.kt'
+      - '**.kts'
+      - 'detekt.yml'
+      - '.editorconfig'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '**.kt'
+      - '**.kts'
+      - 'detekt.yml'
+      - '.editorconfig'
+  workflow_dispatch:  # Allow manual triggering
+
+permissions:
+  contents: read
+  pull-requests: write  # For commenting on PRs with violations
+
+jobs:
+  ktlint:
+    name: ktlint
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Run ktlint
+        run: ./gradlew ktlintMainSourceSetCheck ktlintKotlinScriptCheck
+
+      - name: Upload ktlint report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ktlint-report
+          path: '**/build/reports/ktlint/'
+          retention-days: 7
+
+  detekt:
+    name: detekt
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Run detekt
+        run: ./gradlew detekt
+
+      - name: Upload detekt report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: detekt-report
+          path: '**/build/reports/detekt/'
+          retention-days: 7
+
+  # Optional: Post comment on PR with violations summary
+  report:
+    name: Quality Report
+    runs-on: ubuntu-latest
+    needs: [ ktlint, detekt ]
+    if: always() && github.event_name == 'pull_request'
+    
+    steps:
+      - name: Download ktlint report
+        uses: actions/download-artifact@v4
+        with:
+          name: ktlint-report
+          path: ktlint-reports/
+        continue-on-error: true
+
+      - name: Download detekt report
+        uses: actions/download-artifact@v4
+        with:
+          name: detekt-report
+          path: detekt-reports/
+        continue-on-error: true
+
+      - name: Comment PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let message = '## 📊 Code Quality Report\n\n';
+            
+            // Check ktlint
+            if (fs.existsSync('ktlint-reports')) {
+              message += '❌ **ktlint**: Found style violations\n';
+              message += 'Run `./gradlew ktlintFormat` to auto-fix most issues.\n\n';
+            } else {
+              message += '✅ **ktlint**: No style violations\n\n';
+            }
+            
+            // Check detekt
+            if (fs.existsSync('detekt-reports')) {
+              message += '⚠️ **detekt**: Found code quality issues\n';
+              message += 'Check the detekt report in artifacts for details.\n\n';
+            } else {
+              message += '✅ **detekt**: No issues found\n\n';
+            }
+            
+            if (context.payload.pull_request) {
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: message
+              });
+            }

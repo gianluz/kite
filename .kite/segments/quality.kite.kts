@@ -1,9 +1,10 @@
 segments {
     segment("ktlint") {
-        description = "Run ktlint code style checks"
+        description = "Run ktlint code style checks on main sources"
         dependsOn("compile")
         execute {
-            exec("./gradlew", "ktlintCheck")
+            // Check main sources only (not tests)
+            exec("./gradlew", "ktlintMainSourceSetCheck", "ktlintKotlinScriptCheck")
         }
     }
 

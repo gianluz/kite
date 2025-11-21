@@ -7,8 +7,13 @@ ride {
         segment("clean")
         segment("compile")
         
-        // Then: Run all tests in parallel (this is the real validation)
+        // Then: Run quality checks and tests in parallel
         parallel {
+            // Code quality checks (will fail PR if violations found)
+            segment("ktlint")
+            segment("detekt")
+
+            // Tests
             segment("test-core")
             segment("test-dsl")
             segment("test-runtime")
@@ -18,9 +23,5 @@ ride {
 
         // Finally: Full build to ensure everything compiles
         segment("build")
-
-        // TODO: Add code quality checks once codebase is ktlint/detekt compliant
-        // segment("ktlint")
-        // segment("detekt")
     }
 }
