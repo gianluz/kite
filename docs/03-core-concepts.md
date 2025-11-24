@@ -417,19 +417,17 @@ segment("deploy") {
 
 ### Context Properties
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `branch` | String | Current Git branch |
-| `commitSha` | String | Git commit SHA |
-| `mrNumber` | String? | Merge/pull request number |
-| `isRelease` | Boolean | Is this a release build? |
-| `isLocal` | Boolean | Running locally? |
-| `isCI` | Boolean | Running in CI? |
-| `isMergeRequest` | Boolean | Is this an MR/PR? |
-| `ciPlatform` | CIPlatform | Platform (GitLab, GitHub, Local, Generic) |
-| `environment` | Map | Environment variables |
-| `workspace` | Path | Workspace root directory |
-| `artifacts` | ArtifactManager | Artifact manager |
+| Property      | Type            | Description                                          |
+|---------------|-----------------|------------------------------------------------------|
+| `branch`      | String          | Current Git branch                                   |
+| `commitSha`   | String          | Git commit SHA                                       |
+| `isCI`        | Boolean         | Running in CI? (checks multiple platform indicators) |
+| `environment` | Map             | Environment variables                                |
+| `workspace`   | Path            | Workspace root directory                             |
+| `artifacts`   | ArtifactManager | Artifact manager                                     |
+
+> **Platform-Agnostic Design:** Instead of opinionated properties like `mrNumber` or `isRelease`,
+> check environment variables directly using `env()`. See examples below.
 
 ### Context Functions
 
@@ -445,6 +443,39 @@ segment("deploy") {
 | `readFile(path)` | Read file contents |
 | `writeFile(path, content)` | Write file |
 | `artifacts.get(name)` | Get artifact by name |
+
+### Platform-Specific Checks
+
+Instead of hardcoded properties, check environment variables directly:
+
+```kotlin
+segment("deploy") {
+    condition = { ctx ->
+        // Check if in GitLab MR
+        val isGitLabMR = ctx.env("CI_MERGE_REQUEST_IID") != null
+        
+        // Check if in GitHub PR
+        val isGitHubPR = ctx.env("GITHUB_EVENT_NAME") == "pull_request"
+        
+        // Check for your release convention
+        val isRelease = ctx.env("CI_MERGE_REQUEST_LABELS")?.contains("release") == true
+        
+        // Your logic, your rules
+        (isGitLabMR || isGitHubPR) && isRelease
+    }
+    
+    execute {
+        exec("./deploy.sh", "production")
+    }
+}
+```
+
+**Common environment variables:**
+
+- **GitLab:** `CI_MERGE_REQUEST_IID`, `CI_COMMIT_REF_NAME`, `CI_MERGE_REQUEST_LABELS`
+- **GitHub:** `GITHUB_REF`, `GITHUB_EVENT_NAME`, `GITHUB_SHA`
+- **Jenkins:** `CHANGE_ID`, `BRANCH_NAME`, `GIT_COMMIT`
+- **CircleCI:** `CIRCLE_PULL_REQUEST`, `CIRCLE_BRANCH`
 
 See [Execution Context](06-execution-context.md) for complete API.
 

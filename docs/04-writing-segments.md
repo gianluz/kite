@@ -226,18 +226,26 @@ segment("info") {
     execute {
         println("Branch: $branch")
         println("Commit: $commitSha")
-        println("Platform: ${ciPlatform.displayName}")
-        
-        if (isLocal) {
+        println("Is CI: $isCI")
+
+        if (!isCI) {
             println("Running locally")
         } else {
             println("Running in CI")
         }
-        
-        if (isMergeRequest) {
-            println("MR Number: $mrNumber")
+
+        // Check for MR/PR - platform-specific
+        val mrNumber = env("CI_MERGE_REQUEST_IID") // GitLab
+            ?: env("GITHUB_REF")?.let {
+                if (it.startsWith("refs/pull/")) it.substringAfter("pull/").substringBefore("/") else null
+            } // GitHub
+
+        if (mrNumber != null) {
+            println("MR/PR Number: $mrNumber")
         }
-        
+
+        // Check for release - your convention
+        val isRelease = env("CI_MERGE_REQUEST_LABELS")?.contains("release") == true
         if (isRelease) {
             println("This is a release build")
         }

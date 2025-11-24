@@ -563,7 +563,10 @@ ride {
         
         // Only for release MRs
         segment("performance-tests") {
-            condition = { ctx -> ctx.isRelease }
+                condition = { ctx -> 
+                    // Check for release based on your convention
+                    ctx.env("CI_MERGE_REQUEST_LABELS")?.contains("release") == true
+                }
         }
         
         // Deploy based on branch
