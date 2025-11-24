@@ -195,7 +195,7 @@ parallel {
 
 ```kotlin
 segment("deploy") {
-    condition = { ctx ->
+    condition = { ctx: ExecutionContext ->
         ctx.env("BRANCH") == "main"
     }
     execute {

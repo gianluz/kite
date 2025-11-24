@@ -1,4 +1,9 @@
-# Kite Specification
+# Specifications - Historical Reference
+
+**Note:** This file has been superseded by **[00-index.md](00-index.md)** which provides a complete overview of all
+specifications with better navigation.
+
+---
 
 This directory contains the complete specification for Kite, a Kotlin-based CI ride runner.
 
@@ -90,3 +95,9 @@ ride {
     }
 }
 ```
+
+---
+
+**Note:** This README file has been superseded by [00-index.md](00-index.md) which provides a complete overview of all specifications with better navigation.
+
+See [00-index.md](00-index.md) for the current specification index.
