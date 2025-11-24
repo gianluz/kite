@@ -140,7 +140,7 @@ execute {
     exec("./gradlew", "test")
     
     // Access environment variables
-    val branch = env["BRANCH_NAME"]
+    val branch = env("BRANCH_NAME")
     
     // Work with files
     writeFile("output.txt", "Hello!")
@@ -286,7 +286,7 @@ Run segments based on conditions:
 ```kotlin
 segment("deploy") {
     condition = { ctx ->
-        ctx.env["BRANCH"] == "main"
+        ctx.env("BRANCH") == "main"
     }
     execute {
         exec("./deploy.sh", "production")
