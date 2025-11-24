@@ -1,5 +1,10 @@
 # DSL & Configuration
 
+> **⚠️ Deprecation Notice**: This document references deprecated properties like `mrNumber`, `isRelease`, and `ciPlatform`.
+> These are deprecated in favor of Kite's platform-agnostic design. See the [Platform-Agnostic Design](../dev/platform-agnostic-design.md)
+> document for the recommended approach. Users should check environment variables directly using `env()`.
+
+
 ## Kotlin DSL
 
 Kite uses a Kotlin-based DSL (Domain-Specific Language) for defining segments and rides. This provides type safety, IDE

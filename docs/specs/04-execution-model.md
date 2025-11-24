@@ -1,5 +1,10 @@
 # Execution Model
 
+> **⚠️ Deprecation Notice**: This document references deprecated properties like `mrNumber`, `isRelease`, and `ciPlatform`.
+> These are deprecated in favor of Kite's platform-agnostic design. See the [Platform-Agnostic Design](../dev/platform-agnostic-design.md)
+> document for the recommended approach. Users should check environment variables directly using `env()`.
+
+
 ## Overview
 
 Kite's execution model defines how segments are scheduled, executed, and managed. The execution engine builds a directed

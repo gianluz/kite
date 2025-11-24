@@ -1,5 +1,11 @@
 # Core Concepts
 
+> **⚠️ Deprecation Notice**: This document references deprecated properties like `mrNumber`, `isRelease`, and
+`ciPlatform`.
+> These are deprecated in favor of Kite's platform-agnostic design. See
+> the [Platform-Agnostic Design](../dev/platform-agnostic-design.md)
+> document for the recommended approach. Users should check environment variables directly using `env()`.
+
 ## Segments
 
 A **segment** is the fundamental unit of work in Kite. It represents a single, discrete step in your CI/CD process.
@@ -349,10 +355,9 @@ Segments can execute conditionally:
 ```kotlin
 segment("deploy") {
     condition = { 
-        context.branch == "main" && 
-        context.ciPlatform != CIPlatform.LOCAL 
+        context.branch == "main" && context.isCI
     }
-    
+
     execute {
         // Deploy logic
     }
@@ -365,9 +370,12 @@ Or within the ride:
 ride {
     flow {
         segment("build")
-        
+
         segment("integrationTest") {
-            condition = { context.isRelease }
+            condition = { context ->
+                // Check for release based on your convention
+                context.env("CI_MERGE_REQUEST_LABELS")?.contains("release") == true
+            }
         }
         
         segment("deploy") {

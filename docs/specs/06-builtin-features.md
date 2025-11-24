@@ -1,5 +1,10 @@
 # Built-in Features
 
+> **⚠️ Deprecation Notice**: This document references deprecated properties like `mrNumber`, `isRelease`, and `ciPlatform`.
+> These are deprecated in favor of Kite's platform-agnostic design. See the [Platform-Agnostic Design](../dev/platform-agnostic-design.md)
+> document for the recommended approach. Users should check environment variables directly using `env()`.
+
+
 ## Overview
 
 Kite provides a rich set of built-in features and helper functions to simplify common CI/CD operations. These helpers
