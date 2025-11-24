@@ -406,6 +406,13 @@ were created through extensive collaboration with Claude (Anthropic) using the F
 role in accelerating development and ensuring comprehensive test coverage, all design decisions, architectural choices,
 and code quality standards were carefully reviewed and validated.
 
+**Note on Quality:** Despite thorough testing and review, some inconsistencies between the implementation and
+documentation
+may still exist due to the rapid, AI-assisted development process. If you encounter any bugs, inconsistencies, or areas
+where the documentation doesn't match the actual behavior, please *
+*[open an issue](https://github.com/yourusername/kite/issues)**
+or submit a pull request. Your contributions help improve Kite for everyone!
+
 **Shoutout to [Firebender](https://firebender.dev)** for providing an excellent AI-powered development environment! 🔥
 
 ---
