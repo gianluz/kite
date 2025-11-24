@@ -19,8 +19,24 @@ configuration with testable, reusable Kotlin code.
 - ⚡ **Parallel execution** - Run segments in parallel for faster builds
 - 🔒 **Automatic secret masking** - Secrets never leak into logs
 - 📦 **Artifact management** - Share build outputs between segments
-- 🔄 **CI/CD ready** - Works with GitHub Actions, GitLab CI, Jenkins, and more
+- 🌍 **Platform-agnostic** - Works on any CI/CD platform (no vendor lock-in)
 - 🧩 **Reusable components** - Define segments once, compose into different workflows
+
+**Platform-Agnostic Design:**
+
+Kite doesn't assume you're using GitLab, GitHub, or any specific CI platform. Instead of providing opinionated
+properties
+like `isRelease` or `mrNumber`, you query environment variables directly using `env()`. This means Kite works on ANY
+CI/CD platform without modification:
+
+```kotlin
+segment("deploy") {
+    condition = { ctx ->
+        // Your platform, your conventions
+        ctx.env("CI_MERGE_REQUEST_LABELS")?.contains("release") == true
+    }
+}
+```
 
 ---
 
