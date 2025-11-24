@@ -9,10 +9,8 @@ compose reusable segments, and run them locally or in any CI platform.
 - 📦 [Installation](02-installation.md) - Installation methods
 - 💡 [Core Concepts](03-core-concepts.md) - Understand rides, segments, and flows
 - 📖 [API Reference](api/00-index.md) - Complete API documentation
-- ⚠️ [Implementation Status](IMPLEMENTATION_STATUS.md) - What's implemented vs. planned
 
-> **Note:** Kite is in active development (v0.1.0-alpha). Some DSL features like `timeout` and `maxRetries` are defined
-> but not yet enforced by the runtime. See [Implementation Status](IMPLEMENTATION_STATUS.md) for details.
+> **Note:** Kite is in active development (v0.1.0-alpha).
 
 ## Documentation Sections
 
