@@ -88,13 +88,13 @@ ride {
 
 ```bash
 # Run a complete workflow
-kite ride CI
+kite-cli ride CI
 
 # Run specific segments
-kite run test lint
+kite-cli run test lint
 
 # List available workflows
-kite rides
+kite-cli rides
 ```
 
 **Use in GitHub Actions:**
@@ -167,15 +167,26 @@ cd kite
 ./gradlew :kite-cli:installDist
 ```
 
-**2. Add kite to your PATH (optional):**
+**2. Add to your PATH (recommended):**
+
+Choose one of these options:
 
 ```bash
-# Add to ~/.bashrc or ~/.zshrc
+# Option A: Add to PATH (recommended)
+# Add to ~/.bashrc or ~/.zshrc:
 export PATH="$PATH:/path/to/kite/kite-cli/build/install/kite-cli/bin"
+# Then run: kite-cli run hello
 
-# Or create an alias
+# Option B: Create an alias
+# Add to ~/.bashrc or ~/.zshrc:
 alias kite='/path/to/kite/kite-cli/build/install/kite-cli/bin/kite-cli'
+# Then run: kite run hello
+
+# Option C: Use full path (no setup needed)
+# /path/to/kite/kite-cli/build/install/kite-cli/bin/kite-cli run hello
 ```
+
+**Note:** The executable is named `kite-cli`. Examples in this README use `kite-cli` unless an alias is mentioned.
 
 **3. Create a sample project:**
 
@@ -203,9 +214,14 @@ segments {
 **5. Run it:**
 
 ```bash
+# If you set up the alias (step 2):
 kite run hello
-# Or if not in PATH:
-# /path/to/kite/kite-cli/build/install/kite-cli/bin/kite-cli run hello
+
+# Or use the full path:
+/path/to/kite/kite-cli/build/install/kite-cli/bin/kite-cli run hello
+
+# Or if you added to PATH:
+kite-cli run hello
 ```
 
 See **[Installation Guide](docs/02-installation.md)** for complete setup instructions and troubleshooting.
