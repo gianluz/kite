@@ -291,12 +291,13 @@ ride {
 
 We welcome contributions! Kite is under active development.
 
-**For Contributors:**
+**Start here:** **[CONTRIBUTING.md](CONTRIBUTING.md)** - Complete contribution guide
 
-- **[Contributing Guide](docs/dev/01-contributing.md)** - Development setup and guidelines
-- **[Code Quality](docs/dev/02-code-quality.md)** - Standards and linting
+**Additional Resources:**
+
+- **[Code Quality Standards](docs/dev/02-code-quality.md)** - Linting and quality requirements
 - **[Testing Strategy](docs/dev/03-testing-strategy.md)** - Integration testing approach
-- **[Architecture](docs/specs/)** - System design and specifications
+- **[Architecture Specs](docs/specs/)** - System design and specifications
 
 ### Development Setup
 
@@ -305,14 +306,11 @@ We welcome contributions! Kite is under active development.
 git clone https://github.com/yourusername/kite.git
 cd kite
 
-# Build
+# Build (git hooks install automatically)
 ./gradlew build
 
 # Run tests
 ./gradlew test
-
-# Install git hooks (runs quality checks before push)
-./scripts/install-git-hooks.sh
 ```
 
 ### Project Structure
