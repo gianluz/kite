@@ -51,7 +51,66 @@ Combines setup and execution into a single action.
     command: ride CI
 ```
 
-## Usage Examples
+## Real-World Examples from Kite Project
+
+### Kite's CI Workflow (ci.yml)
+
+```yaml
+name: CI Build
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run CI Build
+        uses: ./.github/actions/run-kite
+        with:
+          command: ride CI
+      
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-ci
+          path: .kite/artifacts/
+          retention-days: 30
+```
+
+### Kite's PR Validation (pr.yml)
+
+```yaml
+name: PR Validation
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run PR Validation
+        uses: ./.github/actions/run-kite
+        with:
+          command: ride MR
+      
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: .kite/artifacts/
+```
+
+## More Usage Examples
 
 ### Running a Complete Workflow
 
