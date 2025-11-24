@@ -1,0 +1,42 @@
+name: 'Run Kite'
+description: 'Run Kite CI/CD workflow'
+branding:
+  icon: 'play-circle'
+  color: 'blue'
+
+inputs:
+  command:
+    description: 'Kite command to run (e.g., "ride CI" or "run test lint")'
+    required: true
+  
+  version:
+    description: 'Kite version to use (default: latest)'
+    required: false
+    default: 'latest'
+  
+  java-version:
+    description: 'Java version to use (default: 17)'
+    required: false
+    default: '17'
+  
+  working-directory:
+    description: 'Working directory for Kite execution'
+    required: false
+    default: '.'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Kite
+      uses: ./.github/actions/setup-kite
+      with:
+        version: ${{ inputs.version }}
+        java-version: ${{ inputs.java-version }}
+
+    - name: Run Kite
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        set -e
+        echo "Running: kite ${{ inputs.command }}"
+        kite-cli ${{ inputs.command }}

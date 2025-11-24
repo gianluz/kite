@@ -1,0 +1,89 @@
+name: 'Setup Kite'
+description: 'Install and setup Kite CI/CD workflow runner'
+branding:
+  icon: 'zap'
+  color: 'blue'
+
+inputs:
+  version:
+    description: 'Kite version to install (default: latest)'
+    required: false
+    default: 'latest'
+  
+  java-version:
+    description: 'Java version to use (default: 17)'
+    required: false
+    default: '17'
+
+outputs:
+  kite-version:
+    description: 'The installed Kite version'
+    value: ${{ steps.install.outputs.version }}
+  
+  kite-path:
+    description: 'Path to the Kite executable'
+    value: ${{ steps.install.outputs.path }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: ${{ inputs.java-version }}
+
+    - name: Cache Kite installation
+      id: cache-kite
+      uses: actions/cache@v3
+      with:
+        path: ~/.kite
+        key: kite-${{ inputs.version }}-${{ runner.os }}
+
+    - name: Install Kite
+      id: install
+      shell: bash
+      run: |
+        set -e
+        
+        VERSION="${{ inputs.version }}"
+        INSTALL_DIR="$HOME/.kite"
+        
+        # TODO: Replace with actual release download when published
+        # For now, build from source (temporary until Maven Central release)
+        if [ "$VERSION" = "latest" ] || [ ! -d "$INSTALL_DIR/bin" ]; then
+          echo "Installing Kite from source (pre-release)..."
+        
+          # Clone the repository to a temp directory
+          TEMP_DIR=$(mktemp -d)
+          cd "$TEMP_DIR"
+        
+          git clone --depth 1 https://github.com/yourusername/kite.git
+          cd kite
+        
+          # Build Kite
+          ./gradlew :kite-cli:installDist --no-daemon
+        
+          # Copy to install directory
+          mkdir -p "$INSTALL_DIR"
+          cp -r kite-cli/build/install/kite-cli/* "$INSTALL_DIR/"
+        
+          # Clean up
+          cd /
+          rm -rf "$TEMP_DIR"
+        
+          INSTALLED_VERSION=$(cat "$INSTALL_DIR/version.txt" 2>/dev/null || echo "dev")
+        else
+          echo "Using cached Kite installation"
+          INSTALLED_VERSION=$(cat "$INSTALL_DIR/version.txt" 2>/dev/null || echo "dev")
+        fi
+        
+        # Add to PATH
+        echo "$INSTALL_DIR/bin" >> $GITHUB_PATH
+        
+        # Set outputs
+        echo "version=$INSTALLED_VERSION" >> $GITHUB_OUTPUT
+        echo "path=$INSTALL_DIR/bin/kite-cli" >> $GITHUB_OUTPUT
+        
+        # Verify installation
+        "$INSTALL_DIR/bin/kite-cli" --version || echo "Kite installed successfully"

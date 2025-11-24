@@ -97,6 +97,26 @@ kite run test lint
 kite rides
 ```
 
+**Use in GitHub Actions:**
+
+```yaml
+name: CI
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run CI Workflow
+        uses: ./.github/actions/run-kite
+        with:
+          command: ride CI
+```
+
+See **[GitHub Actions documentation](.github/actions/README.md)** for more examples.
+
 ---
 
 ## Documentation
@@ -125,6 +145,7 @@ kite rides
 ### Integration & Reference
 
 - **[CI/CD Integration](docs/11-ci-integration.md)** - GitHub Actions, GitLab CI, Jenkins
+- **[GitHub Actions](.github/actions/README.md)** - Use Kite in GitHub Actions workflows
 - **[CLI Reference](docs/12-cli-reference.md)** - Command-line documentation
 - **[Troubleshooting](docs/99-troubleshooting.md)** - Common issues and solutions
 

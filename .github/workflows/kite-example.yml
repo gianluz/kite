@@ -1,0 +1,70 @@
+name: Kite CI Example
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # Example 1: Setup Kite and run multiple commands
+  setup-and-run:
+    runs-on: ubuntu-latest
+    name: Setup and Run
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Kite
+        uses: ./.github/actions/setup-kite
+        with:
+          version: latest
+          java-version: '17'
+
+      - name: Run build segment
+        run: kite-cli run build
+
+      - name: Run tests in parallel
+        run: kite-cli run test lint detekt
+  
+  # Example 2: Run a complete workflow (ride)
+  run-workflow:
+    runs-on: ubuntu-latest
+    name: Run Workflow
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run CI Workflow
+        uses: ./.github/actions/run-kite
+        with:
+          command: ride CI
+          version: latest
+  
+  # Example 3: Run specific segments
+  run-segments:
+    runs-on: ubuntu-latest
+    name: Run Specific Segments
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run test and lint
+        uses: ./.github/actions/run-kite
+        with:
+          command: run test lint
+  
+  # Example 4: Multiple workflows in one job
+  multi-workflow:
+    runs-on: ubuntu-latest
+    name: Multiple Workflows
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Kite
+        uses: ./.github/actions/setup-kite
+
+      - name: Run PR Workflow
+        if: github.event_name == 'pull_request'
+        run: kite-cli ride PR
+
+      - name: Run Release Workflow
+        if: github.ref == 'refs/heads/main'
+        run: kite-cli ride Release
