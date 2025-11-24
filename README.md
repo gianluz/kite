@@ -280,6 +280,38 @@ segment("deploy") {
 
 ## Why Kite?
 
+Kite was created to solve the complexity and limitations of existing CI/CD tools like **Fastlane** and **bash scripts**.
+
+### Before: Fastlane/Fastfile 😓
+
+```ruby
+# Fastfile
+lane :ci do
+  clean
+  build
+  test    # Sequential only
+  lint    # Can't run in parallel
+end
+
+lane :test do
+  gradle(task: "test")
+end
+
+lane :lint do
+  gradle(task: "lint")
+end
+```
+
+**Problems with Fastlane:**
+
+- ❌ **Ruby dependency** - Requires Ruby environment setup
+- ❌ **No type safety** - Errors only at runtime
+- ❌ **Limited parallelization** - Hard to run lanes in parallel
+- ❌ **Complex syntax** - Learning curve for Ruby/Fastlane DSL
+- ❌ **Android/iOS specific** - Not ideal for other JVM projects
+- ❌ **No IDE support** - Limited autocomplete and refactoring
+- ❌ **Difficult debugging** - Stack traces through Ruby/Fastlane layers
+
 ### Before: Bash Scripts 😱
 
 ```bash
@@ -344,17 +376,33 @@ ride {
 }
 ```
 
-**Real Benefits:**
+**Real Benefits vs Fastlane/Bash:**
 
 - ⚡ **Parallel execution** - Test and lint run simultaneously (save 2 minutes!)
 - 🔗 **Dependency management** - Build always runs before tests
 - 🔒 **Secret masking** - `requireSecret()` automatically masks sensitive data
 - 🎯 **Type-safe** - Catch errors at compile time, not runtime
-- ✨ **IDE support** - Full autocomplete and refactoring
-- 🧪 **Testable** - Unit test your CI/CD logic
+- ✨ **Full IDE support** - Autocomplete, refactoring, and debugging with Kotlin
+- 🧪 **Testable** - Unit test your CI/CD logic (impossible with Fastlane)
 - 🔄 **Reusable** - Share segments across different workflows
+- 🚀 **No Ruby needed** - Pure Kotlin/JVM, no additional runtime
+- 🌍 **Platform-agnostic** - Not limited to Android/iOS like Fastlane
+- 📦 **Better for Kotlin projects** - Native Kotlin integration
 
-**Time savings:** Sequential bash = 7 min, Kite parallel = 5 min (29% faster)
+**Time savings:** Sequential (Fastlane/bash) = 7 min, Kite parallel = 5 min (29% faster)
+
+**Comparison:**
+
+|                           | Fastlane             | Bash Scripts   | Kite                  |
+|---------------------------|----------------------|----------------|-----------------------|
+| **Type Safety**           | ❌ Runtime only       | ❌ None         | ✅ Compile-time        |
+| **IDE Support**           | ⚠️ Limited           | ❌ None         | ✅ Full Kotlin support |
+| **Parallel Execution**    | ⚠️ Complex           | ❌ Manual       | ✅ Built-in            |
+| **Testing**               | ❌ Hard to test       | ❌ Hard to test | ✅ Unit testable       |
+| **Dependency Management** | ⚠️ Manual            | ❌ Manual       | ✅ Automatic           |
+| **Secret Masking**        | ⚠️ Manual setup      | ❌ Manual       | ✅ Automatic           |
+| **Platform Support**      | ⚠️ iOS/Android focus | ✅ Any          | ✅ Any CI/CD           |
+| **Learning Curve**        | 🟡 Ruby + Fastlane   | 🟢 Low         | 🟢 Kotlin only        |
 
 ---
 
