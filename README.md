@@ -402,18 +402,19 @@ Apache License 2.0 - see [LICENSE](LICENSE)
 ## AI Disclaimer
 
 This project was developed with significant AI assistance. The implementation, architecture, testing, and documentation
-were created through extensive collaboration with Claude (Anthropic) using the Firebender IDE. While AI played a major
+were created through extensive collaboration using various large language models via **Firebender** 🔥 (an AI-powered
+development tool with IDE plugins for IntelliJ and Android Studio). While AI played a major
 role in accelerating development and ensuring comprehensive test coverage, all design decisions, architectural choices,
 and code quality standards were carefully reviewed and validated.
 
 **Note on Quality:** Despite thorough testing and review, some inconsistencies between the implementation and
-documentation
-may still exist due to the rapid, AI-assisted development process. If you encounter any bugs, inconsistencies, or areas
+documentation may still exist due to the rapid, AI-assisted development process. If you encounter any bugs,
+inconsistencies, or areas
 where the documentation doesn't match the actual behavior, please *
 *[open an issue](https://github.com/yourusername/kite/issues)**
 or submit a pull request. Your contributions help improve Kite for everyone!
 
-**Shoutout to [Firebender](https://firebender.dev)** for providing an excellent AI-powered development environment! 🔥
+**Shoutout to [Firebender](https://firebender.dev)** for providing an excellent AI-powered development tool! 🔥
 
 ---
 
