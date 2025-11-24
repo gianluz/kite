@@ -300,14 +300,38 @@ class RideCommand : CliktCommand(
 
     /**
      * Apply ride overrides to a segment.
+     *
+     * Creates a new segment with overridden properties. Only non-null overrides
+     * are applied, allowing fine-grained control over which properties to override.
      */
     private fun applyOverrides(
         segment: Segment,
         overrides: io.kite.core.SegmentOverrides,
     ): Segment {
-        // For now, return the segment as-is since Segment is immutable
-        // In a full implementation, we'd create a new Segment with overrides
-        // But the execute lambda makes this tricky - would need a builder pattern
-        return segment
+        // Start with the original segment
+        var result = segment
+
+        // Apply dependsOn override (additive - adds to existing dependencies)
+        overrides.dependsOn?.let { overrideDeps ->
+            val combinedDeps = (segment.dependsOn + overrideDeps).distinct()
+            result = result.copy(dependsOn = combinedDeps)
+        }
+
+        // Apply condition override (replaces original condition)
+        overrides.condition?.let { overrideCondition ->
+            result = result.copy(condition = overrideCondition)
+        }
+
+        // Apply timeout override (replaces original timeout)
+        overrides.timeout?.let { overrideTimeout ->
+            result = result.copy(timeout = overrideTimeout)
+        }
+
+        // Apply enabled flag - if false, wrap condition to always return false
+        if (!overrides.enabled) {
+            result = result.copy(condition = { false })
+        }
+
+        return result
     }
 }
