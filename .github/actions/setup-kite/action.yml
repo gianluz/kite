@@ -49,33 +49,25 @@ runs:
         VERSION="${{ inputs.version }}"
         INSTALL_DIR="$HOME/.kite"
         
-        # TODO: Replace with actual release download when published
-        # For now, build from source (temporary until Maven Central release)
-        if [ "$VERSION" = "latest" ] || [ ! -d "$INSTALL_DIR/bin" ]; then
-          echo "Installing Kite from source (pre-release)..."
+        # Check if already installed (from cache)
+        if [ -d "$INSTALL_DIR/bin" ] && [ -f "$INSTALL_DIR/bin/kite-cli" ]; then
+          echo "✓ Using cached Kite installation"
+          INSTALLED_VERSION=$(cat "$INSTALL_DIR/version.txt" 2>/dev/null || echo "dev")
+        else
+          echo "Building Kite from source..."
         
-          # Clone the repository to a temp directory
-          TEMP_DIR=$(mktemp -d)
-          cd "$TEMP_DIR"
-        
-          git clone --depth 1 https://github.com/yourusername/kite.git
-          cd kite
-        
-          # Build Kite
+          # Build from current repository (already checked out by actions/checkout)
           ./gradlew :kite-cli:installDist --no-daemon
         
           # Copy to install directory
           mkdir -p "$INSTALL_DIR"
           cp -r kite-cli/build/install/kite-cli/* "$INSTALL_DIR/"
         
-          # Clean up
-          cd /
-          rm -rf "$TEMP_DIR"
+          # Save version info
+          echo "dev-$(git rev-parse --short HEAD 2>/dev/null || echo 'unknown')" > "$INSTALL_DIR/version.txt"
         
-          INSTALLED_VERSION=$(cat "$INSTALL_DIR/version.txt" 2>/dev/null || echo "dev")
-        else
-          echo "Using cached Kite installation"
-          INSTALLED_VERSION=$(cat "$INSTALL_DIR/version.txt" 2>/dev/null || echo "dev")
+          INSTALLED_VERSION=$(cat "$INSTALL_DIR/version.txt")
+          echo "✓ Kite built successfully (version: $INSTALLED_VERSION)"
         fi
         
         # Add to PATH
@@ -86,4 +78,4 @@ runs:
         echo "path=$INSTALL_DIR/bin/kite-cli" >> $GITHUB_OUTPUT
         
         # Verify installation
-        "$INSTALL_DIR/bin/kite-cli" --version || echo "Kite installed successfully"
+        "$INSTALL_DIR/bin/kite-cli" --version || echo "Kite ready!"
