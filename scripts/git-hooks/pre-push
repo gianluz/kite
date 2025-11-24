@@ -1,0 +1,48 @@
+#!/bin/sh
+#
+# Git pre-push hook to run code quality checks before pushing
+#
+# To install:
+#   ./scripts/install-git-hooks.sh
+#
+# To bypass (use sparingly):
+#   git push --no-verify
+#
+
+echo "🔍 Running pre-push quality checks..."
+echo ""
+
+# Check if kite-cli is built
+if [ ! -f "kite-cli/build/install/kite-cli/bin/kite-cli" ]; then
+    echo "📦 Building Kite CLI..."
+    ./gradlew :kite-cli:installDist --quiet
+    if [ $? -ne 0 ]; then
+        echo "❌ Failed to build Kite CLI"
+        exit 1
+    fi
+fi
+
+# Run quality checks using Kite
+echo "✨ Running ktlint and detekt..."
+kite-cli/build/install/kite-cli/bin/kite-cli segment quality-checks
+
+if [ $? -eq 0 ]; then
+    echo ""
+    echo "✅ All quality checks passed! Proceeding with push..."
+    exit 0
+else
+    echo ""
+    echo "❌ Quality checks failed!"
+    echo ""
+    echo "💡 To auto-fix ktlint issues:"
+    echo "   ./gradlew ktlintFormat"
+    echo ""
+    echo "💡 To view detailed reports:"
+    echo "   ktlint: cat */build/reports/ktlint/*/ktlintMainSourceSetCheck.txt"
+    echo "   detekt: open build/reports/detekt/detekt.html"
+    echo ""
+    echo "⚠️  To bypass this check (not recommended):"
+    echo "   git push --no-verify"
+    echo ""
+    exit 1
+fi
