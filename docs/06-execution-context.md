@@ -549,6 +549,285 @@ curl -s https://app.example.com/health
 
 ---
 
+## Platform-Specific Environment Variables
+
+Kite is **platform-agnostic** - it works on any CI/CD platform without requiring special adapters. To check
+platform-specific information (like merge requests, pull requests, or releases), query environment variables directly
+using `env()`.
+
+### Common CI Platforms
+
+#### GitLab CI
+
+```kotlin
+segment("deploy") {
+    condition = { ctx ->
+        // Check if in merge request
+        val isMR = ctx.env("CI_MERGE_REQUEST_IID") != null
+        
+        // Check MR labels (your convention)
+        val labels = ctx.env("CI_MERGE_REQUEST_LABELS") ?: ""
+        val isRelease = labels.contains("release")
+        
+        // Check target branch
+        val targetBranch = ctx.env("CI_MERGE_REQUEST_TARGET_BRANCH_NAME")
+        val isToMain = targetBranch == "main"
+        
+        isMR && isRelease && isToMain
+    }
+    
+    execute {
+        val mrNumber = env("CI_MERGE_REQUEST_IID")
+        val branch = env("CI_COMMIT_REF_NAME")
+        logger.info("Deploying MR !$mrNumber from $branch")
+        exec("./deploy.sh")
+    }
+}
+```
+
+**Common GitLab variables:**
+
+- `CI=true` - CI indicator
+- `GITLAB_CI=true` - GitLab-specific indicator
+- `CI_COMMIT_REF_NAME` - Branch name
+- `CI_COMMIT_SHA` - Commit SHA
+- `CI_MERGE_REQUEST_IID` - MR number (e.g., "123")
+- `CI_MERGE_REQUEST_LABELS` - Comma-separated labels
+- `CI_MERGE_REQUEST_TARGET_BRANCH_NAME` - Target branch
+- `CI_PROJECT_DIR` - Workspace path
+- `CI_PIPELINE_SOURCE` - How pipeline was triggered
+
+#### GitHub Actions
+
+```kotlin
+segment("deploy") {
+    condition = { ctx ->
+        // Check if in pull request
+        val isPR = ctx.env("GITHUB_EVENT_NAME") == "pull_request"
+        
+        // Check PR labels (requires API call or setup)
+        val ref = ctx.env("GITHUB_REF") ?: ""
+        val prNumber = if (ref.startsWith("refs/pull/")) {
+            ref.substringAfter("pull/").substringBefore("/")
+        } else null
+        
+        // Check base branch
+        val baseBranch = ctx.env("GITHUB_BASE_REF")
+        val isToMain = baseBranch == "main"
+        
+        isPR && isToMain
+    }
+    
+    execute {
+        val ref = env("GITHUB_REF")
+        val sha = env("GITHUB_SHA")
+        logger.info("Deploying from $ref ($sha)")
+        exec("./deploy.sh")
+    }
+}
+```
+
+**Common GitHub Actions variables:**
+
+- `CI=true` - CI indicator
+- `GITHUB_ACTIONS=true` - GitHub-specific indicator
+- `GITHUB_REF` - Full ref (e.g., `refs/heads/main`, `refs/pull/123/merge`)
+- `GITHUB_SHA` - Commit SHA
+- `GITHUB_EVENT_NAME` - Event type (`pull_request`, `push`, `workflow_dispatch`, etc.)
+- `GITHUB_BASE_REF` - PR base branch
+- `GITHUB_HEAD_REF` - PR head branch
+- `GITHUB_WORKSPACE` - Workspace path
+- `GITHUB_REPOSITORY` - Repository (e.g., `owner/repo`)
+
+#### Jenkins
+
+```kotlin
+segment("deploy") {
+    condition = { ctx ->
+        // Check if in change request (PR)
+        val isPR = ctx.env("CHANGE_ID") != null
+        
+        // Check target branch
+        val targetBranch = ctx.env("CHANGE_TARGET") ?: ctx.env("BRANCH_NAME")
+        val isToMain = targetBranch == "main"
+        
+        isPR && isToMain
+    }
+    
+    execute {
+        val changeId = env("CHANGE_ID")
+        val branch = env("BRANCH_NAME")
+        logger.info("Deploying PR #$changeId from $branch")
+        exec("./deploy.sh")
+    }
+}
+```
+
+**Common Jenkins variables:**
+
+- `CI=true` - CI indicator
+- `JENKINS_HOME` - Jenkins installation path
+- `BRANCH_NAME` - Branch name
+- `GIT_COMMIT` - Commit SHA
+- `CHANGE_ID` - PR/Change number
+- `CHANGE_TARGET` - PR target branch
+- `WORKSPACE` - Workspace path
+- `BUILD_NUMBER` - Build number
+- `BUILD_URL` - Build URL
+
+#### CircleCI
+
+```kotlin
+segment("deploy") {
+    condition = { ctx ->
+        // Check if in pull request
+        val prUrl = ctx.env("CIRCLE_PULL_REQUEST")
+        val isPR = prUrl != null
+        
+        // Check branch
+        val branch = ctx.env("CIRCLE_BRANCH")
+        val isMain = branch == "main"
+        
+        isPR || isMain
+    }
+    
+    execute {
+        val branch = env("CIRCLE_BRANCH")
+        val prUrl = env("CIRCLE_PULL_REQUEST")
+        if (prUrl != null) {
+            logger.info("Deploying PR: $prUrl")
+        } else {
+            logger.info("Deploying branch: $branch")
+        }
+        exec("./deploy.sh")
+    }
+}
+```
+
+**Common CircleCI variables:**
+
+- `CI=true` - CI indicator
+- `CIRCLECI=true` - CircleCI-specific indicator
+- `CIRCLE_BRANCH` - Branch name
+- `CIRCLE_SHA1` - Commit SHA
+- `CIRCLE_PULL_REQUEST` - PR URL (if applicable)
+- `CIRCLE_WORKING_DIRECTORY` - Workspace path
+- `CIRCLE_BUILD_NUM` - Build number
+- `CIRCLE_PROJECT_USERNAME` - GitHub/Bitbucket username
+
+#### Travis CI
+
+```kotlin
+segment("deploy") {
+    condition = { ctx ->
+        // Check if in pull request
+        val prNumber = ctx.env("TRAVIS_PULL_REQUEST")
+        val isPR = prNumber != "false"
+        
+        // Check branch
+        val branch = ctx.env("TRAVIS_BRANCH")
+        val isMain = branch == "main"
+        
+        isPR || isMain
+    }
+    
+    execute {
+        val prNumber = env("TRAVIS_PULL_REQUEST")
+        val branch = env("TRAVIS_BRANCH")
+        if (prNumber != "false") {
+            logger.info("Deploying PR #$prNumber")
+        } else {
+            logger.info("Deploying branch: $branch")
+        }
+        exec("./deploy.sh")
+    }
+}
+```
+
+**Common Travis CI variables:**
+
+- `CI=true` - CI indicator
+- `TRAVIS=true` - Travis-specific indicator
+- `TRAVIS_BRANCH` - Branch name
+- `TRAVIS_COMMIT` - Commit SHA
+- `TRAVIS_PULL_REQUEST` - PR number (or "false")
+- `TRAVIS_BUILD_DIR` - Workspace path
+- `TRAVIS_BUILD_NUMBER` - Build number
+
+### Custom Conventions
+
+Define your own conventions using any environment variables:
+
+```kotlin
+// Release detection by branch name
+segment("deploy-prod") {
+    condition = { ctx ->
+        val branch = ctx.env("CI_COMMIT_REF_NAME") ?: ctx.env("GITHUB_REF") ?: ""
+        branch.startsWith("release/")
+    }
+}
+
+// Release detection by tag
+segment("publish") {
+    condition = { ctx ->
+        val ref = ctx.env("GITHUB_REF") ?: ctx.env("CI_COMMIT_REF_NAME") ?: ""
+        ref.startsWith("refs/tags/v") || ref.startsWith("v")
+    }
+}
+
+// Custom label check
+segment("e2e-tests") {
+    condition = { ctx ->
+        val labels = ctx.env("CI_MERGE_REQUEST_LABELS") ?: ""
+        labels.contains("e2e-required")
+    }
+}
+
+// Environment-based deployment
+segment("deploy") {
+    execute {
+        val targetEnv = env("DEPLOY_TARGET") ?: "staging"
+        logger.info("Deploying to $targetEnv")
+        exec("./deploy.sh", "--env", targetEnv)
+    }
+}
+```
+
+### CI Detection
+
+The `isCI` property reliably detects if you're running in any CI environment by checking multiple indicators:
+
+```kotlin
+segment("setup") {
+    execute {
+        if (isCI) {
+            logger.info("Running in CI environment")
+            // CI-specific setup
+            exec("./ci-setup.sh")
+        } else {
+            logger.info("Running locally")
+            // Local development setup
+            exec("./local-setup.sh")
+        }
+    }
+}
+```
+
+`isCI` checks for:
+
+- `CI=true` (standard across most platforms)
+- `GITHUB_ACTIONS=true`
+- `GITLAB_CI=true`
+- `JENKINS_HOME`
+- `CIRCLECI=true`
+- `TRAVIS=true`
+- `BUILDKITE=true`
+- `TEAMCITY_VERSION`
+
+For custom CI systems, set `CI=true` in your environment.
+
+---
+
 ## Best Practices
 
 ### 1. Use Secrets for Sensitive Data

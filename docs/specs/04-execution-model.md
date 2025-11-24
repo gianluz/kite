@@ -1,7 +1,7 @@
 # Execution Model
 
 > **⚠️ Deprecation Notice**: This document references deprecated properties like `mrNumber`, `isRelease`, and `ciPlatform`.
-> These are deprecated in favor of Kite's platform-agnostic design. See the [Platform-Agnostic Design](../dev/platform-agnostic-design.md)
+> These are deprecated in favor of Kite's platform-agnostic design. See [Execution Context - Platform-Specific Environment Variables](../06-execution-context.md#platform-specific-environment-variables)
 > document for the recommended approach. Users should check environment variables directly using `env()`.
 
 
