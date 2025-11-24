@@ -217,43 +217,73 @@ set -e
 
 ./gradlew clean
 ./gradlew assembleRelease
-./gradlew test
-./gradlew lint
 
-# No type safety, hard to test, difficult to debug
+# Run tests and lint sequentially (slow!)
+./gradlew test        # 5 minutes
+./gradlew lint        # 2 minutes
+# Total: 7 minutes wasted waiting
+
+# Problems:
+# - No parallelization
+# - No dependency management
+# - Secrets leak into logs
+# - Hard to maintain
+# - Difficult to test
+# - No IDE support
 ```
 
 ### After: Kite ✨
 
 ```kotlin
 segments {
-    segment("clean") { execute { exec("./gradlew", "clean") } }
-    segment("build") { execute { exec("./gradlew", "assembleRelease") } }
-    segment("test") { dependsOn("build"); execute { exec("./gradlew", "test") } }
-    segment("lint") { dependsOn("build"); execute { exec("./gradlew", "lint") } }
+    segment("clean") { 
+        execute { exec("./gradlew", "clean") } 
+    }
+    
+    segment("build") { 
+        dependsOn("clean")
+        execute { exec("./gradlew", "assembleRelease") } 
+    }
+    
+    segment("test") { 
+        dependsOn("build")
+        execute { exec("./gradlew", "test") }  // 5 minutes
+    }
+    
+    segment("lint") { 
+        dependsOn("build")
+        execute { exec("./gradlew", "lint") }  // 2 minutes
+    }
 }
 
 ride {
     name = "CI"
+    maxConcurrency = 4  // Run up to 4 tasks in parallel
+    
     flow {
         segment("clean")
         segment("build")
+        
+        // Test and lint run in parallel!
         parallel {
-            segment("test")
-            segment("lint")
+            segment("test")   // 5 min ⎤
+            segment("lint")   // 2 min ⎦ → Only 5 min total!
         }
     }
 }
 ```
 
-**Benefits:**
+**Real Benefits:**
 
-- ✅ Type-safe at compile time
-- ✅ IDE autocomplete and refactoring
-- ✅ Testable in unit tests
-- ✅ Reusable across projects
-- ✅ Parallel execution
-- ✅ Automatic secret masking
+- ⚡ **Parallel execution** - Test and lint run simultaneously (save 2 minutes!)
+- 🔗 **Dependency management** - Build always runs before tests
+- 🔒 **Secret masking** - `requireSecret()` automatically masks sensitive data
+- 🎯 **Type-safe** - Catch errors at compile time, not runtime
+- ✨ **IDE support** - Full autocomplete and refactoring
+- 🧪 **Testable** - Unit test your CI/CD logic
+- 🔄 **Reusable** - Share segments across different workflows
+
+**Time savings:** Sequential bash = 7 min, Kite parallel = 5 min (29% faster)
 
 ---
 

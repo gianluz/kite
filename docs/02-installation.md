@@ -30,7 +30,7 @@ That's it! IntelliJ will automatically provide full IDE support for `.kite.kts` 
 ```kotlin
 // build.gradle.kts
 plugins {
-    kotlin("jvm") version "2.0.21"
+    kotlin("jvm") version "2.0.21"  // Kotlin plugin
 }
 
 repositories {
