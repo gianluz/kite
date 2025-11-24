@@ -285,7 +285,7 @@ Run segments based on conditions:
 
 ```kotlin
 segment("deploy") {
-    condition = { ctx ->
+    condition = { ctx: ExecutionContext ->
         ctx.env("BRANCH") == "main"
     }
     execute {
