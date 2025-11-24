@@ -436,6 +436,15 @@ Apache License 2.0 - see [LICENSE](LICENSE)
 
 ---
 
+## Supporters
+
+Special thanks to **[Luno](https://www.luno.com)** for supporting the development of Kite! 🙏
+
+Luno is a leading cryptocurrency platform that believes in empowering developers with better tools. Their support has
+been instrumental in making Kite possible.
+
+---
+
 ## AI Disclaimer
 
 This project was developed with significant AI assistance. The implementation, architecture, testing, and documentation
