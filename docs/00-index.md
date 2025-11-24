@@ -138,8 +138,8 @@ Automatic secret masking in logs and environment variable support.
 
 ## Community & Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/kite/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/kite/discussions)
+- **Issues**: [GitHub Issues](https://github.com/gianluz/kite/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/gianluz/kite/discussions)
 - **Contributing**: See [Contributing Guide](dev/contributing.md)
 
 ## License

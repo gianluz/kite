@@ -94,7 +94,7 @@ Download or build the CLI:
 
 ```bash
 # Clone Kite
-git clone https://github.com/yourusername/kite.git
+git clone https://github.com/gianluz/kite.git
 cd kite
 
 # Build CLI
@@ -108,7 +108,7 @@ Or in your project:
 
 ```bash
 # Add as submodule
-git submodule add https://github.com/yourusername/kite.git tools/kite
+git submodule add https://github.com/gianluz/kite.git tools/kite
 
 # Build and use
 cd tools/kite

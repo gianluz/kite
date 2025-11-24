@@ -350,7 +350,7 @@ Now that you have Kite running, explore these topics:
 ## Getting Help
 
 - **Documentation**: [docs/](00-index.md)
-- **Issues**: [GitHub Issues](https://github.com/yourusername/kite/issues)
+- **Issues**: [GitHub Issues](https://github.com/gianluz/kite/issues)
 - **Examples**: Check `.kite/` in the Kite repository
 
 ---

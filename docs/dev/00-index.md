@@ -88,4 +88,4 @@ kite-cli/build/install/kite-cli/bin/kite-cli run quality-checks
 
 ---
 
-**For questions or help, open a [Discussion](https://github.com/yourusername/kite/discussions)**
+**For questions or help, open a [Discussion](https://github.com/gianluz/kite/discussions)**

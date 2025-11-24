@@ -161,7 +161,7 @@ See **[GitHub Actions documentation](.github/actions/README.md)** for more examp
 **1. Clone and build Kite:**
 
 ```bash
-git clone https://github.com/yourusername/kite.git
+git clone https://github.com/gianluz/kite.git
 cd kite
 ./gradlew build
 ./gradlew :kite-cli:installDist
@@ -422,7 +422,7 @@ We welcome contributions! Kite is under active development.
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/kite.git
+git clone https://github.com/gianluz/kite.git
 cd kite
 
 # Build (git hooks install automatically)
@@ -479,8 +479,8 @@ Apache License 2.0 - see [LICENSE](LICENSE)
 ## Support
 
 - **📚 Documentation:** [docs/](docs/00-index.md)
-- **🐛 Issues:** [GitHub Issues](https://github.com/yourusername/kite/issues)
-- **💬 Discussions:** [GitHub Discussions](https://github.com/yourusername/kite/discussions)
+- **🐛 Issues:** [GitHub Issues](https://github.com/gianluz/kite/issues)
+- **💬 Discussions:** [GitHub Discussions](https://github.com/gianluz/kite/discussions)
 
 ---
 
@@ -505,7 +505,7 @@ and code quality standards were carefully reviewed and validated.
 documentation may still exist due to the rapid, AI-assisted development process. If you encounter any bugs,
 inconsistencies, or areas
 where the documentation doesn't match the actual behavior, please *
-*[open an issue](https://github.com/yourusername/kite/issues)**
+*[open an issue](https://github.com/gianluz/kite/issues)**
 or submit a pull request. Your contributions help improve Kite for everyone!
 
 **Shoutout to [Firebender](https://firebender.dev)** for providing an excellent AI-powered development tool! 🔥

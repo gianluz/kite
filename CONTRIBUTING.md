@@ -28,7 +28,7 @@ This document provides a quick overview. See the full guides above for complete 
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/kite.git
+git clone https://github.com/gianluz/kite.git
 cd kite
 
 # 2. Build the project
@@ -248,8 +248,8 @@ kite-cli/build/install/kite-cli/bin/kite-cli run quality-checks
 
 ## 💡 Need Help?
 
-- **Questions?** Open a [Discussion](https://github.com/yourusername/kite/discussions)
-- **Bug report?** Open an [Issue](https://github.com/yourusername/kite/issues)
+- **Questions?** Open a [Discussion](https://github.com/gianluz/kite/discussions)
+- **Bug report?** Open an [Issue](https://github.com/gianluz/kite/issues)
 - **Documentation:** See [docs/](docs/00-index.md)
 
 ---

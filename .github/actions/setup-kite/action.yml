@@ -60,7 +60,7 @@ runs:
           TEMP_DIR=$(mktemp -d)
           cd "$TEMP_DIR"
         
-          git clone --depth 1 https://github.com/yourusername/kite.git
+          git clone --depth 1 https://github.com/gianluz/kite.git
           cd kite
         
           # Build Kite

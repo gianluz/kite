@@ -12,7 +12,7 @@ Thank you for your interest in contributing to Kite!
 ### Clone and Build
 
 ```bash
-git clone https://github.com/yourusername/kite.git
+git clone https://github.com/gianluz/kite.git
 cd kite
 
 # Build Kite CLI

@@ -346,6 +346,6 @@ See [DEVELOPMENT_PLAN.md](./DEVELOPMENT_PLAN.md) for detailed implementation roa
 - Phase 7: Testing & Refinement (Week 10)
 - Phase 8: Plugin System MVP (Weeks 11-12) - Optional
 
-[Unreleased]: https://github.com/yourusername/kite/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/gianluz/kite/compare/v0.1.0...HEAD
 
-[0.1.0-SNAPSHOT]: https://github.com/yourusername/kite/releases/tag/v0.1.0
+[0.1.0-SNAPSHOT]: https://github.com/gianluz/kite/releases/tag/v0.1.0
