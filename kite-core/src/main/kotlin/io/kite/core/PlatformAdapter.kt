@@ -9,13 +9,15 @@ import java.nio.file.Paths
  * - Detecting the current platform
  * - Populating ExecutionContext with platform-specific information
  * - Providing platform-specific functionality
+ *
+ * @deprecated Platform adapters are being phased out in favor of direct environment variable access.
+ * Use ExecutionContext.env() to check platform-specific values directly.
  */
+@Deprecated(
+    message = "Platform adapters are deprecated. Use env() to check platform-specific values directly.",
+    level = DeprecationLevel.WARNING,
+)
 interface PlatformAdapter {
-    /**
-     * The CI platform this adapter supports.
-     */
-    val platform: CIPlatform
-
     /**
      * Detects if this adapter's platform is currently active.
      *
@@ -44,8 +46,6 @@ interface PlatformAdapter {
  * See: https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
  */
 class GitLabCIPlatformAdapter : PlatformAdapter {
-    override val platform = CIPlatform.GITLAB
-
     override fun detect(environment: Map<String, String>): Boolean {
         return environment["GITLAB_CI"] == "true"
     }
@@ -61,13 +61,13 @@ class GitLabCIPlatformAdapter : PlatformAdapter {
         val isRelease = labels.any { it.trim().equals("release", ignoreCase = true) }
         val workspace = environment["CI_PROJECT_DIR"]?.let { Paths.get(it) } ?: Paths.get(".")
 
+        @Suppress("DEPRECATION")
         return ExecutionContext(
             branch = branch,
             commitSha = commitSha,
             mrNumber = mrNumber,
             isRelease = isRelease,
             isLocal = false,
-            ciPlatform = CIPlatform.GITLAB,
             environment = environment,
             workspace = workspace,
             artifacts = artifacts,
@@ -82,8 +82,6 @@ class GitLabCIPlatformAdapter : PlatformAdapter {
  * See: https://docs.github.com/en/actions/learn-github-actions/variables
  */
 class GitHubActionsPlatformAdapter : PlatformAdapter {
-    override val platform = CIPlatform.GITHUB
-
     override fun detect(environment: Map<String, String>): Boolean {
         return environment["GITHUB_ACTIONS"] == "true"
     }
@@ -109,13 +107,13 @@ class GitHubActionsPlatformAdapter : PlatformAdapter {
         val isRelease = false
         val workspace = environment["GITHUB_WORKSPACE"]?.let { Paths.get(it) } ?: Paths.get(".")
 
+        @Suppress("DEPRECATION")
         return ExecutionContext(
             branch = branch,
             commitSha = commitSha,
             mrNumber = prNumber,
             isRelease = isRelease,
             isLocal = false,
-            ciPlatform = CIPlatform.GITHUB,
             environment = environment,
             workspace = workspace,
             artifacts = artifacts,
@@ -129,8 +127,6 @@ class GitHubActionsPlatformAdapter : PlatformAdapter {
  * Uses Git commands to determine branch and commit SHA.
  */
 class LocalPlatformAdapter : PlatformAdapter {
-    override val platform = CIPlatform.LOCAL
-
     override fun detect(environment: Map<String, String>): Boolean {
         // Local is the default fallback, detected by absence of CI indicators
         return environment["CI"] != "true" &&
@@ -158,13 +154,13 @@ class LocalPlatformAdapter : PlatformAdapter {
 
         val workspace = Paths.get(System.getProperty("user.dir"))
 
+        @Suppress("DEPRECATION")
         return ExecutionContext(
             branch = branch,
             commitSha = commitSha,
             mrNumber = null,
             isRelease = false,
             isLocal = true,
-            ciPlatform = CIPlatform.LOCAL,
             environment = environment,
             workspace = workspace,
             artifacts = artifacts,
@@ -178,8 +174,6 @@ class LocalPlatformAdapter : PlatformAdapter {
  * Uses common CI environment variables.
  */
 class GenericPlatformAdapter : PlatformAdapter {
-    override val platform = CIPlatform.GENERIC
-
     override fun detect(environment: Map<String, String>): Boolean {
         // Detect generic CI by presence of common CI indicators
         return environment["CI"] == "true"
@@ -204,13 +198,13 @@ class GenericPlatformAdapter : PlatformAdapter {
                 ?.let { Paths.get(it) }
                 ?: Paths.get(".")
 
+        @Suppress("DEPRECATION")
         return ExecutionContext(
             branch = branch,
             commitSha = commitSha,
             mrNumber = null,
             isRelease = false,
             isLocal = false,
-            ciPlatform = CIPlatform.GENERIC,
             environment = environment,
             workspace = workspace,
             artifacts = artifacts,

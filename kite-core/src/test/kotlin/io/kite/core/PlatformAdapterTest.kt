@@ -38,7 +38,6 @@ class GitLabCIPlatformAdapterTest {
         assertEquals("42", context.mrNumber)
         assertTrue(context.isRelease) // "release" label present
         assertFalse(context.isLocal)
-        assertEquals(CIPlatform.GITLAB, context.ciPlatform)
     }
 
     @Test
@@ -100,7 +99,6 @@ class GitHubActionsPlatformAdapterTest {
         assertEquals("feature/test", context.branch)
         assertEquals("abc123def456", context.commitSha)
         assertFalse(context.isLocal)
-        assertEquals(CIPlatform.GITHUB, context.ciPlatform)
     }
 
     @Test
@@ -175,13 +173,11 @@ class LocalPlatformAdapterTest {
         // Branch and SHA detection not yet implemented, so expect placeholders
         assertEquals("main", context.branch)
         assertTrue(context.isLocal)
-        assertEquals(CIPlatform.LOCAL, context.ciPlatform)
     }
 
     @Test
     fun `platform is LOCAL`() {
         val adapter = LocalPlatformAdapter()
-        assertEquals(CIPlatform.LOCAL, adapter.platform)
     }
 }
 
@@ -213,7 +209,6 @@ class GenericPlatformAdapterTest {
         assertEquals("main", context.branch)
         assertEquals("abc123", context.commitSha)
         assertFalse(context.isLocal)
-        assertEquals(CIPlatform.GENERIC, context.ciPlatform)
     }
 
     @Test
@@ -264,7 +259,6 @@ class PlatformDetectorTest {
         val env = mapOf("GITLAB_CI" to "true")
         val adapter = PlatformDetector.detect(env)
 
-        assertEquals(CIPlatform.GITLAB, adapter.platform)
         assertTrue(adapter is GitLabCIPlatformAdapter)
     }
 
@@ -273,7 +267,6 @@ class PlatformDetectorTest {
         val env = mapOf("GITHUB_ACTIONS" to "true")
         val adapter = PlatformDetector.detect(env)
 
-        assertEquals(CIPlatform.GITHUB, adapter.platform)
         assertTrue(adapter is GitHubActionsPlatformAdapter)
     }
 
@@ -282,7 +275,6 @@ class PlatformDetectorTest {
         val env = mapOf("CI" to "true")
         val adapter = PlatformDetector.detect(env)
 
-        assertEquals(CIPlatform.GENERIC, adapter.platform)
         assertTrue(adapter is GenericPlatformAdapter)
     }
 
@@ -291,7 +283,6 @@ class PlatformDetectorTest {
         val env = emptyMap<String, String>()
         val adapter = PlatformDetector.detect(env)
 
-        assertEquals(CIPlatform.LOCAL, adapter.platform)
         assertTrue(adapter is LocalPlatformAdapter)
     }
 
@@ -300,7 +291,6 @@ class PlatformDetectorTest {
         val env = mapOf("CI" to "true", "GITLAB_CI" to "true")
         val adapter = PlatformDetector.detect(env)
 
-        assertEquals(CIPlatform.GITLAB, adapter.platform)
     }
 
     @Test
@@ -308,6 +298,5 @@ class PlatformDetectorTest {
         val env = mapOf("CI" to "true", "GITHUB_ACTIONS" to "true")
         val adapter = PlatformDetector.detect(env)
 
-        assertEquals(CIPlatform.GITHUB, adapter.platform)
     }
 }

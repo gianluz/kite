@@ -70,7 +70,7 @@ class RideCommand : CliktCommand(
             val context = platform.createContext(emptyMap(), artifactManager)
 
             if (opts.verbose) {
-                Output.info("Platform: ${context.ciPlatform}")
+                Output.info("Branch: ${context.branch}, CI: ${context.isCI}")
                 Output.info("Branch: ${context.branch}")
                 if (context.commitSha != null) Output.info("Commit: ${context.commitSha}")
             }

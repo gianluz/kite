@@ -52,7 +52,7 @@ class RunCommand : CliktCommand(
             val context = platform.createContext(emptyMap())
 
             if (opts.verbose) {
-                Output.info("Platform: ${context.ciPlatform}")
+                Output.info("Branch: ${context.branch}, CI: ${context.isCI}")
             }
 
             // Discover and load segments

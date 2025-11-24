@@ -33,6 +33,7 @@ class ExecutionContextTest {
         val artifacts = InMemoryArtifactManager()
         val workspace = Paths.get("/workspace")
 
+        @Suppress("DEPRECATION")
         val context =
             ExecutionContext(
                 branch = "feature/test",
@@ -40,7 +41,6 @@ class ExecutionContextTest {
                 mrNumber = "123",
                 isRelease = true,
                 isLocal = false,
-                ciPlatform = CIPlatform.GITLAB,
                 environment = env,
                 workspace = workspace,
                 artifacts = artifacts,
@@ -48,10 +48,12 @@ class ExecutionContextTest {
 
         assertEquals("feature/test", context.branch)
         assertEquals("def456", context.commitSha)
+        @Suppress("DEPRECATION")
         assertEquals("123", context.mrNumber)
+        @Suppress("DEPRECATION")
         assertTrue(context.isRelease)
+        @Suppress("DEPRECATION")
         assertFalse(context.isLocal)
-        assertEquals(CIPlatform.GITLAB, context.ciPlatform)
         assertEquals(env, context.environment)
         assertEquals(workspace, context.workspace)
         assertEquals(artifacts, context.artifacts)
@@ -189,22 +191,5 @@ class ExecutionContextTest {
         assertTrue(str.contains("feature/test"))
         assertTrue(str.contains("abc123de")) // First 8 chars
         assertTrue(str.contains("isCI"))
-    }
-}
-
-class CIPlatformTest {
-    @Test
-    fun `displayName returns readable names`() {
-        assertEquals("GitLab CI", CIPlatform.GITLAB.displayName)
-        assertEquals("GitHub Actions", CIPlatform.GITHUB.displayName)
-        assertEquals("Local", CIPlatform.LOCAL.displayName)
-        assertEquals("Generic CI", CIPlatform.GENERIC.displayName)
-    }
-
-    @Test
-    fun `all platforms have display names`() {
-        CIPlatform.values().forEach { platform ->
-            assertTrue(platform.displayName.isNotBlank())
-        }
     }
 }

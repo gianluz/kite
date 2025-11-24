@@ -62,11 +62,6 @@ data class ExecutionContext(
         level = DeprecationLevel.WARNING,
     )
     val isLocal: Boolean = environment["CI"] != "true",
-    @Deprecated(
-        message = "Platform detection is unnecessary. Check environment variables directly instead.",
-        level = DeprecationLevel.WARNING,
-    )
-    val ciPlatform: CIPlatform = CIPlatform.GENERIC,
 ) {
     /**
      * Gets an environment variable value.
@@ -190,42 +185,4 @@ data class ExecutionContext(
     override fun toString(): String {
         return "ExecutionContext(branch='$branch', commitSha='${commitSha.take(8)}', isCI=$isCI)"
     }
-}
-
-/**
- * Represents different CI/CD platforms.
- *
- * @deprecated Platform detection is unnecessary in a platform-agnostic design.
- * Check environment variables directly instead.
- */
-@Deprecated(
-    message = "Platform detection is unnecessary. Check environment variables directly using env().",
-    level = DeprecationLevel.WARNING,
-)
-enum class CIPlatform {
-    /** GitLab CI */
-    GITLAB,
-
-    /** GitHub Actions */
-    GITHUB,
-
-    /** Local execution */
-    LOCAL,
-
-    /** Generic/unknown CI platform */
-    GENERIC,
-
-    ;
-
-    /**
-     * Returns a human-readable name for this platform.
-     */
-    val displayName: String
-        get() =
-            when (this) {
-                GITLAB -> "GitLab CI"
-                GITHUB -> "GitHub Actions"
-                LOCAL -> "Local"
-                GENERIC -> "Generic CI"
-            }
 }
