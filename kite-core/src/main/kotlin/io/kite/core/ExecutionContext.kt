@@ -6,34 +6,88 @@ import java.nio.file.Paths
 /**
  * Execution context provided to segments during their execution.
  *
- * Contains information about the current CI/CD environment, Git state,
- * and provides access to artifacts and utilities.
+ * Provides platform-agnostic access to the execution environment, Git state,
+ * and utilities for segments to use.
  *
- * @property branch The current Git branch
- * @property commitSha The current Git commit SHA
- * @property mrNumber The merge/pull request number (null if not in MR context)
- * @property isRelease Whether this is a release build
- * @property isLocal Whether this is running locally (not in CI)
- * @property ciPlatform The CI platform being used
- * @property environment Environment variables as a map
+ * **Design Philosophy:**
+ * Kite is intentionally platform-agnostic. Instead of relying on opinionated
+ * properties like [mrNumber] or [isRelease], segments should query environment
+ * variables directly using [env] to check platform-specific values.
+ *
+ * **Migration Guide:**
+ * ```kotlin
+ * // Instead of: ctx.mrNumber != null
+ * // Use: ctx.env("CI_MERGE_REQUEST_IID") != null (GitLab)
+ * //  or: ctx.env("GITHUB_EVENT_NAME") == "pull_request" (GitHub)
+ *
+ * // Instead of: ctx.isRelease
+ * // Use: ctx.env("CI_MERGE_REQUEST_LABELS")?.contains("release") == true
+ * //  or: Define your own convention
+ * ```
+ *
+ * @property branch The current Git branch (detected from git or CI env vars)
+ * @property commitSha The current Git commit SHA (detected from git or CI env vars)
+ * @property environment Environment variables as a map - query these directly for platform-specific info
  * @property workspace The workspace root directory
  * @property artifacts Artifact manager for sharing data between segments
  * @property logger Logger for this segment execution
+ * @property mrNumber DEPRECATED: Use env("CI_MERGE_REQUEST_IID") or env("GITHUB_REF") instead
+ * @property isRelease DEPRECATED: Define your own release detection logic using env()
+ * @property isLocal DEPRECATED: Use isCI instead or check env("CI") directly
+ * @property ciPlatform DEPRECATED: Check environment variables directly instead
  */
 data class ExecutionContext(
     val branch: String,
     val commitSha: String,
-    val mrNumber: String? = null,
-    val isRelease: Boolean = false,
-    val isLocal: Boolean = false,
-    val ciPlatform: CIPlatform = CIPlatform.LOCAL,
     val environment: Map<String, String> = emptyMap(),
     val workspace: Path = Paths.get("."),
     val artifacts: ArtifactManager = InMemoryArtifactManager(),
     val logger: SegmentLoggerInterface = NoOpLogger,
+    // Deprecated properties for backward compatibility
+    @Deprecated(
+        message = "Platform-specific property. Use env(\"CI_MERGE_REQUEST_IID\") for GitLab or env(\"GITHUB_REF\") for GitHub instead.",
+        replaceWith = ReplaceWith("env(\"CI_MERGE_REQUEST_IID\")"),
+        level = DeprecationLevel.WARNING,
+    )
+    val mrNumber: String? = null,
+    @Deprecated(
+        message = "Platform-specific property. Define your own release detection logic using env().",
+        replaceWith = ReplaceWith("env(\"CI_MERGE_REQUEST_LABELS\")?.contains(\"release\") == true"),
+        level = DeprecationLevel.WARNING,
+    )
+    val isRelease: Boolean = false,
+    @Deprecated(
+        message = "Use !isCI instead, or check env(\"CI\") directly for more control.",
+        replaceWith = ReplaceWith("!isCI"),
+        level = DeprecationLevel.WARNING,
+    )
+    val isLocal: Boolean = environment["CI"] != "true",
+    @Deprecated(
+        message = "Platform detection is unnecessary. Check environment variables directly instead.",
+        level = DeprecationLevel.WARNING,
+    )
+    val ciPlatform: CIPlatform = CIPlatform.GENERIC,
 ) {
     /**
      * Gets an environment variable value.
+     *
+     * This is the primary way to check platform-specific information:
+     * ```kotlin
+     * // Check if in GitLab MR
+     * val isGitLabMR = env("CI_MERGE_REQUEST_IID") != null
+     *
+     * // Check if in GitHub PR
+     * val isGitHubPR = env("GITHUB_EVENT_NAME") == "pull_request"
+     *
+     * // Check for release label (your convention)
+     * val isRelease = env("CI_MERGE_REQUEST_LABELS")?.contains("release") == true
+     * ```
+     *
+     * Common environment variables:
+     * - GitLab: `CI_MERGE_REQUEST_IID`, `CI_COMMIT_REF_NAME`, `CI_MERGE_REQUEST_LABELS`
+     * - GitHub: `GITHUB_REF`, `GITHUB_EVENT_NAME`, `GITHUB_SHA`
+     * - Jenkins: `CHANGE_ID`, `BRANCH_NAME`, `GIT_COMMIT`
+     * - CircleCI: `CIRCLE_PULL_REQUEST`, `CIRCLE_BRANCH`
      */
     fun env(key: String): String? = environment[key]
 
@@ -90,25 +144,42 @@ data class ExecutionContext(
 
     /**
      * Returns true if this is a merge/pull request build.
+     *
+     * @deprecated Platform-specific detection. Check environment variables directly:
+     * - GitLab: `env("CI_MERGE_REQUEST_IID") != null`
+     * - GitHub: `env("GITHUB_EVENT_NAME") == "pull_request"`
+     * - Jenkins: `env("CHANGE_ID") != null`
      */
+    @Deprecated(
+        message = "Platform-specific detection. Check env(\"CI_MERGE_REQUEST_IID\") or env(\"GITHUB_EVENT_NAME\") instead.",
+        replaceWith = ReplaceWith("env(\"CI_MERGE_REQUEST_IID\") != null"),
+        level = DeprecationLevel.WARNING,
+    )
     val isMergeRequest: Boolean
         get() = mrNumber != null
 
     /**
-     * Returns true if this is running in a CI environment.
+     * Returns true if running in a CI environment.
+     * Checks for the common `CI=true` environment variable.
      */
     val isCI: Boolean
-        get() = !isLocal
+        get() = environment["CI"] == "true"
 
     override fun toString(): String {
-        return "ExecutionContext(branch='$branch', commitSha='${commitSha.take(8)}', " +
-            "mrNumber=$mrNumber, isRelease=$isRelease, isLocal=$isLocal, ciPlatform=$ciPlatform)"
+        return "ExecutionContext(branch='$branch', commitSha='${commitSha.take(8)}', isCI=$isCI)"
     }
 }
 
 /**
  * Represents different CI/CD platforms.
+ *
+ * @deprecated Platform detection is unnecessary in a platform-agnostic design.
+ * Check environment variables directly instead.
  */
+@Deprecated(
+    message = "Platform detection is unnecessary. Check environment variables directly using env().",
+    level = DeprecationLevel.WARNING,
+)
 enum class CIPlatform {
     /** GitLab CI */
     GITLAB,

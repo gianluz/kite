@@ -19,10 +19,11 @@ class ExecutionContextTest {
 
         assertEquals("main", context.branch)
         assertEquals("abc123", context.commitSha)
+        @Suppress("DEPRECATION")
         assertNull(context.mrNumber)
+        @Suppress("DEPRECATION")
         assertFalse(context.isRelease)
-        assertFalse(context.isLocal)
-        assertEquals(CIPlatform.LOCAL, context.ciPlatform)
+        assertFalse(context.isCI) // No CI env var, so not in CI
         assertEquals(emptyMap(), context.environment)
     }
 
@@ -119,12 +120,12 @@ class ExecutionContextTest {
     }
 
     @Test
-    fun `isCI is opposite of isLocal`() {
+    fun `isCI detects CI environment`() {
         val local =
             ExecutionContext(
                 branch = "main",
                 commitSha = "abc123",
-                isLocal = true,
+                environment = emptyMap(), // No CI env var
             )
         assertFalse(local.isCI)
 
@@ -132,7 +133,7 @@ class ExecutionContextTest {
             ExecutionContext(
                 branch = "main",
                 commitSha = "abc123",
-                isLocal = false,
+                environment = mapOf("CI" to "true"),
             )
         assertTrue(ci.isCI)
     }
@@ -143,19 +144,13 @@ class ExecutionContextTest {
             ExecutionContext(
                 branch = "feature/test",
                 commitSha = "abc123def456",
-                mrNumber = "42",
-                isRelease = true,
-                isLocal = false,
-                ciPlatform = CIPlatform.GITLAB,
+                environment = mapOf("CI" to "true"),
             )
 
         val str = context.toString()
         assertTrue(str.contains("feature/test"))
         assertTrue(str.contains("abc123de")) // First 8 chars
-        assertTrue(str.contains("42"))
-        assertTrue(str.contains("true"))
-        assertTrue(str.contains("false"))
-        assertTrue(str.contains("GITLAB"))
+        assertTrue(str.contains("isCI"))
     }
 }
 
