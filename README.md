@@ -116,44 +116,62 @@ kite rides
 
 ## Installation
 
-### Using in Your Project
+> **Note:** Kite is under active development and not yet published to Maven Central. To try it out, you'll need to build
+> from source.
 
-**1. Create Kite structure:**
+### Try It Out (From Source)
+
+**1. Clone and build Kite:**
 
 ```bash
+git clone https://github.com/yourusername/kite.git
+cd kite
+./gradlew build
+./gradlew :kite-cli:installDist
+```
+
+**2. Add kite to your PATH (optional):**
+
+```bash
+# Add to ~/.bashrc or ~/.zshrc
+export PATH="$PATH:/path/to/kite/kite-cli/build/install/kite-cli/bin"
+
+# Or create an alias
+alias kite='/path/to/kite/kite-cli/build/install/kite-cli/bin/kite-cli'
+```
+
+**3. Create a sample project:**
+
+```bash
+mkdir my-kite-project
+cd my-kite-project
 mkdir -p .kite/segments .kite/rides
 ```
 
-**2. Add to your project:**
-
-```kotlin
-// build.gradle.kts
-dependencies {
-    implementation("io.kite:kite-dsl:0.1.0")
-}
-```
-
-**3. Define your first segment:**
+**4. Define your first segment:**
 
 ```kotlin
 // .kite/segments/hello.kite.kts
 segments {
     segment("hello") {
+        description = "My first Kite segment"
         execute {
             logger.info("Hello from Kite!")
+            exec("echo", "This works!")
         }
     }
 }
 ```
 
-**4. Run it:**
+**5. Run it:**
 
 ```bash
-./gradlew :kite-cli:installDist
-kite-cli/build/install/kite-cli/bin/kite-cli run hello
+kite run hello
+# Or if not in PATH:
+# /path/to/kite/kite-cli/build/install/kite-cli/bin/kite-cli run hello
 ```
 
-See **[Installation Guide](docs/02-installation.md)** for complete setup instructions.
+See **[Installation Guide](docs/02-installation.md)** for complete setup instructions and troubleshooting.
 
 ---
 
