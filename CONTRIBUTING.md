@@ -183,7 +183,7 @@ We use **ktlint** and **detekt** to enforce consistent code style.
 - **Naming:** camelCase for functions/variables, PascalCase for classes
 - **Documentation:** KDoc for public APIs
 
-See [Code Quality Guide](docs/dev/code-quality.md) for complete standards.
+See [Code Quality Guide](docs/dev/02-code-quality.md) for complete standards.
 
 ---
 
@@ -273,4 +273,4 @@ Every contribution, no matter how small, helps make Kite better. Thank you for b
 
 ---
 
-**For complete contributing guidelines, see [docs/dev/contributing.md](docs/dev/contributing.md)**
+**For complete contributing guidelines, see [docs/dev/01-contributing.md](docs/dev/01-contributing.md)**

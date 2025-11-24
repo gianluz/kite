@@ -263,8 +263,9 @@ We welcome contributions! Kite is under active development.
 
 **For Contributors:**
 
-- **[Contributing Guide](docs/dev/contributing.md)** - Development setup and guidelines
-- **[Code Quality](docs/dev/code-quality.md)** - Standards and linting
+- **[Contributing Guide](docs/dev/01-contributing.md)** - Development setup and guidelines
+- **[Code Quality](docs/dev/02-code-quality.md)** - Standards and linting
+- **[Testing Strategy](docs/dev/03-testing-strategy.md)** - Integration testing approach
 - **[Architecture](docs/specs/)** - System design and specifications
 
 ### Development Setup
