@@ -146,8 +146,8 @@ These would be **optional** dependencies, not in core.
 
 ### GitLab CI
 
-- `CI=true`
-- `GITLAB_CI=true`
+- `CI=true` ✅ *Standard*
+- `GITLAB_CI=true` ✅ *Platform-specific (used by Kite's isCI detection)*
 - `CI_COMMIT_REF_NAME` - Branch name
 - `CI_COMMIT_SHA` - Commit SHA
 - `CI_MERGE_REQUEST_IID` - MR number
@@ -156,8 +156,8 @@ These would be **optional** dependencies, not in core.
 
 ### GitHub Actions
 
-- `CI=true`
-- `GITHUB_ACTIONS=true`
+- `CI=true` ✅ *Standard*
+- `GITHUB_ACTIONS=true` ✅ *Platform-specific (used by Kite's isCI detection)*
 - `GITHUB_REF` - Full ref (e.g., `refs/heads/main`, `refs/pull/123/merge`)
 - `GITHUB_SHA` - Commit SHA
 - `GITHUB_EVENT_NAME` - Event type (`pull_request`, `push`, etc.)
@@ -165,7 +165,8 @@ These would be **optional** dependencies, not in core.
 
 ### Jenkins
 
-- `CI=true`
+- `CI=true` ✅ *Standard*
+- `JENKINS_HOME` - Jenkins installation path ✅ *(used by Kite's isCI detection)*
 - `BRANCH_NAME` - Branch name
 - `GIT_COMMIT` - Commit SHA
 - `CHANGE_ID` - PR/Change number
@@ -173,8 +174,8 @@ These would be **optional** dependencies, not in core.
 
 ### CircleCI
 
-- `CI=true`
-- `CIRCLECI=true`
+- `CI=true` ✅ *Standard*
+- `CIRCLECI=true` ✅ *Platform-specific (used by Kite's isCI detection)*
 - `CIRCLE_BRANCH` - Branch name
 - `CIRCLE_SHA1` - Commit SHA
 - `CIRCLE_PULL_REQUEST` - PR URL
@@ -182,12 +183,52 @@ These would be **optional** dependencies, not in core.
 
 ### Travis CI
 
-- `CI=true`
-- `TRAVIS=true`
+- `CI=true` ✅ *Standard*
+- `TRAVIS=true` ✅ *Platform-specific (used by Kite's isCI detection)*
 - `TRAVIS_BRANCH` - Branch name
 - `TRAVIS_COMMIT` - Commit SHA
 - `TRAVIS_PULL_REQUEST` - PR number (or "false")
 - `TRAVIS_BUILD_DIR` - Workspace path
+
+### Buildkite
+
+- `CI=true` ✅ *Standard*
+- `BUILDKITE=true` ✅ *Platform-specific (used by Kite's isCI detection)*
+- `BUILDKITE_BRANCH` - Branch name
+- `BUILDKITE_COMMIT` - Commit SHA
+- `BUILDKITE_PULL_REQUEST` - PR number (or "false")
+- `BUILDKITE_BUILD_CHECKOUT_PATH` - Workspace path
+
+### TeamCity
+
+- `TEAMCITY_VERSION` - TeamCity version ✅ *(used by Kite's isCI detection)*
+- `BUILD_VCS_BRANCH` - Branch name
+- `BUILD_VCS_NUMBER` - Commit SHA
+
+## CI Detection: The `isCI` Property
+
+While Kite is platform-agnostic for workflow logic, we provide a helper `isCI` property that reliably
+detects if code is running in any CI environment:
+
+```kotlin
+val isCI: Boolean
+    get() =
+        environment["CI"]?.equals("true", ignoreCase = true) == true ||
+            environment["GITHUB_ACTIONS"]?.equals("true", ignoreCase = true) == true ||
+            environment["GITLAB_CI"]?.equals("true", ignoreCase = true) == true ||
+            environment["JENKINS_HOME"] != null ||
+            environment["CIRCLECI"]?.equals("true", ignoreCase = true) == true ||
+            environment["TRAVIS"]?.equals("true", ignoreCase = true) == true ||
+            environment["BUILDKITE"]?.equals("true", ignoreCase = true) == true ||
+            environment["TEAMCITY_VERSION"] != null
+```
+
+This checks:
+
+1. **`CI=true`** - The de facto standard set by most platforms
+2. **Platform-specific indicators** - As a fallback for platforms that don't set `CI=true`
+
+**For custom CI systems:** Simply set `CI=true` in your environment to be detected.
 
 ## Implementation Status
 

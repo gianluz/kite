@@ -120,22 +120,60 @@ class ExecutionContextTest {
     }
 
     @Test
-    fun `isCI detects CI environment`() {
+    fun `isCI detects CI environment from various indicators`() {
+        // Local - no CI indicators
         val local =
             ExecutionContext(
                 branch = "main",
                 commitSha = "abc123",
-                environment = emptyMap(), // No CI env var
+                environment = emptyMap(),
             )
         assertFalse(local.isCI)
 
-        val ci =
+        // Standard CI=true
+        val ciStandard =
             ExecutionContext(
                 branch = "main",
                 commitSha = "abc123",
                 environment = mapOf("CI" to "true"),
             )
-        assertTrue(ci.isCI)
+        assertTrue(ciStandard.isCI)
+
+        // GitHub Actions
+        val github =
+            ExecutionContext(
+                branch = "main",
+                commitSha = "abc123",
+                environment = mapOf("GITHUB_ACTIONS" to "true"),
+            )
+        assertTrue(github.isCI)
+
+        // GitLab CI
+        val gitlab =
+            ExecutionContext(
+                branch = "main",
+                commitSha = "abc123",
+                environment = mapOf("GITLAB_CI" to "true"),
+            )
+        assertTrue(gitlab.isCI)
+
+        // Jenkins
+        val jenkins =
+            ExecutionContext(
+                branch = "main",
+                commitSha = "abc123",
+                environment = mapOf("JENKINS_HOME" to "/var/jenkins"),
+            )
+        assertTrue(jenkins.isCI)
+
+        // CircleCI
+        val circle =
+            ExecutionContext(
+                branch = "main",
+                commitSha = "abc123",
+                environment = mapOf("CIRCLECI" to "true"),
+            )
+        assertTrue(circle.isCI)
     }
 
     @Test
