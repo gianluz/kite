@@ -54,9 +54,16 @@ runs:
           echo "✓ Using cached Kite installation"
           INSTALLED_VERSION=$(cat "$INSTALL_DIR/version.txt" 2>/dev/null || echo "dev")
         else
-          echo "Building Kite from source..."
+          echo "Installing Kite from source..."
         
-          # Build from current repository (already checked out by actions/checkout)
+          # Clone the repository to a temp directory
+          TEMP_DIR=$(mktemp -d)
+          cd "$TEMP_DIR"
+        
+          git clone --depth 1 https://github.com/yourusername/kite.git
+          cd kite
+        
+          # Build Kite
           ./gradlew :kite-cli:installDist --no-daemon
         
           # Copy to install directory
@@ -66,8 +73,12 @@ runs:
           # Save version info
           echo "dev-$(git rev-parse --short HEAD 2>/dev/null || echo 'unknown')" > "$INSTALL_DIR/version.txt"
         
+          # Clean up
+          cd /
+          rm -rf "$TEMP_DIR"
+        
           INSTALLED_VERSION=$(cat "$INSTALL_DIR/version.txt")
-          echo "✓ Kite built successfully (version: $INSTALLED_VERSION)"
+          echo "✓ Kite installed successfully (version: $INSTALLED_VERSION)"
         fi
         
         # Add to PATH

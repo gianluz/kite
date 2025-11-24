@@ -16,10 +16,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run CI Build
-        uses: ./.github/actions/run-kite
+      - name: Set up Java
+        uses: actions/setup-java@v4
         with:
-          command: ride CI
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build Kite CLI
+        run: ./gradlew :kite-cli:installDist
+
+      - name: Run CI Build
+        run: kite-cli/build/install/kite-cli/bin/kite-cli ride CI
 
       - name: Upload Test Results
         if: always()
