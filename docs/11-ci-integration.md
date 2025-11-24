@@ -40,7 +40,42 @@ kite-cli/build/install/kite-cli/bin/kite-cli ride CI
 
 ## GitHub Actions
 
-### Complete Example
+### ⚡ Quick Start with Kite Actions (Recommended)
+
+**The easiest way** to use Kite in GitHub Actions is with our pre-built actions:
+
+```yaml
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      # One step to rule them all!
+      - name: Run CI Workflow
+        uses: ./.github/actions/run-kite
+        with:
+          command: ride CI
+```
+
+**That's it!** The action handles:
+
+- ✅ Java installation
+- ✅ Building Kite from source
+- ✅ Caching for fast subsequent runs (~10 sec instead of 2-3 min)
+- ✅ Running your workflow
+
+**See [GitHub Actions documentation](.github/actions/README.md) for complete details.**
+
+---
+
+### Manual Setup (Alternative)
+
+If you prefer manual control, you can set up Kite yourself:
 
 ```yaml
 name: CI Pipeline
@@ -88,6 +123,8 @@ jobs:
           path: .kite/artifacts/
           retention-days: 7
 ```
+
+**Note:** The manual approach requires building Kite on every run. Use the action for better caching!
 
 ### With Secrets
 

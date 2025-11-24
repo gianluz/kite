@@ -239,6 +239,26 @@ ride {
 
 ### GitHub Actions (`.github/workflows/ci.yml`)
 
+**Easiest approach** - Use the Kite action:
+
+```yaml
+name: CI
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run CI
+        uses: ./.github/actions/run-kite
+        with:
+          command: ride CI
+```
+
+Or manual setup:
+
 ```yaml
 name: CI
 on: [push, pull_request]
@@ -258,6 +278,10 @@ jobs:
       - name: Run CI
         run: kite-cli/build/install/kite-cli/bin/kite-cli ride CI
 ```
+
+**Tip:** The action includes caching for much faster subsequent runs!
+
+See [CI Integration](11-ci-integration.md) and [GitHub Actions](.github/actions/README.md) for details.
 
 ## Common Patterns
 
