@@ -399,4 +399,15 @@ Apache License 2.0 - see [LICENSE](LICENSE)
 
 ---
 
+## AI Disclaimer
+
+This project was developed with significant AI assistance. The implementation, architecture, testing, and documentation
+were created through extensive collaboration with Claude (Anthropic) using the Firebender IDE. While AI played a major
+role in accelerating development and ensuring comprehensive test coverage, all design decisions, architectural choices,
+and code quality standards were carefully reviewed and validated.
+
+**Shoutout to [Firebender](https://firebender.dev)** for providing an excellent AI-powered development environment! 🔥
+
+---
+
 **Made with ❤️ using Kotlin**
