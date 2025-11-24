@@ -1,108 +1,339 @@
-# kite
+# 🪁 Kite
 
-A Kotlin-based CI ride runner for GitHub Actions, GitLab CI, and beyond.
+A modern, type-safe CI/CD workflow runner for Kotlin projects.
 
-## Overview
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Kotlin](https://img.shields.io/badge/kotlin-2.0.21-blue.svg?logo=kotlin)](http://kotlinlang.org)
+[![Java](https://img.shields.io/badge/Java-17+-orange.svg)](https://openjdk.java.net/)
 
-Kite replaces Fastlane and bash scripting in CI/CD with a type-safe, testable Kotlin DSL. Define **segments** (units of
-work) once, compose them into different **rides** (workflows) for different scenarios.
+---
 
-## Key Terminology
+## What is Kite?
 
-- **Ride**: A pipeline/workflow (e.g., "MR Ride", "Release Ride")
-- **Segment**: A single unit of work (e.g., "build", "test", "deploy")
-- **Flow**: Execution order and dependencies of segments
+Kite helps you define and execute CI/CD workflows using a **type-safe Kotlin DSL**. Replace bash scripts and YAML
+configuration with testable, reusable Kotlin code.
+
+**Key Features:**
+
+- 🎯 **Type-safe DSL** - Catch errors at compile time, not runtime
+- ⚡ **Parallel execution** - Run segments in parallel for faster builds
+- 🔒 **Automatic secret masking** - Secrets never leak into logs
+- 📦 **Artifact management** - Share build outputs between segments
+- 🔄 **CI/CD ready** - Works with GitHub Actions, GitLab CI, Jenkins, and more
+- 🧩 **Reusable components** - Define segments once, compose into different workflows
+
+---
 
 ## Quick Example
+
+**Define segments** (units of work):
 
 ```kotlin
 // .kite/segments/build.kite.kts
 segments {
     segment("build") {
-        execute { exec("./gradlew", "assembleRelease") }
+        description = "Build the application"
+        execute {
+            exec("./gradlew", "assembleRelease")
+        }
+    }
+    
+    segment("test") {
+        description = "Run tests"
+        dependsOn("build")
+        execute {
+            exec("./gradlew", "test")
+        }
     }
 }
+```
 
-// .kite/rides/mr.kite.kts
+**Compose into rides** (workflows):
+
+```kotlin
+// .kite/rides/ci.kite.kts
 ride {
-    name = "MR Ride"
+    name = "CI"
+    maxConcurrency = 4
     
     flow {
         segment("build")
         
         parallel {
-            segment("unitTest")
+            segment("test")
+            segment("lint")
+            segment("detekt")
+        }
+    }
+}
+```
+
+**Execute:**
+
+```bash
+# Run a complete workflow
+kite ride CI
+
+# Run specific segments
+kite run test lint
+
+# List available workflows
+kite rides
+```
+
+---
+
+## Documentation
+
+📚 **[Complete Documentation](docs/00-index.md)**
+
+### Getting Started
+
+- **[Quick Start Guide](docs/01-getting-started.md)** - Get up and running in 5 minutes
+- **[Installation](docs/02-installation.md)** - Setup and configuration
+- **[Core Concepts](docs/03-core-concepts.md)** - Understand rides, segments, and flows
+
+### Writing Workflows
+
+- **[Writing Segments](docs/04-writing-segments.md)** - Create reusable units of work
+- **[Writing Rides](docs/05-writing-rides.md)** - Compose segments into workflows
+- **[Execution Context](docs/06-execution-context.md)** - Complete API reference
+
+### Advanced Topics
+
+- **[Parallel Execution](docs/07-parallel-execution.md)** - Optimize performance
+- **[Artifacts](docs/08-artifacts.md)** - Share files between segments
+- **[Secrets Management](docs/09-secrets.md)** - Handle sensitive data securely
+- **[External Dependencies](docs/10-external-dependencies.md)** - Use external libraries
+
+### Integration & Reference
+
+- **[CI/CD Integration](docs/11-ci-integration.md)** - GitHub Actions, GitLab CI, Jenkins
+- **[CLI Reference](docs/12-cli-reference.md)** - Command-line documentation
+- **[Troubleshooting](docs/99-troubleshooting.md)** - Common issues and solutions
+
+---
+
+## Installation
+
+### Using in Your Project
+
+**1. Create Kite structure:**
+
+```bash
+mkdir -p .kite/segments .kite/rides
+```
+
+**2. Add to your project:**
+
+```kotlin
+// build.gradle.kts
+dependencies {
+    implementation("io.kite:kite-dsl:0.1.0")
+}
+```
+
+**3. Define your first segment:**
+
+```kotlin
+// .kite/segments/hello.kite.kts
+segments {
+    segment("hello") {
+        execute {
+            logger.info("Hello from Kite!")
+        }
+    }
+}
+```
+
+**4. Run it:**
+
+```bash
+./gradlew :kite-cli:installDist
+kite-cli/build/install/kite-cli/bin/kite-cli run hello
+```
+
+See **[Installation Guide](docs/02-installation.md)** for complete setup instructions.
+
+---
+
+## Example Workflows
+
+### Android Build Pipeline
+
+```kotlin
+ride {
+    name = "Android CI"
+    maxConcurrency = 3
+    
+    flow {
+        segment("clean")
+        segment("compile")
+        
+        parallel {
+            segment("unit-tests")
+            segment("instrumented-tests")
+            segment("lint")
+        }
+        
+        segment("assemble")
+    }
+}
+```
+
+### Multi-Module Project
+
+```kotlin
+parallel {
+    segment("test-core")
+    segment("test-api")
+    segment("test-ui")
+}
+```
+
+### Conditional Deployment
+
+```kotlin
+segment("deploy") {
+    condition = { ctx ->
+        ctx.env("BRANCH") == "main"
+    }
+    execute {
+        val token = requireSecret("DEPLOY_TOKEN")
+        exec("./deploy.sh", "--prod")
+    }
+}
+```
+
+---
+
+## Why Kite?
+
+### Before: Bash Scripts 😱
+
+```bash
+#!/bin/bash
+set -e
+
+./gradlew clean
+./gradlew assembleRelease
+./gradlew test
+./gradlew lint
+
+# No type safety, hard to test, difficult to debug
+```
+
+### After: Kite ✨
+
+```kotlin
+segments {
+    segment("clean") { execute { exec("./gradlew", "clean") } }
+    segment("build") { execute { exec("./gradlew", "assembleRelease") } }
+    segment("test") { dependsOn("build"); execute { exec("./gradlew", "test") } }
+    segment("lint") { dependsOn("build"); execute { exec("./gradlew", "lint") } }
+}
+
+ride {
+    name = "CI"
+    flow {
+        segment("clean")
+        segment("build")
+        parallel {
+            segment("test")
             segment("lint")
         }
     }
 }
 ```
 
-```bash
-# Run a ride
-./kite ride mr
+**Benefits:**
 
-# Run specific segments
-./kite run build test
+- ✅ Type-safe at compile time
+- ✅ IDE autocomplete and refactoring
+- ✅ Testable in unit tests
+- ✅ Reusable across projects
+- ✅ Parallel execution
+- ✅ Automatic secret masking
 
-# List available rides
-./kite rides
-```
+---
 
-## Documentation
+## Contributing
 
-**📚 See [docs/](./docs/)** for comprehensive guides:
+We welcome contributions! Kite is under active development.
 
-- **[Getting Started](./docs/EXTERNAL_PROJECT_SETUP.md)** - Using Kite in your projects
-- **[External Dependencies](./docs/EXTERNAL_DEPENDENCIES.md)** - Using `@DependsOn` for libraries
-- **[IDE Setup](./docs/IDE_SETUP.md)** - Setting up IntelliJ IDEA
-- **[Troubleshooting](./docs/IDE_AUTOCOMPLETE_TROUBLESHOOTING.md)** - Fixing common IDE issues
+**For Contributors:**
 
-**📋 See [specs/](./specs/)** for detailed specifications:
+- **[Contributing Guide](docs/dev/contributing.md)** - Development setup and guidelines
+- **[Code Quality](docs/dev/code-quality.md)** - Standards and linting
+- **[Architecture](docs/specs/)** - System design and specifications
 
-- [Overview & Problem Statement](./specs/01-overview.md) - What Kite is and why
-- [Core Concepts](./specs/02-core-concepts.md) - Rides, segments, and flows
-- [DSL & Configuration](./specs/03-dsl-configuration.md) - Kotlin DSL syntax
-- [Full specifications](./specs/) for execution model, parallelization, plugins, and more
-
-**🗺️ See [devplan/](./devplan/)** for the development roadmap:
-
-- [Phase 1: Foundation & Core DSL](./devplan/phase-1-foundation.md) ✅ Complete
-- [Phase 2: Graph & Execution Engine](./devplan/phase-2-execution.md) ✅ Complete
-- [Phase 3: CLI & File Discovery](./devplan/phase-3-cli.md) ✅ Complete
-- [Phase 4: Platform Adapters](./devplan/phase-4-platform-adapters.md) ⏭️ Skipped
-- [Phase 5: Built-in Features](./devplan/phase-5-features.md) ✅ Complete
-- [Phase 6: Documentation](./devplan/phase-6-documentation.md) 🔄 90% Complete
-- [Phase 7: Testing & Refinement](./devplan/phase-7-testing.md) 🔄 70% Complete
-- [Security Roadmap](./devplan/security-roadmap.md) - Cross-phase security features
-
-## Development
-
-This project is under active development. Contributions will be welcomed after the initial release.
-
-### Prerequisites
-
-- JDK 17 or higher (LTS)
-- Kotlin 2.0+
-- Gradle 9.2+ (wrapper included)
-
-### Building
+### Development Setup
 
 ```bash
+# Clone repository
+git clone https://github.com/yourusername/kite.git
+cd kite
+
+# Build
 ./gradlew build
+
+# Run tests
+./gradlew test
+
+# Install git hooks (runs quality checks before push)
+./scripts/install-git-hooks.sh
 ```
 
-### Running
+### Project Structure
 
-```bash
-./gradlew :kite-cli:run
+```
+kite/
+├── kite-core/          # Core domain models
+├── kite-dsl/           # DSL and scripting
+├── kite-runtime/       # Execution engine
+├── kite-cli/           # Command-line interface
+├── kite-integration-tests/  # End-to-end tests
+└── docs/               # Documentation
 ```
 
-### For Contributors
+---
 
-See **[docs/IDE_SETUP.md](./docs/IDE_SETUP.md)** to set up your development environment with full IDE autocomplete
-support.
+## Requirements
+
+- **Java:** 17 or higher (LTS)
+- **Kotlin:** 2.0.21
+- **Gradle:** 8.0+ (wrapper included)
+
+---
+
+## Roadmap
+
+- [x] Core DSL and execution engine
+- [x] Parallel execution
+- [x] Artifact management
+- [x] Secret masking
+- [x] CLI interface
+- [x] CI/CD integration
+- [ ] Plugin system
+- [ ] Remote caching
+- [ ] Distributed execution
+
+See **[Development Plan](devplan/)** for detailed roadmap.
+
+---
 
 ## License
 
 Apache License 2.0 - see [LICENSE](LICENSE)
+
+---
+
+## Support
+
+- **📚 Documentation:** [docs/](docs/00-index.md)
+- **🐛 Issues:** [GitHub Issues](https://github.com/yourusername/kite/issues)
+- **💬 Discussions:** [GitHub Discussions](https://github.com/yourusername/kite/discussions)
+
+---
+
+**Made with ❤️ using Kotlin**

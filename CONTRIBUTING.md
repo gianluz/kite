@@ -1,193 +1,276 @@
 # Contributing to Kite
 
-Thank you for your interest in contributing to Kite! This document provides guidelines and instructions for
-contributing.
+Thank you for your interest in contributing to Kite! We're excited to have you here.
 
-## Development Setup
+---
+
+## 📚 Documentation
+
+**Before contributing, please read:**
+
+- **[Contributing Guide](docs/dev/contributing.md)** - Complete development setup and guidelines
+- **[Code Quality Standards](docs/dev/code-quality.md)** - Linting and quality requirements
+- **[Architecture Specs](docs/specs/)** - System design and specifications
+
+This document provides a quick overview. See the full guides above for complete details.
+
+---
+
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- JDK 17 or higher (LTS)
-- Kotlin 2.0+
-- Gradle 9.2+ (wrapper included)
+- Java 17 or higher
+- Git
+- An IDE with Kotlin support (IntelliJ IDEA recommended)
 
-### Building the Project
+### Setup
 
 ```bash
-# Clone the repository
+# 1. Clone the repository
 git clone https://github.com/yourusername/kite.git
 cd kite
 
-# Build all modules
+# 2. Build the project
 ./gradlew build
 
-# Run tests
+# 3. Run tests
 ./gradlew test
 
-# Run linters
-./gradlew ktlintCheck detekt
+# 4. Install git hooks (recommended)
+./scripts/install-git-hooks.sh
 ```
 
-## Project Structure
+The git hooks automatically run quality checks before pushing, helping catch issues early.
+
+---
+
+## 🏗️ Development Workflow
+
+### 1. Create a Branch
+
+```bash
+git checkout -b feature/your-feature-name
+# or
+git checkout -b fix/your-bug-fix
+```
+
+### 2. Make Changes
+
+- Write clean, idiomatic Kotlin code
+- Add tests for new functionality
+- Update documentation if needed
+- Follow our [code quality standards](docs/dev/code-quality.md)
+
+### 3. Run Quality Checks
+
+```bash
+# Run all checks (done automatically by git hooks)
+kite-cli/build/install/kite-cli/bin/kite-cli run quality-checks
+
+# Or run individually
+./gradlew ktlintFormat  # Auto-fix formatting
+./gradlew ktlintCheck   # Check style
+./gradlew detekt        # Static analysis
+./gradlew test          # Run tests
+```
+
+### 4. Commit
+
+Use [Conventional Commits](https://www.conventionalcommits.org/):
+
+```bash
+git commit -m "feat: add new feature"
+git commit -m "fix: resolve issue with X"
+git commit -m "docs: update installation guide"
+```
+
+**Commit types:**
+
+- `feat:` - New feature
+- `fix:` - Bug fix
+- `docs:` - Documentation changes
+- `refactor:` - Code refactoring
+- `test:` - Test changes
+- `chore:` - Build/tooling changes
+
+### 5. Push and Create PR
+
+```bash
+git push origin feature/your-feature-name
+```
+
+Then create a Pull Request on GitHub.
+
+---
+
+## 📋 Pull Request Guidelines
+
+### PR Checklist
+
+Before submitting, ensure:
+
+- [ ] Code builds successfully
+- [ ] All tests pass
+- [ ] Quality checks pass (ktlint, detekt)
+- [ ] New features have tests
+- [ ] Documentation is updated
+- [ ] Commit messages follow conventions
+- [ ] PR description explains changes
+
+### PR Template
+
+```markdown
+## Description
+Brief description of changes
+
+## Type of Change
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
+- [ ] Documentation update
+
+## Testing
+How was this tested?
+
+## Related Issues
+Fixes #123
+```
+
+---
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+./gradlew test
+
+# Run specific module tests
+./gradlew :kite-core:test
+./gradlew :kite-dsl:test
+
+# Run integration tests
+./gradlew :kite-integration-tests:test
+
+# Run via Kite
+kite-cli/build/install/kite-cli/bin/kite-cli run test-all
+```
+
+**Test Guidelines:**
+
+- Write tests for all new code
+- Use descriptive test names
+- Follow AAA pattern (Arrange, Act, Assert)
+- Aim for >80% code coverage
+
+---
+
+## 🎨 Code Style
+
+We use **ktlint** and **detekt** to enforce consistent code style.
+
+### Automatic Formatting
+
+```bash
+./gradlew ktlintFormat
+```
+
+### Key Standards
+
+- **Line length:** 120 characters
+- **Indentation:** 4 spaces (no tabs)
+- **Imports:** No wildcards, alphabetically sorted
+- **Naming:** camelCase for functions/variables, PascalCase for classes
+- **Documentation:** KDoc for public APIs
+
+See [Code Quality Guide](docs/dev/code-quality.md) for complete standards.
+
+---
+
+## 📁 Project Structure
 
 ```
 kite/
-├── kite-core/      # Core domain models and interfaces
-├── kite-dsl/       # DSL and scripting engine
-├── kite-runtime/   # Task execution runtime
-├── kite-cli/       # Command-line interface
-├── SPECS.md        # Complete specification
-└── DEVELOPMENT_PLAN.md  # Development roadmap
+├── kite-core/              # Core domain models and interfaces
+├── kite-dsl/               # DSL and script compilation
+├── kite-runtime/           # Execution engine and scheduling
+├── kite-cli/               # Command-line interface
+├── kite-integration-tests/ # End-to-end tests
+├── docs/                   # Documentation
+│   ├── 00-index.md through 99-troubleshooting.md
+│   ├── dev/                # Developer guides
+│   └── specs/              # Architecture specifications
+├── .kite/                  # Kite's own CI/CD
+│   ├── rides/              # Workflow definitions
+│   └── segments/           # Build, test, quality segments
+└── scripts/                # Development scripts
 ```
 
-## Development Process
+---
 
-### 1. Pick a Task
+## 🔧 Common Tasks
 
-- Check the [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) for available tasks
-- Tasks are organized by phases and epics
-- Comment on the issue to claim it
-
-### 2. Create a Branch
+### Building the CLI
 
 ```bash
-git checkout -b feature/task-number-description
-# Example: git checkout -b feature/1.2.1-task-model
+./gradlew :kite-cli:installDist
 ```
 
-### 3. Implement the Task
+Binary located at: `kite-cli/build/install/kite-cli/bin/kite-cli`
 
-- Follow the task description in DEVELOPMENT_PLAN.md
-- Write tests alongside your code
-- Ensure code coverage > 80%
-- Follow Kotlin coding conventions
+### Running Kite Itself
 
-### 4. Code Quality
-
-Run quality checks before committing:
+Kite uses itself for CI/CD! Try:
 
 ```bash
-# Format code
-./gradlew ktlintFormat
+# Run CI workflow
+kite-cli/build/install/kite-cli/bin/kite-cli ride CI
 
-# Run linters
-./gradlew ktlintCheck detekt
+# Run PR validation
+kite-cli/build/install/kite-cli/bin/kite-cli ride MR
 
-# Run tests
-./gradlew test
-
-# Check coverage
-./gradlew koverReport
+# List all workflows
+kite-cli/build/install/kite-cli/bin/kite-cli rides
 ```
 
-### 5. Commit Guidelines
+### Quality Checks
 
-Use conventional commit messages:
+```bash
+# All checks
+kite-cli/build/install/kite-cli/bin/kite-cli run quality-checks
 
-```
-type(scope): description
-
-feat(core): add Task model with validation
-fix(runtime): handle timeout edge case
-docs(readme): update installation instructions
-test(dsl): add tests for task builder
+# Individual checks
+./gradlew ktlintCheck
+./gradlew detekt
 ```
 
-Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
+---
 
-### 6. Submit a Pull Request
+## 💡 Need Help?
 
-- Push your branch to GitHub
-- Create a pull request against `main`
-- Fill out the PR template
-- Link to the task in DEVELOPMENT_PLAN.md
-- Wait for code review
+- **Questions?** Open a [Discussion](https://github.com/yourusername/kite/discussions)
+- **Bug report?** Open an [Issue](https://github.com/yourusername/kite/issues)
+- **Documentation:** See [docs/](docs/00-index.md)
 
-## Code Style
+---
 
-### Kotlin
+## 📜 Code of Conduct
 
-- Follow [Kotlin Coding Conventions](https://kotlinlang.org/docs/coding-conventions.html)
-- Maximum line length: 120 characters
-- Use meaningful variable names
-- Document public APIs with KDoc
+We are committed to providing a welcoming and inclusive environment for all contributors.
 
-### Testing
-
-- Write unit tests for all new code
-- Use descriptive test names: `` `test name in backticks` ``
-- Follow AAA pattern: Arrange, Act, Assert
-- Use MockK for mocking
-
-Example:
-
-```kotlin
-@Test
-fun `task execution should timeout after configured duration`() {
-    // Arrange
-    val task = Task(id = "test", timeout = 1.seconds)
-    
-    // Act
-    val result = runBlocking { executor.execute(task) }
-    
-    // Assert
-    assertTrue(result.isTimeout)
-}
-```
-
-## Module Dependencies
-
-```
-kite-cli
-  └── kite-runtime
-      ├── kite-core
-      └── kite-dsl
-          └── kite-core
-```
-
-- `kite-core`: No dependencies on other modules
-- `kite-dsl`: Depends on `kite-core`
-- `kite-runtime`: Depends on `kite-core` and `kite-dsl`
-- `kite-cli`: Depends on all modules
-
-## Testing Strategy
-
-### Unit Tests
-
-- Test individual classes and functions
-- Mock external dependencies
-- Fast execution (<100ms per test)
-- Located in `src/test/kotlin`
-
-### Integration Tests
-
-- Test interactions between modules
-- Use real implementations where possible
-- May be slower
-- Located in `src/test/kotlin` with `@IntegrationTest` annotation
-
-### End-to-End Tests
-
-- Test complete pipelines
-- Will be added in Phase 7
-
-## Documentation
-
-- Update relevant documentation when making changes
-- KDoc for public APIs
-- Comments for complex logic
-- Update CHANGELOG.md
-
-## Questions?
-
-- Open an issue for questions
-- Check existing issues and discussions
-- Refer to SPECS.md for design decisions
-
-## Code of Conduct
+**Our Standards:**
 
 - Be respectful and inclusive
 - Provide constructive feedback
-- Help others learn
+- Focus on what is best for the community
+- Show empathy towards others
 
-Thank you for contributing to Kite! 🚀
+---
+
+## 🙏 Thank You!
+
+Every contribution, no matter how small, helps make Kite better. Thank you for being part of our community!
+
+---
+
+**For complete contributing guidelines, see [docs/dev/contributing.md](docs/dev/contributing.md)**
