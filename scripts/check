@@ -1,0 +1,45 @@
+#!/bin/bash
+#
+# Quick script to run quality checks
+#
+# Usage:
+#   ./scripts/check           # Run all checks
+#   ./scripts/check ktlint    # Run only ktlint
+#   ./scripts/check detekt    # Run only detekt
+#   ./scripts/check fix       # Auto-fix ktlint issues
+#
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$SCRIPT_DIR/.."
+KITE_CLI="$PROJECT_ROOT/kite-cli/build/install/kite-cli/bin/kite-cli"
+
+# Build Kite CLI if needed
+if [ ! -f "$KITE_CLI" ]; then
+    echo "📦 Building Kite CLI..."
+    cd "$PROJECT_ROOT"
+    ./gradlew :kite-cli:installDist --quiet
+fi
+
+cd "$PROJECT_ROOT"
+
+case "${1:-all}" in
+    ktlint)
+        echo "🔍 Running ktlint..."
+        "$KITE_CLI" segment ktlint
+        ;;
+    detekt)
+        echo "🔍 Running detekt..."
+        "$KITE_CLI" segment detekt
+        ;;
+    fix)
+        echo "🔧 Auto-fixing ktlint issues..."
+        ./gradlew ktlintFormat
+        echo "✅ Done! Run './scripts/check' to verify."
+        ;;
+    all|*)
+        echo "🔍 Running all quality checks..."
+        "$KITE_CLI" segment quality-checks
+        ;;
+esac
