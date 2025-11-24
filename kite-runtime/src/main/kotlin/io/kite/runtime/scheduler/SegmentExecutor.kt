@@ -151,10 +151,8 @@ object SegmentExecutor {
 
                 finalStatus = SegmentStatus.SUCCESS
 
-                // Call onSuccess hook (only on final success, not intermediate retries)
-                if (!isRetry || attemptNumber == segment.maxRetries) {
-                    segment.onSuccess?.invoke(contextWithLogger)
-                }
+                // Call onSuccess hook on success (we don't retry after success anyway)
+                segment.onSuccess?.invoke(contextWithLogger)
             } catch (e: TimeoutCancellationException) {
                 // Handle timeout exceptions
                 finalStatus = SegmentStatus.TIMEOUT
