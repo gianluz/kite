@@ -358,7 +358,7 @@ segments {
 ```kotlin
 // .kite/rides/api-workflow.kite.kts
 ride {
-    name = "API Workflow"
+    name = kite-cli ride "API Workflow"
     
     flow {
         segment("fetch-repos")
@@ -370,7 +370,7 @@ ride {
 ### Running
 
 ```bash
-$ kite ride "API Workflow"
+$ kite-cli ride kite-cli ride "API Workflow"
 
   ██╗  ██╗██╗████████╗███████╗
   ██║ ██╔╝██║╚══██╔══╝██╔════╝
@@ -403,7 +403,7 @@ Found 26 repositories
 **With @DependsOn:**
 
 1. Write your script with `@file:DependsOn` annotations
-2. Run once: `kite ride "My Ride"`
+2. Run once: `kite-cli ride "My Ride"`
 3. Dependencies download to `~/.ivy2/cache`
 4. In IntelliJ: **File → Reload All Gradle Projects**
 5. Autocomplete now works!
@@ -485,7 +485,7 @@ import com.google.gson.Gson
     key: ${{ runner.os }}-ivy-${{ hashFiles('**/*.kite.kts') }}
     
 - name: Run Kite
-  run: kite ride "My Ride"
+  run: kite-cli ride "My Ride"
 ```
 
 ---
@@ -498,7 +498,7 @@ import com.google.gson.Gson
 
 **Solution:**
 
-1. Run script once: `kite ride "My Ride"`
+1. Run script once: `kite-cli ride "My Ride"`
 2. Dependencies download to `~/.ivy2/cache`
 3. Reload Gradle project in IntelliJ
 4. Autocomplete will work

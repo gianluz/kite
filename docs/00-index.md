@@ -95,14 +95,14 @@ ride {
 
 ```bash
 # Run the CI ride
-kite ride CI
+kite-cli ride CI
 
 # Run specific segments
-kite run build test
+kite-cli run build test
 
 # List available rides and segments
-kite rides
-kite segments
+kite-cli rides
+kite-cli segments
 ```
 
 ## Key Features

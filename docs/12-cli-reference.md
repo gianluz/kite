@@ -8,11 +8,16 @@ Complete reference for the Kite command-line interface.
 
 The Kite CLI provides commands to execute rides, run individual segments, and inspect your workflow definitions.
 
+**Command name:** The executable is called `kite-cli`
+
 **Basic usage:**
 
 ```bash
-kite <command> [options] [arguments]
+kite-cli <command> [options] [arguments]
 ```
+
+**Note:** Throughout this reference, examples use `kite-cli`. You can create a shell alias `kite` for convenience (see
+Installation section below).
 
 ---
 
@@ -30,17 +35,31 @@ The CLI is installed to:
 kite-cli/build/install/kite-cli/bin/kite-cli
 ```
 
-**Create an alias for convenience:**
+**Option 1: Add to your PATH (recommended):**
+
+```bash
+export PATH="$PWD/kite-cli/build/install/kite-cli/bin:$PATH"
+```
+
+Then run commands with `kite-cli`:
+
+```bash
+kite-cli ride CI
+```
+
+**Option 2: Create an alias (optional):**
 
 ```bash
 alias kite='kite-cli/build/install/kite-cli/bin/kite-cli'
 ```
 
-Or add to your PATH:
+Then you can use the shorter `kite` command:
 
 ```bash
-export PATH="$PWD/kite-cli/build/install/kite-cli/bin:$PATH"
+kite ride CI
 ```
+
+**Note:** Examples in this reference use `kite-cli` (the actual executable name).
 
 ---
 
@@ -59,10 +78,10 @@ Available for all commands:
 **Examples:**
 
 ```bash
-kite --version
-kite --help
-kite ride CI --verbose
-kite run test --debug
+kite-cli --version
+kite-cli --help
+kite-cli ride CI --verbose
+kite-cli run test --debug
 ```
 
 ---
@@ -76,7 +95,7 @@ Execute a named ride from `.kite/rides/<name>.kite.kts`.
 **Usage:**
 
 ```bash
-kite ride <name> [options]
+kite-cli ride <name> [options]
 ```
 
 **Arguments:**
@@ -92,16 +111,16 @@ kite ride <name> [options]
 
 ```bash
 # Execute a ride
-kite ride CI
+kite-cli ride CI
 
 # Dry run (show plan without executing)
-kite ride CI --dry-run
+kite-cli ride CI --dry-run
 
 # Force sequential execution
-kite ride CI --sequential
+kite-cli ride CI --sequential
 
 # Verbose output
-kite ride CI --verbose
+kite-cli ride CI --verbose
 ```
 
 **Output:**
@@ -170,7 +189,7 @@ Execute one or more segments by name, including their dependencies.
 **Usage:**
 
 ```bash
-kite run <segment>... [options]
+kite-cli run <segment>... [options]
 ```
 
 **Arguments:**
@@ -186,16 +205,16 @@ kite run <segment>... [options]
 
 ```bash
 # Run a single segment (and its dependencies)
-kite run test
+kite-cli run test
 
 # Run multiple segments
-kite run test lint
+kite-cli run test lint
 
 # Dry run
-kite run test lint --dry-run
+kite-cli run test lint --dry-run
 
 # Sequential execution
-kite run test --sequential
+kite-cli run test --sequential
 ```
 
 **Output:**
@@ -236,7 +255,7 @@ List all available segments from `.kite/segments/*.kite.kts`.
 **Usage:**
 
 ```bash
-kite segments [options]
+kite-cli segments [options]
 ```
 
 **Options:**
@@ -247,10 +266,10 @@ kite segments [options]
 
 ```bash
 # List all segments
-kite segments
+kite-cli segments
 
 # JSON output
-kite segments --json
+kite-cli segments --json
 ```
 
 **Output:**
@@ -316,7 +335,7 @@ List all available rides from `.kite/rides/*.kite.kts`.
 **Usage:**
 
 ```bash
-kite rides [options]
+kite-cli rides [options]
 ```
 
 **Options:**
@@ -327,10 +346,10 @@ kite rides [options]
 
 ```bash
 # List all rides
-kite rides
+kite-cli rides
 
 # JSON output
-kite rides --json
+kite-cli rides --json
 ```
 
 **Output:**
@@ -390,7 +409,7 @@ Visualize the dependency graph for a ride.
 **Usage:**
 
 ```bash
-kite graph <name>
+kite-cli graph <name>
 ```
 
 **Arguments:**
@@ -400,7 +419,7 @@ kite graph <name>
 **Example:**
 
 ```bash
-kite graph CI
+kite-cli graph CI
 ```
 
 ---
@@ -418,7 +437,7 @@ kite graph CI
 ```bash
 #!/bin/bash
 
-if kite ride CI; then
+if kite-cli ride CI; then
     echo "Build successful!"
     exit 0
 else
@@ -631,16 +650,16 @@ Kite uses three log levels:
 
 ```bash
 # Normal output
-kite ride CI
+kite-cli ride CI
 
 # Verbose - more details
-kite ride CI --verbose
+kite-cli ride CI --verbose
 
 # Quiet - minimal output
-kite ride CI --quiet
+kite-cli ride CI --quiet
 
 # Debug - full details
-kite ride CI --debug
+kite-cli ride CI --debug
 ```
 
 ---
@@ -651,13 +670,13 @@ kite ride CI --debug
 
 ```bash
 # ✅ Good - clear purpose
-kite ride CI
-kite ride PR
-kite ride Deploy
+kite-cli ride CI
+kite-cli ride PR
+kite-cli ride Deploy
 
 # ❌ Bad - vague
-kite ride test1
-kite ride run
+kite-cli ride test1
+kite-cli ride run
 ```
 
 ### 2. Organize Segments by Purpose
@@ -674,17 +693,17 @@ kite ride run
 
 ```bash
 # Check what will execute
-kite ride Deploy --dry-run
+kite-cli ride Deploy --dry-run
 
 # If it looks good, run it
-kite ride Deploy
+kite-cli ride Deploy
 ```
 
 ### 4. Capture Output in CI
 
 ```bash
 # Save output to file
-kite ride CI 2>&1 | tee build.log
+kite-cli ride CI 2>&1 | tee build.log
 
 # Upload to CI artifacts
 ```
@@ -696,10 +715,10 @@ kite ride CI 2>&1 | tee build.log
 set -e  # Exit on error
 
 # Run CI
-kite ride CI
+kite-cli ride CI
 
 # Only deploy if CI passes
-kite ride Deploy
+kite-cli ride Deploy
 ```
 
 ---
@@ -721,7 +740,7 @@ mkdir -p .kite/segments .kite/rides
 List available rides:
 
 ```bash
-kite rides
+kite-cli rides
 ```
 
 Ensure your ride file is in `.kite/rides/` and matches the name you're using.
@@ -732,7 +751,7 @@ Ensure your ride file is in `.kite/rides/` and matches the name you're using.
 List available segments:
 
 ```bash
-kite segments
+kite-cli segments
 ```
 
 Check dependencies are defined correctly.
@@ -760,20 +779,20 @@ kite-cli/build/install/kite-cli/bin/kite-cli ride CI
 
 ```bash
 # Execute rides
-kite ride CI
-kite ride Deploy --dry-run
+kite-cli ride CI
+kite-cli ride Deploy --dry-run
 
 # Run specific segments
-kite run test lint
-kite run build test --sequential
+kite-cli run test lint
+kite-cli run build test --sequential
 
 # List available items
-kite segments
-kite rides
+kite-cli segments
+kite-cli rides
 
 # Get help
-kite --help
-kite ride --help
+kite-cli --help
+kite-cli ride --help
 ```
 
 ### Common Options

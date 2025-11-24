@@ -72,10 +72,10 @@ ride {
 
 ```bash
 # Run the CI ride
-kite ride CI
+kite-cli ride CI
 
 # Or run specific segments
-kite run build test
+kite-cli run build test
 ```
 
 That's it! You've created your first Kite workflow.

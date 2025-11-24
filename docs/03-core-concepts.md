@@ -584,7 +584,7 @@ ride {
 ### Run It
 
 ```bash
-kite ride CI
+kite-cli ride CI
 ```
 
 ## Next Steps

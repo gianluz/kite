@@ -67,7 +67,7 @@ EOF
 **Symptom:**
 
 ```bash
-$ kite ride CI
+$ kite-cli ride CI
 bash: kite: command not found
 ```
 
@@ -132,7 +132,7 @@ Error: Ride 'CI' not found
 
 ```bash
 # List available rides
-kite rides
+kite-cli rides
 
 # Check ride file exists
 ls .kite/rides/
@@ -146,7 +146,7 @@ cat .kite/rides/ci.kite.kts
 ```kotlin
 // .kite/rides/ci.kite.kts
 ride {
-    name = "CI"  // Must match: kite ride CI
+    name = "CI"  // Must match: kite-cli ride CI
     flow { /* ... */ }
 }
 ```
@@ -167,7 +167,7 @@ Error: Segment 'test' referenced in ride but not found
 
 ```bash
 # List available segments
-kite segments
+kite-cli segments
 
 # Check segment files
 ls .kite/segments/
@@ -215,7 +215,7 @@ segment("test") {
 3. Run with `--debug` for details:
 
 ```bash
-kite ride CI --debug
+kite-cli ride CI --debug
 ```
 
 ---
@@ -349,12 +349,12 @@ IllegalArgumentException: Required secret environment variable 'API_KEY' is not 
 ```bash
 # Set the variable
 export API_KEY=your-key-here
-kite ride Deploy
+kite-cli ride Deploy
 
 # Or in CI
 env:
   API_KEY: ${{ secrets.API_KEY }}
-run: kite ride Deploy
+run: kite-cli ride Deploy
 ```
 
 Or make it optional:
@@ -555,8 +555,8 @@ ride {
 **3. `--sequential` flag:**
 
 ```bash
-kite ride CI --sequential  # ❌ Forces sequential
-kite ride CI               # ✅ Allow parallelism
+kite-cli ride CI --sequential  # ❌ Forces sequential
+kite-cli ride CI               # ✅ Allow parallelism
 ```
 
 ---
@@ -630,7 +630,7 @@ logger.info("Using API key: $apiKey")  // Masked: [API_KEY:***]
 - name: Deploy
   env:
     API_KEY: ${{ secrets.API_KEY }}  # Add this
-  run: kite ride Deploy
+  run: kite-cli ride Deploy
 ```
 
 **GitLab CI:**
@@ -638,7 +638,7 @@ logger.info("Using API key: $apiKey")  // Masked: [API_KEY:***]
 ```yaml
 deploy:
   script:
-    - kite ride Deploy
+    - kite-cli ride Deploy
   variables:
     API_KEY: $CI_API_KEY  # Add this
 ```
@@ -674,7 +674,7 @@ import com.google.gson.Gson  // Unresolved reference
 1. **Run once to download:**
 
 ```bash
-kite ride Test  # Downloads dependencies
+kite-cli ride Test  # Downloads dependencies
 ```
 
 2. **Reload Gradle in IDE:**
@@ -837,7 +837,7 @@ segment("integration-tests")  # 5m
 
 ```bash
 # Run with verbose output to see timings
-kite ride CI --verbose
+kite-cli ride CI --verbose
 
 # Check individual segment durations
 ```
@@ -902,7 +902,7 @@ environment {
 **3. Run segments sequentially:**
 
 ```bash
-kite ride CI --sequential
+kite-cli ride CI --sequential
 ```
 
 ---
@@ -937,7 +937,7 @@ import com.google.gson.Gson  // Cannot resolve
 **Solution:**
 
 1. **For @DependsOn:**
-    - Run once: `kite ride Test`
+    - Run once: `kite-cli ride Test`
     - Reload Gradle project
 
 2. **For classpath dependencies:**
@@ -951,7 +951,7 @@ import com.google.gson.Gson  // Cannot resolve
 ### Enable Debug Mode
 
 ```bash
-kite ride CI --debug
+kite-cli ride CI --debug
 ```
 
 Shows:
@@ -965,10 +965,10 @@ Shows:
 
 ```bash
 # Verbose output
-kite ride CI --verbose
+kite-cli ride CI --verbose
 
 # Save output to file
-kite ride CI 2>&1 | tee build.log
+kite-cli ride CI 2>&1 | tee build.log
 ```
 
 ### Verify Setup
@@ -984,8 +984,8 @@ java -version  # Should be 17+
 tree .kite/
 
 # List available items
-kite segments
-kite rides
+kite-cli segments
+kite-cli rides
 ```
 
 ---
@@ -1011,7 +1011,7 @@ kite rides
 **Most common issues:**
 
 1. ✅ Missing `.kite` directory → Create it
-2. ✅ Wrong ride/segment name → Use `kite rides/segments`
+2. ✅ Wrong ride/segment name → Use `kite-cli rides/segments`
 3. ✅ Missing dependencies → Add `dependsOn()`
 4. ✅ Secrets leaking → Use `secret()` not `env()`
 5. ✅ Out of memory → Reduce `maxConcurrency`

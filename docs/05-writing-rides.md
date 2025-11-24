@@ -679,13 +679,13 @@ ride {
 
 ```bash
 # Run a ride
-kite ride "MR Validation"
+kite-cli ride "MR Validation"
 
 # List all rides
-kite rides
+kite-cli rides
 
 # View ride flow
-kite graph "MR Validation"
+kite-cli graph "MR Validation"
 ```
 
 ### In CI/CD
@@ -697,7 +697,7 @@ kite graph "MR Validation"
 
 # GitLab CI
 script:
-  - kite ride CI
+  - kite-cli ride CI
 ```
 
 See [CI Integration](11-ci-integration.md) for complete examples.
@@ -708,21 +708,21 @@ See [CI Integration](11-ci-integration.md) for complete examples.
 
 ```bash
 # See what will execute (dry run)
-kite ride CI --dry-run
+kite-cli ride CI --dry-run
 ```
 
 ### View Dependency Graph
 
 ```bash
 # Visualize segment dependencies
-kite graph CI
+kite-cli graph CI
 ```
 
 ### Verbose Output
 
 ```bash
 # See detailed execution
-kite ride CI --verbose
+kite-cli ride CI --verbose
 ```
 
 ## Next Steps

@@ -644,7 +644,7 @@ Speedup = 1 / ((1 - 0.8) + (0.8 / 4))
 
 ```bash
 # Run with timing information
-kite ride CI --verbose
+kite-cli ride CI --verbose
 
 # Output shows segment durations:
 ✓ build          (2m 30s)
@@ -766,7 +766,7 @@ ride {
 Preview parallel execution without running:
 
 ```bash
-$ kite ride CI --dry-run
+$ kite-cli ride CI --dry-run
 
 Ride: CI Pipeline
 ═════════════════════════════════════════
