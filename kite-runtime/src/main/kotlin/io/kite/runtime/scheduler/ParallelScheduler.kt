@@ -1,12 +1,10 @@
 package io.kite.runtime.scheduler
 
 import io.kite.core.ExecutionContext
-import io.kite.core.ProcessExecutionContext
 import io.kite.core.Segment
 import io.kite.core.SegmentStatus
 import io.kite.runtime.graph.SegmentGraph
 import io.kite.runtime.graph.TopologicalSort
-import io.kite.runtime.process.ProcessExecutionProviderImpl
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -142,109 +140,8 @@ class ParallelScheduler(
         }
 
         // Execute the segment
-        val result = executeSegment(segment, context)
+        val result = SegmentExecutor.executeSegment(segment, context)
         results[segment.name] = result
         return result
-    }
-
-    /**
-     * Executes a single segment.
-     */
-    private suspend fun executeSegment(
-        segment: Segment,
-        context: ExecutionContext,
-    ): SegmentResult {
-        val startTime = System.currentTimeMillis()
-        var finalStatus = SegmentStatus.FAILURE
-        var finalError: String? = null
-        var finalException: Throwable? = null
-
-        try {
-            // Set up process execution provider for this segment
-            val provider = ProcessExecutionProviderImpl()
-            ProcessExecutionContext.setProvider(provider)
-
-            // Set up logging for this segment
-            // TODO: Get showInConsole flag from global options
-            val logger = io.kite.runtime.logging.LogManager.startSegmentLogging(segment.name, showInConsole = false)
-
-            try {
-                // Execute the segment with logger in context
-                val contextWithLogger = context.copy(logger = logger)
-                segment.execute.invoke(contextWithLogger)
-
-                // Store output artifacts if segment succeeded
-                segment.outputs.forEach { (artifactName, artifactPath) ->
-                    try {
-                        val fullPath = contextWithLogger.workspace.resolve(artifactPath)
-                        contextWithLogger.artifacts.put(artifactName, fullPath)
-                        logger.info("Stored artifact '$artifactName' from '$artifactPath'")
-                    } catch (e: Exception) {
-                        logger.warn("Failed to store artifact '$artifactName': ${e.message}")
-                    }
-                }
-
-                finalStatus = SegmentStatus.SUCCESS
-
-                // Call onSuccess hook
-                segment.onSuccess?.invoke(contextWithLogger)
-            } catch (e: Exception) {
-                finalStatus = SegmentStatus.FAILURE
-                finalError = e.message
-                finalException = e
-
-                // Call onFailure hook
-                try {
-                    val contextWithLogger = context.copy(logger = logger)
-                    segment.onFailure?.invoke(contextWithLogger, e)
-                } catch (hookError: Exception) {
-                    logger.error("onFailure hook failed: ${hookError.message}")
-                }
-            } finally {
-                // Call onComplete hook (always runs)
-                try {
-                    val contextWithLogger = context.copy(logger = logger)
-                    segment.onComplete?.invoke(contextWithLogger, finalStatus)
-                } catch (hookError: Exception) {
-                    logger.error("onComplete hook failed: ${hookError.message}")
-                }
-
-                // Clean up logging
-                io.kite.runtime.logging.LogManager.stopSegmentLogging(segment.name)
-
-                // Clean up provider
-                ProcessExecutionContext.clear()
-            }
-
-            val endTime = System.currentTimeMillis()
-            val duration = endTime - startTime
-            val finalLogger = io.kite.runtime.logging.LogManager.getLogger(segment.name)
-
-            return SegmentResult(
-                segment = segment,
-                status = finalStatus,
-                error = finalError,
-                exception = finalException,
-                durationMs = duration,
-                logOutput = finalLogger?.getOutput(),
-            )
-        } catch (e: Exception) {
-            // This catches setup/teardown errors
-            val endTime = System.currentTimeMillis()
-            val duration = endTime - startTime
-
-            // Stop logging and capture output
-            val logger = io.kite.runtime.logging.LogManager.getLogger(segment.name)
-            io.kite.runtime.logging.LogManager.stopSegmentLogging(segment.name)
-
-            return SegmentResult(
-                segment = segment,
-                status = SegmentStatus.FAILURE,
-                error = e.message,
-                exception = e,
-                durationMs = duration,
-                logOutput = logger?.getOutput(),
-            )
-        }
     }
 }

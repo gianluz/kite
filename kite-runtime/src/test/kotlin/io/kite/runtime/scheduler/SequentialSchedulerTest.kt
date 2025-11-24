@@ -151,7 +151,8 @@ class SequentialSchedulerTest {
             val segment =
                 Segment(
                     name = "deploy",
-                    condition = { it.isRelease }, // Only run on release
+                    // Only run on release
+                    condition = { it.isRelease },
                     execute = { executed = true },
                 )
 
@@ -230,7 +231,8 @@ class SequentialSchedulerTest {
             val segment =
                 Segment(
                     name = "test",
-                    dependsOn = listOf("missing"), // Missing dependency
+                    // Missing dependency
+                    dependsOn = listOf("missing"),
                     execute = { },
                 )
 

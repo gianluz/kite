@@ -48,10 +48,14 @@ segments {
 - **dependsOn**: List of segment names that must execute first
 - **inputs**: Files or artifacts required by this segment
 - **outputs**: Files or artifacts produced by this segment
-- **timeout**: Maximum execution time
-- **retries**: Number of retry attempts on failure
 - **condition**: Lambda determining if segment should execute
 - **execute**: The actual work to perform
+- **onSuccess**: Callback invoked after successful execution
+- **onFailure**: Callback invoked after failure
+- **onComplete**: Callback invoked regardless of outcome
+
+> **Note:** The DSL also supports `timeout`, `maxRetries`, `retryDelay`, and `retryOn` properties, but these are not yet
+> enforced by the runtime. They are planned for a future release.
 
 ## Rides
 
