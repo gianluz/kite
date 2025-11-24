@@ -47,11 +47,11 @@ Before committing, run:
 
 ```bash
 # Run all quality checks
-kite-cli/build/install/kite-cli/bin/kite-cli segment quality-checks
+kite-cli/build/install/kite-cli/bin/kite-cli run quality-checks
 
 # Or individually
-kite-cli/build/install/kite-cli/bin/kite-cli segment ktlint
-kite-cli/build/install/kite-cli/bin/kite-cli segment detekt
+kite-cli/build/install/kite-cli/bin/kite-cli run ktlint
+kite-cli/build/install/kite-cli/bin/kite-cli run detekt
 
 # Auto-fix ktlint issues
 ./gradlew ktlintFormat
@@ -82,7 +82,7 @@ See [docs/CODE_QUALITY.md](CODE_QUALITY.md) for detailed information.
 3. **Run quality checks**
    ```bash
    # This happens automatically if you installed git hooks
-   kite-cli/build/install/kite-cli/bin/kite-cli segment quality-checks
+   kite-cli/build/install/kite-cli/bin/kite-cli run quality-checks
    ```
 
 4. **Run tests**
@@ -173,8 +173,8 @@ kite-cli/build/install/kite-cli/bin/kite-cli ride MR
 
 ```bash
 # Run all tests via Kite
-kite-cli/build/install/kite-cli/bin/kite-cli segment test-core
-kite-cli/build/install/kite-cli/bin/kite-cli segment test-dsl
+kite-cli/build/install/kite-cli/bin/kite-cli run test-core
+kite-cli/build/install/kite-cli/bin/kite-cli run test-dsl
 # etc.
 ```
 

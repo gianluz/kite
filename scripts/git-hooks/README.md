@@ -21,7 +21,7 @@ Runs code quality checks before pushing to remote.
 **What it does:**
 
 - Builds Kite CLI (if not already built)
-- Runs `kite segment quality-checks` (ktlint + detekt)
+- Runs `kite-cli/build/install/kite-cli/bin/kite-cli run quality-checks` (ktlint + detekt)
 - Blocks push if checks fail
 
 **Auto-fix style issues:**

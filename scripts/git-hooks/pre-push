@@ -24,7 +24,7 @@ fi
 
 # Run quality checks using Kite
 echo "✨ Running ktlint and detekt..."
-kite-cli/build/install/kite-cli/bin/kite-cli segment quality-checks
+kite-cli/build/install/kite-cli/bin/kite-cli run quality-checks
 
 if [ $? -eq 0 ]; then
     echo ""

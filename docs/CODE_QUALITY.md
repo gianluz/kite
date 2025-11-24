@@ -12,9 +12,9 @@ Kite enforces code quality using **ktlint** (code style) and **detekt** (static 
 ./gradlew ktlintFormat
 
 # Run via Kite (recommended)
-kite segment ktlint
-kite segment detekt
-kite segment quality-checks  # Runs both
+kite-cli/build/install/kite-cli/bin/kite-cli run ktlint
+kite-cli/build/install/kite-cli/bin/kite-cli run detekt
+kite-cli/build/install/kite-cli/bin/kite-cli run quality-checks  # Runs both
 ```
 
 ---
@@ -242,7 +242,7 @@ ride {
 ./gradlew ktlintMainSourceSetCheck detekt
 
 # Or use Kite
-kite segment quality-checks
+kite-cli/build/install/kite-cli/bin/kite-cli run quality-checks
 ```
 
 ### 2. Auto-fix When Possible

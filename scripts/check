@@ -27,11 +27,11 @@ cd "$PROJECT_ROOT"
 case "${1:-all}" in
     ktlint)
         echo "🔍 Running ktlint..."
-        "$KITE_CLI" segment ktlint
+        "$KITE_CLI" run ktlint
         ;;
     detekt)
         echo "🔍 Running detekt..."
-        "$KITE_CLI" segment detekt
+        "$KITE_CLI" run detekt
         ;;
     fix)
         echo "🔧 Auto-fixing ktlint issues..."
@@ -40,6 +40,6 @@ case "${1:-all}" in
         ;;
     all|*)
         echo "🔍 Running all quality checks..."
-        "$KITE_CLI" segment quality-checks
+        "$KITE_CLI" run quality-checks
         ;;
 esac
