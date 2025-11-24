@@ -242,7 +242,7 @@ class RideDslTest {
                 name = "Test"
                 flow {
                     segment("deploy") {
-                        condition { it.isRelease }
+                        condition { it.env("RELEASE") == "true" }
                     }
                 }
             }
@@ -254,7 +254,7 @@ class RideDslTest {
             ExecutionContext(
                 branch = "main",
                 commitSha = "abc",
-                isRelease = true,
+                environment = mapOf("RELEASE" to "true"),
             )
         assertTrue(segmentRef.overrides.condition!!.invoke(releaseContext))
 
@@ -262,7 +262,7 @@ class RideDslTest {
             ExecutionContext(
                 branch = "main",
                 commitSha = "abc",
-                isRelease = false,
+                environment = mapOf("RELEASE" to "false"),
             )
         assertFalse(segmentRef.overrides.condition!!.invoke(nonReleaseContext))
     }
@@ -316,7 +316,7 @@ class RideDslTest {
                         segment("unitTest")
                         segment("integrationTest") {
                             timeout = 10.minutes
-                            condition { it.isRelease }
+                            condition { it.env("RELEASE") == "true" }
                         }
                         segment("screenshotTest")
                     }

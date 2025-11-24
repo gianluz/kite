@@ -56,18 +56,11 @@ class GitLabCIPlatformAdapter : PlatformAdapter {
     ): ExecutionContext {
         val branch = environment["CI_COMMIT_REF_NAME"] ?: "unknown"
         val commitSha = environment["CI_COMMIT_SHA"] ?: "unknown"
-        val mrNumber = environment["CI_MERGE_REQUEST_IID"]
-        val labels = environment["CI_MERGE_REQUEST_LABELS"]?.split(",") ?: emptyList()
-        val isRelease = labels.any { it.trim().equals("release", ignoreCase = true) }
         val workspace = environment["CI_PROJECT_DIR"]?.let { Paths.get(it) } ?: Paths.get(".")
 
-        @Suppress("DEPRECATION")
         return ExecutionContext(
             branch = branch,
             commitSha = commitSha,
-            mrNumber = mrNumber,
-            isRelease = isRelease,
-            isLocal = false,
             environment = environment,
             workspace = workspace,
             artifacts = artifacts,
@@ -98,22 +91,11 @@ class GitHubActionsPlatformAdapter : PlatformAdapter {
                 else -> ref
             }
         val commitSha = environment["GITHUB_SHA"] ?: "unknown"
-        val prNumber =
-            environment["GITHUB_EVENT_NAME"]?.takeIf { it == "pull_request" }?.let {
-                ref.split("/").getOrNull(2)
-            }
-        // Detect release label from PR event payload
-        // TODO: Implement PR event payload parsing
-        val isRelease = false
         val workspace = environment["GITHUB_WORKSPACE"]?.let { Paths.get(it) } ?: Paths.get(".")
 
-        @Suppress("DEPRECATION")
         return ExecutionContext(
             branch = branch,
             commitSha = commitSha,
-            mrNumber = prNumber,
-            isRelease = isRelease,
-            isLocal = false,
             environment = environment,
             workspace = workspace,
             artifacts = artifacts,
@@ -154,13 +136,9 @@ class LocalPlatformAdapter : PlatformAdapter {
 
         val workspace = Paths.get(System.getProperty("user.dir"))
 
-        @Suppress("DEPRECATION")
         return ExecutionContext(
             branch = branch,
             commitSha = commitSha,
-            mrNumber = null,
-            isRelease = false,
-            isLocal = true,
             environment = environment,
             workspace = workspace,
             artifacts = artifacts,
@@ -198,13 +176,9 @@ class GenericPlatformAdapter : PlatformAdapter {
                 ?.let { Paths.get(it) }
                 ?: Paths.get(".")
 
-        @Suppress("DEPRECATION")
         return ExecutionContext(
             branch = branch,
             commitSha = commitSha,
-            mrNumber = null,
-            isRelease = false,
-            isLocal = false,
             environment = environment,
             workspace = workspace,
             artifacts = artifacts,

@@ -35,9 +35,9 @@ class GitLabCIPlatformAdapterTest {
 
         assertEquals("feature/test", context.branch)
         assertEquals("abc123def456", context.commitSha)
-        assertEquals("42", context.mrNumber)
-        assertTrue(context.isRelease) // "release" label present
-        assertFalse(context.isLocal)
+        assertEquals("42", context.env("CI_MERGE_REQUEST_IID"))
+        assertTrue(context.env("CI_MERGE_REQUEST_LABELS")?.contains("release") == true) // "release" label present
+        assertFalse(!context.isCI)
     }
 
     @Test
@@ -49,8 +49,8 @@ class GitLabCIPlatformAdapterTest {
 
         assertEquals("unknown", context.branch)
         assertEquals("unknown", context.commitSha)
-        assertNull(context.mrNumber)
-        assertFalse(context.isRelease)
+        assertNull(context.env("CI_MERGE_REQUEST_IID"))
+        assertFalse(context.env("CI_MERGE_REQUEST_LABELS")?.contains("release") == true)
     }
 
     @Test
@@ -59,15 +59,18 @@ class GitLabCIPlatformAdapterTest {
 
         val env1 = mapOf("CI_MERGE_REQUEST_LABELS" to "Release")
         val context1 = adapter.createContext(env1)
-        assertTrue(context1.isRelease)
+        val isRelease1 = context1.env("CI_MERGE_REQUEST_LABELS")?.contains("release", ignoreCase = true) == true
+        assertTrue(isRelease1)
 
         val env2 = mapOf("CI_MERGE_REQUEST_LABELS" to "RELEASE")
         val context2 = adapter.createContext(env2)
-        assertTrue(context2.isRelease)
+        val isRelease2 = context2.env("CI_MERGE_REQUEST_LABELS")?.contains("release", ignoreCase = true) == true
+        assertTrue(isRelease2)
 
         val env3 = mapOf("CI_MERGE_REQUEST_LABELS" to "bug,enhancement")
         val context3 = adapter.createContext(env3)
-        assertFalse(context3.isRelease)
+        val isRelease3 = context3.env("CI_MERGE_REQUEST_LABELS")?.contains("release", ignoreCase = true) == true
+        assertFalse(isRelease3)
     }
 }
 
@@ -98,7 +101,7 @@ class GitHubActionsPlatformAdapterTest {
 
         assertEquals("feature/test", context.branch)
         assertEquals("abc123def456", context.commitSha)
-        assertFalse(context.isLocal)
+        assertFalse(!context.isCI)
     }
 
     @Test
@@ -129,7 +132,12 @@ class GitHubActionsPlatformAdapterTest {
 
         val context = adapter.createContext(env)
 
-        assertEquals("42", context.mrNumber)
+        // Platform-agnostic: Check the actual GitHub environment variable
+        val ref = context.env("GITHUB_REF")
+        assertEquals("refs/pull/42/merge", ref)
+        // Extract PR number if needed
+        val prNumber = ref?.substringAfter("pull/")?.substringBefore("/")
+        assertEquals("42", prNumber)
     }
 
     @Test
@@ -141,7 +149,7 @@ class GitHubActionsPlatformAdapterTest {
 
         assertEquals("unknown", context.branch)
         assertEquals("unknown", context.commitSha)
-        assertNull(context.mrNumber)
+        assertNull(context.env("CI_MERGE_REQUEST_IID"))
     }
 }
 
@@ -172,7 +180,7 @@ class LocalPlatformAdapterTest {
 
         // Branch and SHA detection not yet implemented, so expect placeholders
         assertEquals("main", context.branch)
-        assertTrue(context.isLocal)
+        assertTrue(!context.isCI)
     }
 
     @Test
@@ -208,7 +216,7 @@ class GenericPlatformAdapterTest {
 
         assertEquals("main", context.branch)
         assertEquals("abc123", context.commitSha)
-        assertFalse(context.isLocal)
+        assertFalse(!context.isCI)
     }
 
     @Test
@@ -248,8 +256,8 @@ class GenericPlatformAdapterTest {
 
         assertEquals("unknown", context.branch)
         assertEquals("unknown", context.commitSha)
-        assertNull(context.mrNumber)
-        assertFalse(context.isRelease)
+        assertNull(context.env("CI_MERGE_REQUEST_IID"))
+        assertFalse(context.env("CI_MERGE_REQUEST_LABELS")?.contains("release") == true)
     }
 }
 

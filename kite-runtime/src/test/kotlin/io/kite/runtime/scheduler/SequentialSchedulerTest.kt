@@ -152,12 +152,12 @@ class SequentialSchedulerTest {
                 Segment(
                     name = "deploy",
                     // Only run on release
-                    condition = { it.isRelease },
+                    condition = { it.env("RELEASE") == "true" },
                     execute = { executed = true },
                 )
 
             val scheduler = SequentialScheduler()
-            val nonReleaseContext = context.copy(isRelease = false)
+            val nonReleaseContext = context.copy(environment = mapOf("RELEASE" to "false", "CI" to "true"))
             val result = scheduler.execute(listOf(segment), nonReleaseContext)
 
             assertFalse(executed)
@@ -173,12 +173,12 @@ class SequentialSchedulerTest {
             val segment =
                 Segment(
                     name = "deploy",
-                    condition = { it.isRelease },
+                    condition = { it.env("RELEASE") == "true" },
                     execute = { executed = true },
                 )
 
             val scheduler = SequentialScheduler()
-            val releaseContext = context.copy(isRelease = true)
+            val releaseContext = context.copy(environment = mapOf("RELEASE" to "true", "CI" to "true"))
             val result = scheduler.execute(listOf(segment), releaseContext)
 
             assertTrue(executed)

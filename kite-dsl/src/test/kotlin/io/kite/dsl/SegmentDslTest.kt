@@ -58,7 +58,7 @@ class SegmentDslTest {
                     dependsOn("build")
                     retryOn("IOException")
 
-                    condition { it.isLocal }
+                    condition { !it.isCI }
 
                     execute {
                         // Execution logic
@@ -176,7 +176,7 @@ class SegmentDslTest {
         val segmentsList =
             segments {
                 segment("conditional") {
-                    condition { context -> context.isLocal }
+                    condition { context -> !context.isCI }
                     execute { }
                 }
             }
@@ -184,10 +184,10 @@ class SegmentDslTest {
         val segment = segmentsList[0]
         assertNotNull(segment.condition)
 
-        val localContext = ExecutionContext(branch = "main", commitSha = "abc", isLocal = true)
+        val localContext = ExecutionContext(branch = "main", commitSha = "abc", environment = emptyMap())
         assertTrue(segment.shouldExecute(localContext))
 
-        val ciContext = ExecutionContext(branch = "main", commitSha = "abc", isLocal = false)
+        val ciContext = ExecutionContext(branch = "main", commitSha = "abc", environment = mapOf("CI" to "true"))
         assertFalse(segment.shouldExecute(ciContext))
     }
 

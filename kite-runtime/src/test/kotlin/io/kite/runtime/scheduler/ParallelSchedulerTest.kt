@@ -232,12 +232,12 @@ class ParallelSchedulerTest {
             val segment =
                 Segment(
                     name = "deploy",
-                    condition = { it.isRelease },
+                    condition = { it.env("RELEASE") == "true" },
                     execute = { executed = true },
                 )
 
             val scheduler = ParallelScheduler()
-            val nonReleaseContext = context.copy(isRelease = false)
+            val nonReleaseContext = context.copy(environment = mapOf("RELEASE" to "false", "CI" to "true"))
             val result = scheduler.execute(listOf(segment), nonReleaseContext)
 
             assertEquals(false, executed)

@@ -10,19 +10,19 @@ import java.nio.file.Paths
  * and utilities for segments to use.
  *
  * **Design Philosophy:**
- * Kite is intentionally platform-agnostic. Instead of relying on opinionated
- * properties like [mrNumber] or [isRelease], segments should query environment
+ * Kite is intentionally platform-agnostic. Segments query environment
  * variables directly using [env] to check platform-specific values.
  *
- * **Migration Guide:**
+ * **Examples:**
  * ```kotlin
- * // Instead of: ctx.mrNumber != null
- * // Use: ctx.env("CI_MERGE_REQUEST_IID") != null (GitLab)
- * //  or: ctx.env("GITHUB_EVENT_NAME") == "pull_request" (GitHub)
+ * // Check if in GitLab MR
+ * val isGitLabMR = ctx.env("CI_MERGE_REQUEST_IID") != null
  *
- * // Instead of: ctx.isRelease
- * // Use: ctx.env("CI_MERGE_REQUEST_LABELS")?.contains("release") == true
- * //  or: Define your own convention
+ * // Check if in GitHub PR
+ * val isGitHubPR = ctx.env("GITHUB_EVENT_NAME") == "pull_request"
+ *
+ * // Check for your release convention
+ * val isRelease = ctx.env("CI_MERGE_REQUEST_LABELS")?.contains("release") == true
  * ```
  *
  * @property branch The current Git branch (detected from git or CI env vars)
@@ -31,10 +31,6 @@ import java.nio.file.Paths
  * @property workspace The workspace root directory
  * @property artifacts Artifact manager for sharing data between segments
  * @property logger Logger for this segment execution
- * @property mrNumber DEPRECATED: Use env("CI_MERGE_REQUEST_IID") or env("GITHUB_REF") instead
- * @property isRelease DEPRECATED: Define your own release detection logic using env()
- * @property isLocal DEPRECATED: Use isCI instead or check env("CI") directly
- * @property ciPlatform DEPRECATED: Check environment variables directly instead
  */
 data class ExecutionContext(
     val branch: String,
@@ -43,25 +39,6 @@ data class ExecutionContext(
     val workspace: Path = Paths.get("."),
     val artifacts: ArtifactManager = InMemoryArtifactManager(),
     val logger: SegmentLoggerInterface = NoOpLogger,
-    // Deprecated properties for backward compatibility
-    @Deprecated(
-        message = "Platform-specific property. Use env(\"CI_MERGE_REQUEST_IID\") for GitLab or env(\"GITHUB_REF\") for GitHub instead.",
-        replaceWith = ReplaceWith("env(\"CI_MERGE_REQUEST_IID\")"),
-        level = DeprecationLevel.WARNING,
-    )
-    val mrNumber: String? = null,
-    @Deprecated(
-        message = "Platform-specific property. Define your own release detection logic using env().",
-        replaceWith = ReplaceWith("env(\"CI_MERGE_REQUEST_LABELS\")?.contains(\"release\") == true"),
-        level = DeprecationLevel.WARNING,
-    )
-    val isRelease: Boolean = false,
-    @Deprecated(
-        message = "Use !isCI instead, or check env(\"CI\") directly for more control.",
-        replaceWith = ReplaceWith("!isCI"),
-        level = DeprecationLevel.WARNING,
-    )
-    val isLocal: Boolean = environment["CI"] != "true",
 ) {
     /**
      * Gets an environment variable value.
@@ -136,22 +113,6 @@ data class ExecutionContext(
         requireNotNull(value) { "Required secret environment variable '$key' is not set" }
         return value
     }
-
-    /**
-     * Returns true if this is a merge/pull request build.
-     *
-     * @deprecated Platform-specific detection. Check environment variables directly:
-     * - GitLab: `env("CI_MERGE_REQUEST_IID") != null`
-     * - GitHub: `env("GITHUB_EVENT_NAME") == "pull_request"`
-     * - Jenkins: `env("CHANGE_ID") != null`
-     */
-    @Deprecated(
-        message = "Platform-specific detection. Check env(\"CI_MERGE_REQUEST_IID\") or env(\"GITHUB_EVENT_NAME\") instead.",
-        replaceWith = ReplaceWith("env(\"CI_MERGE_REQUEST_IID\") != null"),
-        level = DeprecationLevel.WARNING,
-    )
-    val isMergeRequest: Boolean
-        get() = mrNumber != null
 
     /**
      * Returns true if running in a CI environment.

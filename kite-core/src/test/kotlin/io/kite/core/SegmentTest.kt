@@ -49,7 +49,7 @@ class SegmentTest {
 
     @Test
     fun `segment with all properties`() {
-        val condition: (ExecutionContext) -> Boolean = { it.isLocal }
+        val condition: (ExecutionContext) -> Boolean = { !it.isCI }
         val execute: suspend ExecutionContext.() -> Unit = {}
 
         val segment =
@@ -88,7 +88,7 @@ class SegmentTest {
         val segment =
             Segment(
                 name = "test",
-                condition = { it.isLocal },
+                condition = { !it.isCI },
                 execute = {},
             )
 
@@ -96,7 +96,7 @@ class SegmentTest {
             ExecutionContext(
                 branch = "main",
                 commitSha = "abc123",
-                isLocal = true,
+                environment = emptyMap(), // No CI indicator, so local
             )
         assertTrue(segment.shouldExecute(localContext))
 
@@ -104,7 +104,7 @@ class SegmentTest {
             ExecutionContext(
                 branch = "main",
                 commitSha = "abc123",
-                isLocal = false,
+                environment = mapOf("CI" to "true"), // CI environment
             )
         assertFalse(segment.shouldExecute(ciContext))
     }

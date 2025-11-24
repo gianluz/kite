@@ -19,10 +19,6 @@ class ExecutionContextTest {
 
         assertEquals("main", context.branch)
         assertEquals("abc123", context.commitSha)
-        @Suppress("DEPRECATION")
-        assertNull(context.mrNumber)
-        @Suppress("DEPRECATION")
-        assertFalse(context.isRelease)
         assertFalse(context.isCI) // No CI env var, so not in CI
         assertEquals(emptyMap(), context.environment)
     }
@@ -33,14 +29,10 @@ class ExecutionContextTest {
         val artifacts = InMemoryArtifactManager()
         val workspace = Paths.get("/workspace")
 
-        @Suppress("DEPRECATION")
         val context =
             ExecutionContext(
                 branch = "feature/test",
                 commitSha = "def456",
-                mrNumber = "123",
-                isRelease = true,
-                isLocal = false,
                 environment = env,
                 workspace = workspace,
                 artifacts = artifacts,
@@ -48,12 +40,7 @@ class ExecutionContextTest {
 
         assertEquals("feature/test", context.branch)
         assertEquals("def456", context.commitSha)
-        @Suppress("DEPRECATION")
-        assertEquals("123", context.mrNumber)
-        @Suppress("DEPRECATION")
-        assertTrue(context.isRelease)
-        @Suppress("DEPRECATION")
-        assertFalse(context.isLocal)
+        assertTrue(context.isCI) // CI=true present
         assertEquals(env, context.environment)
         assertEquals(workspace, context.workspace)
         assertEquals(artifacts, context.artifacts)
@@ -103,22 +90,70 @@ class ExecutionContextTest {
     }
 
     @Test
-    fun `isMergeRequest is true when mrNumber is set`() {
-        val withMR =
+    fun `platform-agnostic MR detection using env variables`() {
+        // GitLab MR detection
+        val gitlabContext =
             ExecutionContext(
                 branch = "main",
                 commitSha = "abc123",
-                mrNumber = "42",
+                environment = mapOf("CI_MERGE_REQUEST_IID" to "42"),
             )
-        assertTrue(withMR.isMergeRequest)
+        val isGitLabMR = gitlabContext.env("CI_MERGE_REQUEST_IID") != null
+        assertTrue(isGitLabMR)
 
-        val withoutMR =
+        // GitHub PR detection
+        val githubContext =
             ExecutionContext(
                 branch = "main",
                 commitSha = "abc123",
-                mrNumber = null,
+                environment = mapOf("GITHUB_EVENT_NAME" to "pull_request"),
             )
-        assertFalse(withoutMR.isMergeRequest)
+        val isGitHubPR = githubContext.env("GITHUB_EVENT_NAME") == "pull_request"
+        assertTrue(isGitHubPR)
+
+        // No MR/PR
+        val noMrContext =
+            ExecutionContext(
+                branch = "main",
+                commitSha = "abc123",
+                environment = emptyMap(),
+            )
+        val isNoMR = noMrContext.env("CI_MERGE_REQUEST_IID") == null &&
+                noMrContext.env("GITHUB_EVENT_NAME") != "pull_request"
+        assertTrue(isNoMR)
+    }
+
+    @Test
+    fun `platform-agnostic release detection using env variables`() {
+        // GitLab release label
+        val gitlabContext =
+            ExecutionContext(
+                branch = "main",
+                commitSha = "abc123",
+                environment = mapOf("CI_MERGE_REQUEST_LABELS" to "release,important"),
+            )
+        val isGitLabRelease = gitlabContext.env("CI_MERGE_REQUEST_LABELS")?.contains("release") == true
+        assertTrue(isGitLabRelease)
+
+        // Custom convention - branch name
+        val branchContext =
+            ExecutionContext(
+                branch = "release/v1.0.0",
+                commitSha = "abc123",
+                environment = emptyMap(),
+            )
+        val isBranchRelease = branchContext.branch.startsWith("release/")
+        assertTrue(isBranchRelease)
+
+        // No release indicator
+        val noReleaseContext =
+            ExecutionContext(
+                branch = "feature/test",
+                commitSha = "abc123",
+                environment = emptyMap(),
+            )
+        val isNoRelease = noReleaseContext.env("CI_MERGE_REQUEST_LABELS")?.contains("release") != true
+        assertTrue(isNoRelease)
     }
 
     @Test
