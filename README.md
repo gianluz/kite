@@ -456,15 +456,32 @@ kite/
 
 ## Roadmap
 
+### ✅ Completed
+
 - [x] Core DSL and execution engine
-- [x] Parallel execution
+- [x] Parallel execution with dependency management
 - [x] Artifact management
-- [x] Secret masking
+- [x] Automatic secret masking
 - [x] CLI interface
-- [x] CI/CD integration
-- [ ] Plugin system
-- [ ] Remote caching
-- [ ] Distributed execution
+- [x] CI/CD integration (GitHub Actions, GitLab CI)
+- [x] Timeout and retry mechanisms
+- [x] Platform-agnostic design
+
+### 🚧 In Progress
+
+- [ ] **Maven Central distribution** - Publish to Maven Central for easy dependency management
+- [ ] **Swift script support** - Write Kite segments in Swift (`.kite.swift` files)
+    - Using Danger-style inline dependency comments
+    - Automatic compilation and caching
+    - Full Swift Package Manager integration
+
+### 🔮 Planned
+
+- [ ] Plugin system for extensibility
+- [ ] Remote caching for distributed teams
+- [ ] Distributed execution across multiple machines
+- [ ] Web dashboard for visualization
+- [ ] Additional language support (Python, Go, Rust)
 
 See **[Development Plan](devplan/)** for detailed roadmap.
 
