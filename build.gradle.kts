@@ -7,7 +7,7 @@ plugins {
 }
 
 allprojects {
-    group = "io.kite"
+    group = "com.gianluz"  // Maven Central namespace
     version = "0.1.0-alpha"
 
     repositories {
