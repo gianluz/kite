@@ -30,7 +30,7 @@ jobs:
         run: ./gradlew :kite-cli:installDist
 
       - name: Run PR Validation
-        run: kite-cli/build/install/kite-cli/bin/kite-cli ride MR
+        run: kite-cli/build/install/kite-cli/bin/kite-cli ride PR
 
       - name: Upload Test Results
         if: always()

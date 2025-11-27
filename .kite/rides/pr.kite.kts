@@ -1,12 +1,12 @@
 ride {
-    name = "MR"
+    name = "PR"
     maxConcurrency = 4
-    
+
     flow {
         // First: Clean and compile
         segment("clean")
         segment("compile")
-        
+
         // Then: Run quality checks and tests in parallel
         parallel {
             // Code quality checks (will fail PR if violations found)
