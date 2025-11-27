@@ -470,13 +470,13 @@ kite/
 ### 🚧 In Progress
 
 - [ ] **Maven Central distribution** - Publish to Maven Central for easy dependency management
-- [ ] **Swift script support** - Write Kite segments in Swift (`.kite.swift` files)
-    - Using Danger-style inline dependency comments
-    - Automatic compilation and caching
-    - Full Swift Package Manager integration
 
 ### 🔮 Planned
 
+- [ ] **Swift script support** (exploratory) - Write Kite segments in Swift (`.kite.swift` files)
+    - Using Danger-style inline dependency comments
+    - Automatic compilation and caching
+    - Full Swift Package Manager integration
 - [ ] Plugin system for extensibility
 - [ ] Remote caching for distributed teams
 - [ ] Distributed execution across multiple machines
