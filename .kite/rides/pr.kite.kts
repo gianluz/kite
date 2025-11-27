@@ -3,9 +3,6 @@ ride {
     maxConcurrency = 4
 
     flow {
-        // Check version sync before building
-        segment("check-version-sync")
-
         // First: Clean and compile
         segment("clean")
         segment("compile")

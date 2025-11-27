@@ -1,6 +1,6 @@
 segments {
     segment("update-version-badge") {
-        description = "Update version badge in README to match build.gradle.kts"
+        description = "Update version badge in README to match build.gradle.kts (run locally before commit)"
 
         execute {
             logger.info("Updating version badge in README...")
@@ -48,7 +48,7 @@ segments {
     }
 
     segment("check-version-sync") {
-        description = "Check if version badge matches build.gradle.kts version"
+        description = "Check if version badge matches build.gradle.kts version (used by pre-commit hook)"
 
         execute {
             logger.info("Checking version synchronization...")

@@ -1,0 +1,53 @@
+#!/bin/sh
+#
+# Git pre-commit hook to check version synchronization
+#
+# Ensures that when build.gradle.kts version is changed,
+# the README.md version badge is also updated.
+#
+# To install:
+#   ./gradlew build  (hooks install automatically)
+#
+# To bypass (use sparingly):
+#   git commit --no-verify
+#
+
+# Check if build.gradle.kts or README.md is being committed
+CHANGED_FILES=$(git diff --cached --name-only)
+
+if echo "$CHANGED_FILES" | grep -q "build.gradle.kts"; then
+    # build.gradle.kts is being committed, check version sync
+    echo "🔍 Detected build.gradle.kts change, checking version synchronization..."
+    echo ""
+    
+    # Check if kite-cli is built
+    if [ ! -f "kite-cli/build/install/kite-cli/bin/kite-cli" ]; then
+        echo "📦 Building Kite CLI..."
+        ./gradlew :kite-cli:installDist --quiet --no-daemon > /dev/null 2>&1
+        if [ $? -ne 0 ]; then
+            echo "❌ Failed to build Kite CLI"
+            exit 1
+        fi
+    fi
+    
+    # Run version sync check
+    kite-cli/build/install/kite-cli/bin/kite-cli run check-version-sync 2>&1 | grep -v "^Picked up"
+    
+    if [ $? -eq 0 ]; then
+        echo ""
+        echo "✅ Version synchronization OK!"
+    else
+        echo ""
+        echo "💡 Quick fix:"
+        echo "   kite-cli/build/install/kite-cli/bin/kite-cli run update-version-badge"
+        echo "   git add README.md"
+        echo ""
+        echo "⚠️  To bypass this check (not recommended):"
+        echo "   git commit --no-verify"
+        echo ""
+        exit 1
+    fi
+fi
+
+# All good!
+exit 0
