@@ -29,5 +29,8 @@ ride {
 
         // Finally: Create GitHub release with binaries
         segment("create-github-release")
+
+        // Publish summary to GitHub Actions
+        segment("publish-release-summary")
     }
 }

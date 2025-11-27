@@ -94,25 +94,3 @@ jobs:
         run: |
           export PATH="$PWD/kite-cli/build/install/kite-cli/bin:$PATH"
           kite-cli ride "${{ steps.ride.outputs.ride }}"
-
-      - name: Deployment Summary
-        if: always()
-        run: |
-          echo "# 🚀 Manual Deployment Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Type:** ${{ inputs.deployment_type }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Version:** ${{ inputs.version_tag }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Ride:** ${{ steps.ride.outputs.ride }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          if [[ "${{ inputs.deployment_type }}" == "full" || "${{ inputs.deployment_type }}" == "maven" ]]; then
-            echo "- ✅ Maven Central: \`com.gianluz.kite:kite-core:${{ inputs.version_tag }}\`" >> $GITHUB_STEP_SUMMARY
-          fi
-          
-          if [[ "${{ inputs.deployment_type }}" == "full" || "${{ inputs.deployment_type }}" == "docker" ]]; then
-            echo "- ✅ Docker Hub: \`gianluz/kite:${{ inputs.version_tag }}\`" >> $GITHUB_STEP_SUMMARY
-          fi
-          
-          if [[ "${{ inputs.deployment_type }}" == "full" || "${{ inputs.deployment_type }}" == "release" ]]; then
-            echo "- ✅ GitHub Release: [View](https://github.com/gianluz/kite/releases/tag/${{ inputs.version_tag }})" >> $GITHUB_STEP_SUMMARY
-          fi

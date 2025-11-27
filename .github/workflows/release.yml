@@ -62,27 +62,3 @@ jobs:
         run: |
           export PATH="$PWD/kite-cli/build/install/kite-cli/bin:$PATH"
           kite-cli ride Deploy
-
-      - name: Create Release Summary
-        if: always()
-        run: |
-          echo "# 🚀 Release Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Version:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## 📦 Distribution Channels" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ **Maven Central:** \`com.gianluz.kite:kite-core:${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ **GitHub Packages:** Available in this repository" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ **Docker Hub:** \`gianluz/kite:${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ **GitHub Release:** [View Release](https://github.com/gianluz/kite/releases/tag/${{ github.ref_name }})" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## 📥 Installation" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          echo "# Via Docker" >> $GITHUB_STEP_SUMMARY
-          echo "docker pull gianluz/kite:${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "# Via direct download" >> $GITHUB_STEP_SUMMARY
-          echo "curl -LO https://github.com/gianluz/kite/releases/download/${{ github.ref_name }}/kite-cli-${{ github.ref_name }}.tar" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

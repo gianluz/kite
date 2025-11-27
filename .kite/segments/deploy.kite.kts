@@ -180,4 +180,68 @@ segments {
             logger.info("  https://github.com/gianluz/kite/releases/tag/$tag")
         }
     }
+
+    segment("publish-release-summary") {
+        description = "Publish release summary to GitHub Actions"
+        dependsOn("create-github-release", "deploy-maven-central", "deploy-docker")
+
+        condition { ctx ->
+            // Only in CI environment
+            ctx.isCI
+        }
+
+        execute {
+            val tag = env("CI_COMMIT_TAG") ?: env("VERSION") ?: "unknown"
+            val version = tag.removePrefix("v")
+
+            logger.info("Publishing release summary to GitHub Actions...")
+
+            // Get GitHub step summary file (GitHub Actions specific)
+            val summaryFile = env("GITHUB_STEP_SUMMARY")
+
+            if (summaryFile != null) {
+                val summary = """
+                    # 🚀 Release Summary
+                    
+                    **Version:** $tag
+                    
+                    ## 📦 Distribution Channels
+                    
+                    - ✅ **Maven Central:** `com.gianluz.kite:kite-core:$version`
+                    - ✅ **GitHub Packages:** Available in this repository
+                    - ✅ **Docker Hub:** `gianluz/kite:$version`
+                    - ✅ **GitHub Release:** [View Release](https://github.com/gianluz/kite/releases/tag/$tag)
+                    
+                    ## 📥 Installation
+                    
+                    ```bash
+                    # Via Docker
+                    docker pull gianluz/kite:$version
+                    
+                    # Via direct download
+                    curl -LO https://github.com/gianluz/kite/releases/download/$tag/kite-cli-$version.tar
+                    tar -xf kite-cli-$version.tar
+                    export PATH="${'$'}PWD/kite-cli-$version/bin:${'$'}PATH"
+                    ```
+                    
+                    ## 📚 Documentation
+                    
+                    - [GitHub Repository](https://github.com/gianluz/kite)
+                    - [Getting Started](https://github.com/gianluz/kite/blob/main/docs/01-getting-started.md)
+                    - [CLI Reference](https://github.com/gianluz/kite/blob/main/docs/12-cli-reference.md)
+                    
+                    ## 🎉 Thank You!
+                    
+                    Special thanks to [Luno](https://www.luno.com) for supporting this project!
+                """.trimIndent()
+
+                // Write to GitHub step summary
+                shell("echo '$summary' >> $summaryFile")
+
+                logger.info("✅ Release summary published!")
+            } else {
+                logger.info("⚠️  Not in GitHub Actions, skipping summary")
+            }
+        }
+    }
 }
