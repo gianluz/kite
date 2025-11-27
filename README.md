@@ -2,6 +2,7 @@
 
 A modern, type-safe CI/CD workflow runner for Kotlin projects.
 
+[![Version](https://img.shields.io/badge/version-0.1.0--alpha-blue.svg)](https://github.com/gianluz/kite/releases)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Kotlin](https://img.shields.io/badge/kotlin-2.0.21-blue.svg?logo=kotlin)](http://kotlinlang.org)
 [![Java](https://img.shields.io/badge/Java-17+-orange.svg)](https://openjdk.java.net/)
