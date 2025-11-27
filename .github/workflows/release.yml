@@ -1,0 +1,88 @@
+name: Release & Deploy
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Trigger on version tags like v1.0.0, v2.1.3, etc.
+
+permissions:
+  contents: write      # Required for creating releases
+  packages: write      # Required for GitHub Packages
+  id-token: write      # Required for signing
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for changelog generation
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Kite CLI
+        run: ./gradlew :kite-cli:installDist
+
+      - name: Run Full Deployment
+        env:
+          # Maven Central credentials
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+          
+          # GitHub credentials
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+          # Docker credentials
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          
+          # Git/CI info
+          CI_COMMIT_TAG: ${{ github.ref_name }}
+          VERSION: ${{ github.ref_name }}
+        run: |
+          export PATH="$PWD/kite-cli/build/install/kite-cli/bin:$PATH"
+          kite-cli ride Deploy
+
+      - name: Create Release Summary
+        if: always()
+        run: |
+          echo "# 🚀 Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📦 Distribution Channels" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Maven Central:** \`com.gianluz.kite:kite-core:${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **GitHub Packages:** Available in this repository" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **Docker Hub:** \`gianluz/kite:${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ **GitHub Release:** [View Release](https://github.com/gianluz/kite/releases/tag/${{ github.ref_name }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 📥 Installation" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
+          echo "# Via Docker" >> $GITHUB_STEP_SUMMARY
+          echo "docker pull gianluz/kite:${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "# Via direct download" >> $GITHUB_STEP_SUMMARY
+          echo "curl -LO https://github.com/gianluz/kite/releases/download/${{ github.ref_name }}/kite-cli-${{ github.ref_name }}.tar" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
