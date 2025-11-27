@@ -77,7 +77,7 @@ subprojects {
                 pom {
                     name.set(project.name)
                     description.set(project.description)
-                    url.set("https://github.com/yourusername/kite")
+                    url.set("https://github.com/gianluz/kite")
 
                     licenses {
                         license {
