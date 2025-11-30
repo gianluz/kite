@@ -6,14 +6,13 @@ repositories {
 }
 
 dependencies {
-    // Plugin depends on Kite core from Maven (not project dependency)
-    // This allows independent publishing
-    compileOnly("com.gianluz.kite:kite-core:${project.version}")
+    // Plugin depends on Kite core (using project dependency for build)
+    compileOnly(project(":kite-core"))
 
     // JGit for Git operations
     implementation("org.eclipse.jgit:org.eclipse.jgit:6.7.0.202309050840-r")
 
-    // Testing - use project dependency for tests only
+    // Testing
     testImplementation(project(":kite-core"))
 }
 

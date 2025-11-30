@@ -6,12 +6,12 @@ repositories {
 }
 
 dependencies {
-    // Plugin depends on Kite core (published to Maven Local during development)
-    compileOnly("com.gianluz.kite:kite-core:${project.version}")
+    // Plugin depends on Kite core (using project dependency for build)
+    compileOnly(project(":kite-core"))
 
     // Test dependencies
     testImplementation(kotlin("test"))
     testImplementation("io.mockk:mockk:1.13.8")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
-    testImplementation("com.gianluz.kite:kite-core:${project.version}")
+    testImplementation(project(":kite-core"))
 }
