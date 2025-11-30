@@ -36,12 +36,18 @@ class GitPluginTest {
         // Initialize Git repository
         git = Git.init().setDirectory(tempDir.toFile()).call()
 
+        // Configure Git user for commits
+        val config = git.repository.config
+        config.setString("user", null, "name", "Test User")
+        config.setString("user", null, "email", "test@example.com")
+        config.save()
+
         // Create initial commit
         val testFile = tempDir.resolve("test.txt")
         testFile.createFile()
         testFile.writeText("Initial content")
 
-        git.add().addFilepattern(".").call()
+        git.add().addFilepattern("test.txt").call()
         git.commit().setMessage("Initial commit").call()
 
         // Mock ExecutionContext
@@ -110,44 +116,44 @@ class GitPluginTest {
 
     @Test
     fun `tag creates a new tag`() {
-        plugin.tag("v1.0.0")
+        plugin.tag("test-tag-1")
 
         val tags = git.tagList().call()
         assertEquals(1, tags.size)
-        assertEquals("refs/tags/v1.0.0", tags.first().name)
+        assertEquals("refs/tags/test-tag-1", tags.first().name)
 
-        verify { ctx.logger.info("🏷️  Creating tag: v1.0.0") }
-        verify { ctx.logger.info("✅ Tag created: v1.0.0") }
+        verify { ctx.logger.info("🏷️  Creating tag: test-tag-1") }
+        verify { ctx.logger.info("✅ Tag created: test-tag-1") }
     }
 
     @Test
     fun `tag with message creates annotated tag`() {
-        plugin.tag("v1.0.0", message = "Release 1.0.0")
+        plugin.tag("test-tag-annotated", message = "Test annotated tag")
 
         val tags = git.tagList().call()
         assertEquals(1, tags.size)
-        assertEquals("refs/tags/v1.0.0", tags.first().name)
+        assertEquals("refs/tags/test-tag-annotated", tags.first().name)
     }
 
     @Test
     fun `tagExists returns true for existing tag`() {
-        plugin.tag("v1.0.0")
+        plugin.tag("test-exists-1")
 
-        assertTrue(plugin.tagExists("v1.0.0"))
-        assertFalse(plugin.tagExists("v2.0.0"))
+        assertTrue(plugin.tagExists("test-exists-1"))
+        assertFalse(plugin.tagExists("test-exists-2"))
     }
 
     @Test
     fun `latestTag returns most recent tag`() {
-        plugin.tag("v1.0.0")
-        plugin.tag("v1.1.0")
-        plugin.tag("v2.0.0")
+        plugin.tag("test-latest-1")
+        plugin.tag("test-latest-2")
+        plugin.tag("test-latest-3")
 
         val latest = plugin.latestTag()
 
-        // Tags are ordered, so latest should be v2.0.0
+        // Tags are ordered, so latest should be one of them
         assertNotNull(latest)
-        assertTrue(latest in listOf("v1.0.0", "v1.1.0", "v2.0.0"))
+        assertTrue(latest in listOf("test-latest-1", "test-latest-2", "test-latest-3"))
     }
 
     @Test
