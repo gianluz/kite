@@ -136,8 +136,8 @@ class IvyDependenciesResolver : ExternalDependenciesResolver {
             this.name = name
             this.root = root
             isM2compatible = true
-            isUsepoms = true  // CRITICAL: Enable POM parsing for transitive deps!
-            setDescriptor(IBiblioResolver.DESCRIPTOR_OPTIONAL)  // Look for POM but don't fail if missing
+            isUsepoms = true // CRITICAL: Enable POM parsing for transitive deps!
+            setDescriptor(IBiblioResolver.DESCRIPTOR_OPTIONAL) // Look for POM but don't fail if missing
         }
     }
 
@@ -165,7 +165,7 @@ class IvyDependenciesResolver : ExternalDependenciesResolver {
         // Resolve with transitives enabled
         val resolveOptions =
             ResolveOptions().apply {
-                isTransitive = true  // Enable transitive resolution
+                isTransitive = true // Enable transitive resolution
                 confs = arrayOf("default")
             }
 
@@ -192,7 +192,7 @@ class IvyDependenciesResolver : ExternalDependenciesResolver {
             println("     Including ${files.size - 1} transitive dependencies")
         }
 
-        return files.distinct()  // Remove duplicates
+        return files.distinct() // Remove duplicates
     }
 
     private fun parseMavenCoordinate(coord: String): ModuleRevisionId {
