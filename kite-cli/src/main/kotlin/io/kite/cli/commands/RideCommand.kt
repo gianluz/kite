@@ -382,8 +382,6 @@ class RideCommand : CliktCommand(
         return Pair(segments, missingSegments)
     }
 
-
-
     /**
      * Apply ride overrides to a segment.
      *

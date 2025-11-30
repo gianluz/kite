@@ -92,19 +92,21 @@ class SegmentTest {
                 execute = {},
             )
 
+        // No CI indicator, so local
         val localContext =
             ExecutionContext(
                 branch = "main",
                 commitSha = "abc123",
-                environment = emptyMap(), // No CI indicator, so local
+                environment = emptyMap(),
             )
         assertTrue(segment.shouldExecute(localContext))
 
+        // CI environment
         val ciContext =
             ExecutionContext(
                 branch = "main",
                 commitSha = "abc123",
-                environment = mapOf("CI" to "true"), // CI environment
+                environment = mapOf("CI" to "true"),
             )
         assertFalse(segment.shouldExecute(ciContext))
     }

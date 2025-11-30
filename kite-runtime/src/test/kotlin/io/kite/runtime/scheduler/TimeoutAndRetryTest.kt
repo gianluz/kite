@@ -72,11 +72,13 @@ class TimeoutAndRetryTest {
     fun `segment without timeout runs indefinitely`() =
         runTest {
             val segment =
+                // No timeout
                 Segment(
                     name = "no-timeout-task",
-                    timeout = null, // No timeout
+                    timeout = null,
                     execute = {
-                        delay(200) // Should complete without timeout
+                        // Should complete without timeout
+                        delay(200)
                     },
                 )
 
@@ -173,10 +175,11 @@ class TimeoutAndRetryTest {
         runTest {
             var attempts = 0
 
+            // No retries
             val segment =
                 Segment(
                     name = "no-retry-task",
-                    maxRetries = 0, // No retries
+                    maxRetries = 0,
                     execute = {
                         attempts++
                         throw RuntimeException("Failed")
@@ -249,12 +252,13 @@ class TimeoutAndRetryTest {
         runTest {
             var attempts = 0
 
+            // Retry on any exception
             val segment =
                 Segment(
                     name = "retry-all",
                     maxRetries = 2,
                     retryDelay = 10.milliseconds,
-                    retryOn = emptyList(), // Retry on any exception
+                    retryOn = emptyList(),
                     execute = {
                         attempts++
                         throw IllegalArgumentException("Any error")
