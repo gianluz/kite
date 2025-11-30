@@ -1,6 +1,9 @@
 # Kite Gradle Plugin
 
-Type-safe Gradle operations for Kite workflows.
+Flexible Gradle task execution for Kite workflows.
+
+**Design Philosophy:** This plugin is intentionally minimal and flexible to work with **any** Gradle setup - Java,
+Kotlin, Android, custom plugins, multi-module projects, etc.
 
 ## Installation
 
@@ -24,189 +27,147 @@ import io.kite.plugins.gradle.*
 import io.kite.plugins.gradle.*
 ```
 
+## Core Concept
+
+The plugin provides a **single powerful method** `execute()` that can run any Gradle tasks with full control over
+arguments. Convenience methods (`build()`, `clean()`, `test()`) are just wrappers.
+
 ## Usage
 
-### Basic Build
+### Basic Task Execution
 
 ```kotlin
-segments {
-    segment("build") {
-        execute {
-            gradle {
-                build()
-            }
-        }
+gradle {
+    // Execute any Gradle task
+    execute("build")
+    execute("clean", "build")
+    execute(":app:assembleDebug")
+    execute(":module1:test", ":module2:test")
+}
+```
+
+### With Options
+
+```kotlin
+gradle {
+    execute("build") {
+        parallel = true
+        stacktrace = true
+        property("version", "1.0.0")
+        property("env", "production")
     }
 }
 ```
 
-### Build Operations
+### Android Examples
 
 ```kotlin
 gradle {
-    // Simple build
-    build()
+    // Build Android app
+    execute(":app:assembleDebug")
     
-    // Custom tasks
-    build(tasks = listOf("clean", "build"))
+    // Release build
+    execute(":app:assembleRelease") {
+        property("android.injected.signing.store.file", keystorePath)
+        property("android.injected.signing.store.password", keystorePass)
+    }
     
-    // Parallel build
-    build(parallel = true)
+    // Run Android tests
+    execute(":app:testDebugUnitTest")
+    execute(":app:connectedAndroidTest")
     
-    // Without daemon
-    build(daemon = false)
+    // Lint check
+    execute(":app:lintDebug")
     
-    // With stacktrace
-    build(stacktrace = true)
-    
-    // With properties
-    build(properties = mapOf(
-        "version" to "1.0.0",
-        "env" to "production"
-    ))
+    // Bundle AAB
+    execute(":app:bundleRelease")
 }
 ```
 
-### Test Operations
+### Multi-Module Projects
 
 ```kotlin
 gradle {
-    // Run all tests
+    // Build specific modules
+    execute(":core:build", ":api:build", ":app:build") {
+        parallel = true
+    }
+    
+    // Test all modules
+    execute("test") {
+        continueOnFailure = true  // Don't stop on first failure
+    }
+    
+    // Publish library modules
+    execute(":core:publish", ":api:publish")
+}
+```
+
+### Convenience Methods
+
+```kotlin
+gradle {
+    // These are just wrappers around execute()
+    clean()
+    build()
     test()
     
-    // Parallel tests
-    test(parallel = true)
-    
-    // Continue after failures
-    test(continueAfterFailure = true)
-    
-    // Run specific tests
-    test(testNamePattern = "*IntegrationTest")
-    test(testNamePattern = "com.example.UserServiceTest")
-}
-```
-
-### Clean and Assemble
-
-```kotlin
-gradle {
-    // Clean build artifacts
-    clean()
-    
-    // Assemble without tests
-    assemble()
-    
-    // Clean and build
-    clean()
-    build()
-}
-```
-
-### Publishing
-
-```kotlin
-gradle {
-    // Publish to Maven Local
-    publishToMavenLocal()
-    
-    // Publish to all configured repositories
-    publish()
-    
-    // Publish to specific repository
-    publish(repository = "MavenCentral")
-    publish(repository = "GitHubPackages")
-}
-```
-
-### Dependency Management
-
-```kotlin
-gradle {
-    // View dependencies
-    dependencies()
-    
-    // Check for updates
-    dependencyUpdates()
-}
-```
-
-### Custom Tasks
-
-```kotlin
-gradle {
-    // Run custom tasks
-    tasks("customTask")
-    tasks("task1", "task2", "task3")
-    
-    // With additional arguments
-    tasks("myTask", args = listOf("--info", "--no-daemon"))
-}
-```
-
-### Wrapper Management
-
-```kotlin
-gradle {
-    // Update Gradle wrapper
-    wrapper("8.5")
+    // With options
+    build {
+        parallel = true
+        stacktrace = true
+    }
 }
 ```
 
 ## Complete Examples
 
-### CI Build Pipeline
+### Standard Java/Kotlin Project
 
 ```kotlin
 segments {
     segment("ci-build") {
-        description = "Complete CI build pipeline"
         execute {
             gradle {
-                // Clean previous artifacts
                 clean()
-                
-                // Build with tests
-                build(
-                    parallel = true,
+                execute("build") {
+                    parallel = true
                     stacktrace = true
-                )
-                
-                // Publish to Maven Local for integration tests
-                publishToMavenLocal()
+                }
             }
         }
     }
 }
 ```
 
-### Release Workflow
+### Android App Build
 
 ```kotlin
 segments {
-    segment("release") {
-        description = "Build and publish release"
+    segment("android-release") {
         execute {
             val version = env("VERSION") ?: error("VERSION not set")
+            val keystorePath = requireSecret("KEYSTORE_PATH")
+            val keystorePass = requireSecret("KEYSTORE_PASSWORD")
             
             gradle {
-                // Clean and build
-                clean()
-                build(
-                    properties = mapOf("version" to version),
-                    parallel = true
-                )
-                
-                // Publish to Maven Central
-                publish(repository = "MavenCentral")
+                execute("clean")
+                execute(":app:bundleRelease") {
+                    property("versionName", version)
+                    property("android.injected.signing.store.file", keystorePath)
+                    property("android.injected.signing.store.password", keystorePass)
+                    property("android.injected.signing.key.alias", "release")
+                    property("android.injected.signing.key.password", keystorePass)
+                }
             }
             
-            logger.info("✅ Released version $version")
+            logger.info("✅ Android release build complete")
         }
     }
 }
 ```
 
-### Multi-Module Build
+### Multi-Module Android Project
 
 ```kotlin
 segments {
@@ -214,94 +175,155 @@ segments {
         execute {
             gradle {
                 // Build all modules in parallel
-                build(
-                    tasks = listOf(
-                        ":module1:build",
-                        ":module2:build",
-                        ":module3:build"
-                    ),
+                execute(
+                    ":app:assembleDebug",
+                    ":library1:assemble",
+                    ":library2:assemble"
+                ) {
                     parallel = true
-                )
+                }
+            }
+        }
+    }
+    
+    segment("test-all") {
+        execute {
+            gradle {
+                // Test all modules, continue even if some fail
+                execute("test") {
+                    parallel = true
+                    continueOnFailure = true
+                }
             }
         }
     }
 }
 ```
 
-### Test with Coverage
+### Publishing Workflow
 
 ```kotlin
 segments {
-    segment("test-coverage") {
+    segment("publish-release") {
         execute {
             gradle {
-                // Run tests with coverage
-                tasks(
-                    "test",
-                    "jacocoTestReport",
-                    args = listOf("--continue")
-                )
+                execute("clean")
+                execute("build") {
+                    property("version", env("VERSION")!!)
+                }
+                execute("publish") {
+                    property("mavenUser", requireSecret("MAVEN_USER"))
+                    property("mavenPassword", requireSecret("MAVEN_PASSWORD"))
+                }
             }
         }
     }
 }
 ```
 
-### Dependency Analysis
+### Custom Gradle Tasks
 
 ```kotlin
 segments {
-    segment("analyze-dependencies") {
+    segment("custom-tasks") {
         execute {
             gradle {
-                // Check dependencies
-                dependencies()
+                // Any custom Gradle task
+                execute("detekt")
+                execute("ktlintCheck")
+                execute("dependencyUpdates")
+                execute("generateProto")
+                execute("myCustomTask")
+                
+                // With arguments
+                execute("myTask") {
+                    arg("--custom-flag")
+                    property("customProp", "value")
+                    systemProperty("java.awt.headless", "true")
+                }
+            }
+        }
+    }
+}
+```
+
+### Android CI/CD Pipeline
+
+```kotlin
+segments {
+    segment("android-ci") {
+        execute {
+            gradle {
+                // Lint
+                execute(":app:lintDebug")
+                
+                // Unit tests
+                execute(":app:testDebugUnitTest") {
+                    continueOnFailure = true
+                }
+                
+                // Build
+                execute(":app:assembleDebug")
+                
+                // Integration tests (if emulator available)
+                if (env("CI_HAS_EMULATOR") == "true") {
+                    execute(":app:connectedAndroidTest")
+                }
+            }
+        }
+    }
+}
+```
+
+### Dependency Management
+
+```kotlin
+segments {
+    segment("check-dependencies") {
+        execute {
+            gradle {
+                // View dependencies
+                execute("dependencies")
                 
                 // Check for updates
-                dependencyUpdates()
-            }
-        }
-    }
-}
-```
-
-### Docker Build with Gradle
-
-```kotlin
-segments {
-    segment("docker-build") {
-        execute {
-            gradle {
-                // Build application
-                build(tasks = listOf("clean", "bootJar"))
-            }
-            
-            // Build Docker image (assuming jib plugin)
-            gradle {
-                tasks("jib", args = listOf("--image=myapp:latest"))
-            }
-        }
-    }
-}
-```
-
-### Conditional Build
-
-```kotlin
-segments {
-    segment("build-snapshot") {
-        condition { ctx ->
-            // Only for snapshot versions
-            ctx.env("VERSION")?.endsWith("-SNAPSHOT") == true
-        }
-        
-        execute {
-            gradle {
-                build(properties = mapOf(
-                    "version" to env("VERSION")!!
-                ))
+                execute("dependencyUpdates")
                 
-                publish(repository = "Snapshots")
+                // Verify dependencies
+                execute("dependencies", "--configuration", "runtimeClasspath")
+            }
+        }
+    }
+}
+```
+
+### Offline Build
+
+```kotlin
+segments {
+    segment("offline-build") {
+        execute {
+            gradle {
+                execute("build") {
+                    offline = true  // Use cached dependencies
+                }
+            }
+        }
+    }
+}
+```
+
+### Debug Build Issues
+
+```kotlin
+segments {
+    segment("debug-build") {
+        execute {
+            gradle {
+                execute("build") {
+                    stacktrace = true
+                    info = true  // or debug = true for more details
+                    daemon = false  // Disable daemon for clean state
+                }
             }
         }
     }
@@ -310,74 +332,76 @@ segments {
 
 ## API Reference
 
-### Build Operations
+### Core Method
 
-- `build(tasks, parallel, daemon, stacktrace, properties)` - Build the project
-- `clean()` - Clean build artifacts
-- `assemble()` - Assemble artifacts without tests
+- `execute(vararg tasks: String, options: GradleOptions.() -> Unit = {})` - Execute any Gradle tasks
 
-### Test Operations
+### Convenience Methods
 
-- `test(parallel, continueAfterFailure, testNamePattern)` - Run tests
+- `build(options: GradleOptions.() -> Unit = {})` - Wrapper for `execute("build")`
+- `clean(options: GradleOptions.() -> Unit = {})` - Wrapper for `execute("clean")`
+- `test(options: GradleOptions.() -> Unit = {})` - Wrapper for `execute("test")`
 
-### Publishing Operations
+### GradleOptions (DSL)
 
-- `publishToMavenLocal()` - Publish to Maven Local
-- `publish(repository)` - Publish to remote repository
+**Flags:**
 
-### Dependency Operations
+- `parallel: Boolean = false` - Enable parallel execution (--parallel)
+- `daemon: Boolean = true` - Enable Gradle daemon
+- `stacktrace: Boolean = false` - Show stacktrace (--stacktrace)
+- `info: Boolean = false` - Info logging (--info)
+- `debug: Boolean = false` - Debug logging (--debug)
+- `continueOnFailure: Boolean = false` - Continue after failures (--continue)
+- `offline: Boolean = false` - Offline mode (--offline)
+- `refreshDependencies: Boolean = false` - Refresh dependencies (--refresh-dependencies)
 
-- `dependencies()` - Generate dependency report
-- `dependencyUpdates()` - Check for dependency updates
+**Properties:**
 
-### Task Execution
+- `property(key: String, value: String)` - Add Gradle property (-Pkey=value)
+- `systemProperty(key: String, value: String)` - Add system property (-Dkey=value)
 
-- `tasks(vararg tasks, args)` - Run custom Gradle tasks
+**Custom Arguments:**
 
-### Wrapper Operations
+- `arg(argument: String)` - Add custom argument
 
-- `wrapper(version)` - Update Gradle wrapper
+**Direct access:**
+
+- `properties: MutableMap<String, String>` - Gradle properties map
+- `systemProperties: MutableMap<String, String>` - System properties map
+- `arguments: MutableList<String>` - Custom arguments list
+
+## Why This Design?
+
+### ❌ **Too Opinionated (Bad)**
+
+```kotlin
+// Doesn't work for Android!
+gradle.publishToMavenCentral()
+gradle.assembleDebug() // Method doesn't exist
+gradle.bundleRelease() // Method doesn't exist
+```
+
+### ✅ **Flexible (Good)**
+
+```kotlin
+// Works for everything!
+gradle.execute(":app:assembleDebug")
+gradle.execute(":app:bundleRelease")
+gradle.execute("anyCustomTask")
+```
+
+### Benefits
+
+1. **Works with any Gradle setup** - Java, Kotlin, Android, custom plugins
+2. **Future-proof** - New Gradle tasks automatically supported
+3. **No maintenance** - Don't need to add methods for every possible task
+4. **Type-safe** - Options are type-checked via DSL
+5. **Flexible** - Full control over arguments and flags
 
 ## Requirements
 
 - Gradle wrapper (`./gradlew`) in project root
 - Kite 0.1.0+
-
-## Tips
-
-### Using with Environment Variables
-
-```kotlin
-gradle {
-    build(properties = mapOf(
-        "mavenUser" to requireSecret("MAVEN_USER"),
-        "mavenPass" to requireSecret("MAVEN_PASS")
-    ))
-}
-```
-
-### Parallel Builds
-
-```kotlin
-gradle {
-    // Enable parallel execution for faster builds
-    build(
-        tasks = listOf("clean", "build"),
-        parallel = true
-    )
-}
-```
-
-### Debugging Build Issues
-
-```kotlin
-gradle {
-    build(
-        stacktrace = true,  // Show full stacktrace
-        daemon = false      // Disable daemon for clean state
-    )
-}
-```
 
 ## License
 
