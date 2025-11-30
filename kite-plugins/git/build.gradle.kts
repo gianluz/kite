@@ -1,13 +1,19 @@
 description = "Git operations plugin for Kite"
 
+repositories {
+    mavenLocal() // Check Maven Local first for kite-core
+    mavenCentral()
+}
+
 dependencies {
-    // Plugin depends on Kite core (compile-only to avoid version conflicts)
-    compileOnly(project(":kite-core"))
+    // Plugin depends on Kite core from Maven (not project dependency)
+    // This allows independent publishing
+    compileOnly("com.gianluz.kite:kite-core:${project.version}")
 
     // JGit for Git operations
     implementation("org.eclipse.jgit:org.eclipse.jgit:6.7.0.202309050840-r")
 
-    // Testing
+    // Testing - use project dependency for tests only
     testImplementation(project(":kite-core"))
 }
 
