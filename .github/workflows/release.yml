@@ -64,3 +64,19 @@ jobs:
         run: |
           export PATH="$PWD/kite-cli/build/install/kite-cli/bin:$PATH"
           kite-cli ride Deploy
+
+      - name: Upload Kite Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kite-artifacts-release
+          path: .kite/artifacts/
+          retention-days: 90
+
+      - name: Upload Build Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kite-cli-release
+          path: kite-cli/build/install/kite-cli/
+          retention-days: 90
