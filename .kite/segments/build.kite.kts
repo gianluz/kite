@@ -2,7 +2,7 @@ segments {
     segment("clean") {
         description = "Clean build artifacts"
         execute {
-            exec("./gradlew", "clean")
+            exec("./gradlew", "clean", "--no-configuration-cache")
         }
     }
 
@@ -10,7 +10,7 @@ segments {
         description = "Compile all Kotlin modules"
         dependsOn("clean")
         execute {
-            exec("./gradlew", "compileKotlin", "compileTestKotlin")
+            exec("./gradlew", "compileKotlin", "compileTestKotlin", "--no-configuration-cache")
         }
     }
 
@@ -18,7 +18,7 @@ segments {
         description = "Build all modules (assemble JARs)"
         dependsOn("compile")
         execute {
-            exec("./gradlew", "assemble")
+            exec("./gradlew", "assemble", "--no-configuration-cache")
         }
     }
 
@@ -31,6 +31,7 @@ segments {
                 "./gradlew",
                 ":kite-plugins:git:publishToMavenLocal",
                 ":kite-plugins:gradle:publishToMavenLocal",
+                "--no-configuration-cache",
             )
             logger.info("✅ Plugins published to Maven Local")
         }

@@ -9,7 +9,7 @@ segments {
         }
 
         execute {
-            exec("./gradlew", ":kite-core:test")
+            exec("./gradlew", ":kite-core:test", "--no-configuration-cache")
         }
     }
 
@@ -23,7 +23,7 @@ segments {
         }
 
         execute {
-            exec("./gradlew", ":kite-dsl:test")
+            exec("./gradlew", ":kite-dsl:test", "--no-configuration-cache")
         }
     }
 
@@ -37,7 +37,7 @@ segments {
         }
 
         execute {
-            exec("./gradlew", ":kite-runtime:test")
+            exec("./gradlew", ":kite-runtime:test", "--no-configuration-cache")
         }
     }
 
@@ -51,7 +51,7 @@ segments {
         }
 
         execute {
-            exec("./gradlew", ":kite-cli:test")
+            exec("./gradlew", ":kite-cli:test", "--no-configuration-cache")
         }
     }
 
@@ -65,7 +65,7 @@ segments {
         }
 
         execute {
-            exec("./gradlew", ":kite-integration-tests:test")
+            exec("./gradlew", ":kite-integration-tests:test", "--no-configuration-cache")
         }
     }
 
@@ -79,7 +79,7 @@ segments {
         }
 
         execute {
-            exec("./gradlew", ":kite-plugins:git:test")
+            exec("./gradlew", ":kite-plugins:git:test", "--no-configuration-cache")
         }
     }
 
@@ -93,7 +93,7 @@ segments {
         }
 
         execute {
-            exec("./gradlew", ":kite-plugins:gradle:test")
+            exec("./gradlew", ":kite-plugins:gradle:test", "--no-configuration-cache")
         }
     }
 

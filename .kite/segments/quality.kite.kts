@@ -3,7 +3,7 @@ segments {
         description = "Run ktlint code style checks on main sources"
         dependsOn("compile")
         execute {
-            exec("./gradlew", "ktlintMainSourceSetCheck", "ktlintKotlinScriptCheck")
+            exec("./gradlew", "ktlintMainSourceSetCheck", "ktlintKotlinScriptCheck", "--no-configuration-cache")
         }
     }
 
@@ -11,7 +11,7 @@ segments {
         description = "Run detekt static analysis"
         dependsOn("compile")
         execute {
-            exec("./gradlew", "detekt")
+            exec("./gradlew", "detekt", "--no-configuration-cache")
         }
     }
 
