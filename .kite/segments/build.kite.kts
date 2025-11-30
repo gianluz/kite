@@ -26,7 +26,16 @@ segments {
         description = "Publish plugins to Maven Local for use in other segments"
         dependsOn("compile")
         execute {
+            logger.info("📦 Publishing core modules to Maven Local first...")
+            // Publish core dependencies first
+            exec(
+                "./gradlew",
+                ":kite-core:publishToMavenLocal",
+                "--no-configuration-cache",
+            )
+
             logger.info("📦 Publishing plugins to Maven Local...")
+            // Now publish plugins
             exec(
                 "./gradlew",
                 ":kite-plugins:git:publishToMavenLocal",

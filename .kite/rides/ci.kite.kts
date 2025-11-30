@@ -7,8 +7,8 @@ ride {
         segment("clean")
         segment("compile")
 
-        // Publish plugins to Maven Local so they can be used by other segments
-        segment("publish-plugins-local")
+        // Note: Skipping publish-plugins-local due to Gradle 9.2 bug with project dependencies
+        // See: https://github.com/gradle/gradle/issues/XXXXX
 
         // Run quality checks and tests in parallel
         parallel {
