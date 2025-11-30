@@ -9,6 +9,7 @@ import org.eclipse.jgit.transport.RefSpec
 /**
  * Git plugin for Kite providing type-safe Git operations.
  */
+@Suppress("TooManyFunctions") // Git operations naturally require many functions
 class GitPlugin(private val ctx: ExecutionContext) {
     private val repository: Repository by lazy {
         FileRepositoryBuilder()
@@ -82,6 +83,122 @@ class GitPlugin(private val ctx: ExecutionContext) {
             }
 
         ctx.logger.info("✅ Pushed $what to $remote")
+    }
+
+    /**
+     * Fetch updates from remote repository.
+     *
+     * @param remote Remote name (default: origin)
+     * @param prune Remove deleted remote branches
+     */
+    fun fetch(
+        remote: String = "origin",
+        prune: Boolean = false,
+    ) {
+        ctx.logger.info("📥 Fetching from $remote...")
+
+        git.fetch()
+            .setRemote(remote)
+            .setRemoveDeletedRefs(prune)
+            .call()
+
+        ctx.logger.info("✅ Fetched from $remote")
+    }
+
+    /**
+     * Pull changes from remote (fetch + merge).
+     *
+     * @param remote Remote name (default: origin)
+     * @param branch Remote branch to pull (default: current branch)
+     * @param rebase Use rebase instead of merge
+     */
+    fun pull(
+        remote: String = "origin",
+        branch: String? = null,
+        rebase: Boolean = false,
+    ) {
+        ctx.logger.info("⬇️  Pulling from $remote${if (rebase) " (with rebase)" else ""}...")
+
+        val pullCommand =
+            git.pull()
+                .setRemote(remote)
+                .setRebase(rebase)
+
+        if (branch != null) {
+            pullCommand.setRemoteBranchName(branch)
+        }
+
+        pullCommand.call()
+        ctx.logger.info("✅ Pulled from $remote")
+    }
+
+    /**
+     * Checkout branch, tag, or commit.
+     *
+     * @param ref Branch name, tag, or commit SHA
+     * @param createBranch Create branch if it doesn't exist
+     */
+    fun checkout(
+        ref: String,
+        createBranch: Boolean = false,
+    ) {
+        ctx.logger.info("🔄 Checking out: $ref")
+
+        git.checkout()
+            .setName(ref)
+            .setCreateBranch(createBranch)
+            .call()
+
+        ctx.logger.info("✅ Checked out: $ref")
+    }
+
+    /**
+     * Merge branch into current branch.
+     *
+     * @param branch Branch to merge
+     * @param message Merge commit message
+     * @param fastForward Allow fast-forward merge
+     */
+    fun merge(
+        branch: String,
+        message: String? = null,
+        fastForward: Boolean = true,
+    ) {
+        ctx.logger.info("🔀 Merging: $branch")
+
+        val branchRef = repository.resolve(branch)
+        if (branchRef == null) {
+            ctx.logger.error("❌ Branch not found: $branch")
+            error("Branch not found: $branch")
+        }
+
+        val mergeCommand = git.merge().include(branchRef)
+
+        if (message != null) {
+            mergeCommand.setMessage(message)
+        }
+
+        if (!fastForward) {
+            mergeCommand.setFastForward(org.eclipse.jgit.api.MergeCommand.FastForwardMode.NO_FF)
+        }
+
+        val result = mergeCommand.call()
+
+        when {
+            result.mergeStatus.isSuccessful -> {
+                ctx.logger.info("✅ Merged: $branch (${result.mergeStatus})")
+            }
+
+            result.conflicts != null -> {
+                ctx.logger.error("❌ Merge conflicts in: ${result.conflicts.keys.joinToString()}")
+                error("Merge conflicts detected")
+            }
+
+            else -> {
+                ctx.logger.error("❌ Merge failed: ${result.mergeStatus}")
+                error("Merge failed: ${result.mergeStatus}")
+            }
+        }
     }
 
     /**

@@ -101,6 +101,43 @@ git {
 }
 ```
 
+### Remote Operations
+
+```kotlin
+git {
+    // Fetch from remote
+    fetch()
+    fetch(remote = "upstream")
+    fetch(prune = true)  // Remove deleted remote branches
+    
+    // Pull changes
+    pull()
+    pull(remote = "upstream", branch = "main")
+    pull(rebase = true)  // Pull with rebase
+    
+    // Push changes (see Push Operations section for more)
+    push()
+}
+```
+
+### Branch Operations
+
+```kotlin
+git {
+    // Checkout branch
+    checkout("main")
+    checkout("feature/new-feature")
+    
+    // Create and checkout new branch
+    checkout("new-branch", createBranch = true)
+    
+    // Merge branch
+    merge("feature/branch")
+    merge("hotfix", message = "Merge hotfix")
+    merge("feature", fastForward = false)  // Force merge commit
+}
+```
+
 ### Status Checks
 
 ```kotlin
@@ -149,17 +186,29 @@ git {
 
 ## Complete Examples
 
-### Release Workflow
+### Update and Release Workflow
 
 ```kotlin
 segments {
-    segment("create-release") {
+    segment("release") {
         execute {
             git {
+                // Fetch latest changes
+                fetch()
+                
+                // Switch to main branch
+                checkout("main")
+                
+                // Pull latest changes with rebase
+                pull(rebase = true)
+                
                 // Ensure clean state
                 if (!isClean()) {
                     error("Working directory must be clean")
                 }
+                
+                // Merge feature branch
+                merge("develop", message = "Merge develop into main")
                 
                 // Get version
                 val version = env("VERSION") ?: error("VERSION not set")
@@ -167,10 +216,48 @@ segments {
                 // Create release tag
                 tag("v$version", message = "Release $version")
                 
-                // Push tag
+                // Push branch and tag
+                push(branch = "main")
                 push(tags = true)
                 
                 logger.info("✅ Release v$version created and pushed")
+            }
+        }
+    }
+}
+```
+
+### Hotfix Workflow
+
+```kotlin
+segments {
+    segment("hotfix") {
+        execute {
+            git {
+                // Fetch latest
+                fetch()
+                
+                // Create hotfix branch from main
+                checkout("main")
+                pull(rebase = true)
+                checkout("hotfix/critical-bug", createBranch = true)
+                
+                // Make fixes...
+                add(".")
+                commit("fix: Critical bug fix")
+                
+                // Merge back to main
+                checkout("main")
+                merge("hotfix/critical-bug")
+                
+                // Tag the hotfix
+                tag("v1.0.1", message = "Hotfix 1.0.1")
+                
+                // Push everything
+                push(branch = "main")
+                push(tags = true)
+                
+                logger.info("✅ Hotfix deployed")
             }
         }
     }
@@ -224,20 +311,27 @@ segments {
 
 ## API Reference
 
+### Remote Operations
+
+- `fetch(remote: String = "origin", prune: Boolean = false)` - Fetch updates from remote
+- `pull(remote: String = "origin", branch: String? = null, rebase: Boolean = false)` - Pull changes from remote
+- `push(remote: String = "origin", branch: String? = null, tags: Boolean = false, force: Boolean = false)` - Push
+  changes to remote
+
+### Branch Operations
+
+- `currentBranch(): String` - Get current branch name
+- `checkout(ref: String, createBranch: Boolean = false)` - Checkout branch, tag, or commit
+- `merge(branch: String, message: String? = null, fastForward: Boolean = true)` - Merge branch into current branch
+
 ### Tag Operations
 
 - `tag(name: String, message: String? = null, force: Boolean = false)` - Create a tag
 - `tagExists(name: String): Boolean` - Check if tag exists
 - `latestTag(): String?` - Get latest tag name
 
-### Push Operations
-
-- `push(remote: String = "origin", branch: String? = null, tags: Boolean = false, force: Boolean = false)` - Push
-  changes
-
 ### Status Operations
 
-- `currentBranch(): String` - Get current branch name
 - `isClean(): Boolean` - Check if working directory is clean
 - `modifiedFiles(): List<String>` - Get list of modified files
 - `untrackedFiles(): List<String>` - Get list of untracked files
