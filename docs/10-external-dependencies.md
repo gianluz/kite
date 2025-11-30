@@ -101,6 +101,91 @@ segments {
 
 **Default repository:** Maven Central (`https://repo.maven.apache.org/maven2/`)
 
+### Private Repositories with Authentication
+
+**For internal company repositories (Nexus, Artifactory, etc.) requiring HTTP Basic authentication:**
+
+#### Option 1: Environment Variables (Recommended)
+
+Set credentials via environment variables before running Kite:
+
+```bash
+# Set credentials
+export IVY_REPO_USER="your-username"
+export IVY_REPO_PASS="your-password"
+
+# Or use secrets management
+export IVY_REPO_USER="$(cat ~/.credentials/nexus-user)"
+export IVY_REPO_PASS="$(cat ~/.credentials/nexus-pass)"
+
+# Run Kite
+kite-cli run my-segment
+```
+
+```kotlin
+// .kite/segments/internal-deps.kite.kts
+
+// Use credentials from environment
+@file:DependsOn("com.company:internal-lib:1.0.0")
+@file:Repository("https://nexus.company.com/repository/maven-releases/")
+
+import com.company.internal.*
+```
+
+**How it works:** Ivy automatically reads credentials from environment variables. The URL host is matched against
+`IVY_REPO_USER` and `IVY_REPO_PASS`.
+
+#### Option 2: URL-Embedded Credentials (Not Recommended - Security Risk)
+
+```kotlin
+// ⚠️ WARNING: Credentials visible in code!
+@file:Repository("https://username:password@nexus.company.com/repository/maven-releases/")
+```
+
+**Security Issues:**
+
+- ❌ Credentials in version control
+- ❌ Visible in logs
+- ❌ Can't rotate without code changes
+
+**Use environment variables instead!**
+
+#### Option 3: Ivy Settings File (Advanced)
+
+Create `~/.ivy2/ivysettings.xml`:
+
+```xml
+<ivysettings>
+  <credentials 
+    host="nexus.company.com" 
+    realm="Artifactory Realm"
+    username="${env.NEXUS_USER}" 
+    passwd="${env.NEXUS_PASS}"/>
+  
+  <settings defaultResolver="chain"/>
+  
+  <resolvers>
+    <chain name="chain">
+      <ibiblio 
+        name="nexus" 
+        m2compatible="true"
+        root="https://nexus.company.com/repository/maven-releases/"/>
+      <ibiblio name="central" m2compatible="true"/>
+    </chain>
+  </resolvers>
+</ivysettings>
+```
+
+Then use environment variables:
+
+```bash
+export NEXUS_USER="your-username"
+export NEXUS_PASS="your-password"
+kite-cli run my-segment
+```
+
+**Note:** Ivy settings files are automatically loaded from `~/.ivy2/ivysettings.xml` if present.
+
 **Note:** `@DependsOn` automatically checks Maven Local (`~/.m2/repository`) first, then Maven Central. This makes
 plugin development easy:
 
@@ -644,6 +729,47 @@ import com.google.gson.Gson
 2. Check firewall/proxy settings
 3. Cache `~/.ivy2/cache` for faster builds
 4. Use classpath dependencies for stricter CI control
+
+### Problem: Authentication failed for private repository
+
+**Cause:** Missing or incorrect credentials for internal Maven repository
+
+**Solution:**
+
+1. **Set environment variables:**
+   ```bash
+   export IVY_REPO_USER="your-username"
+   export IVY_REPO_PASS="your-password"
+   ```
+
+2. **Verify repository URL is correct**
+
+3. **Check credentials are valid:**
+   ```bash
+   # Test with curl
+   curl -u $IVY_REPO_USER:$IVY_REPO_PASS https://nexus.company.com/repository/maven-releases/
+   ```
+
+4. **For CI/CD:**
+   ```yaml
+   # GitHub Actions
+   - name: Run Kite with Nexus
+     env:
+       IVY_REPO_USER: ${{ secrets.NEXUS_USER }}
+       IVY_REPO_PASS: ${{ secrets.NEXUS_PASS }}
+     run: kite-cli run my-segment
+   ```
+
+5. **Check Ivy settings:**
+    - Verify `~/.ivy2/ivysettings.xml` if using custom settings
+    - Ensure `realm` matches your repository's realm
+
+**Common mistakes:**
+
+- ❌ Hardcoding credentials in code (security risk!)
+- ❌ Wrong realm name for Artifactory/Nexus
+- ❌ Credentials not exported in CI environment
+- ❌ Using URL-embedded credentials (doesn't work reliably)
 
 ---
 
