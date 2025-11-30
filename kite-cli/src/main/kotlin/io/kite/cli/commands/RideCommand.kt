@@ -133,76 +133,8 @@ class RideCommand : CliktCommand(
                 return
             }
 
-            // Validate the segment graph before execution
-            if (!opts.quiet) {
-                Output.section("Validating Execution Plan")
-            }
-
-            val validationErrors = mutableListOf<String>()
-
-            // Check for missing segment references
-            if (missingSegments.isNotEmpty()) {
-                validationErrors.add("Missing segment references:")
-                for (segmentName in missingSegments) {
-                    validationErrors.add("  • Segment '$segmentName' is referenced but not found")
-                }
-            }
-
-            // Build dependency graph and validate
-            val graph = SegmentGraph(segmentsToExecute)
-            val graphValidation = graph.validate()
-
-            if (!graphValidation.isValid) {
-                validationErrors.addAll(graphValidation.errors.map { "  • $it" })
-            }
-
-            // If there are validation errors, fail immediately
-            if (validationErrors.isNotEmpty()) {
-                Output.error("Validation failed:")
-                validationErrors.forEach { error ->
-                    Output.error(error)
-                }
-
-                // Show helpful context
-                if (missingSegments.isNotEmpty()) {
-                    val availableSegments = loadResult.segments.map { it.name }.sorted()
-                    Output.info("")
-                    Output.info("Available segments: ${availableSegments.joinToString(", ")}")
-                }
-
-                throw Exception("Ride validation failed with ${validationErrors.size} error(s)")
-            }
-
-            if (opts.verbose) {
-                Output.info("✓ All segment references valid")
-                Output.info("✓ No circular dependencies detected")
-                Output.info("✓ Dependency graph is valid")
-            }
-
-            // Show execution plan
-            if (!opts.quiet) {
-                Output.section("Execution Plan")
-                Output.info("Segments to execute: ${segmentsToExecute.size}")
-                for (segment in segmentsToExecute) {
-                    val deps =
-                        if (segment.dependsOn.isNotEmpty()) {
-                            " (depends on: ${segment.dependsOn.joinToString(", ")})"
-                        } else {
-                            ""
-                        }
-                    Output.progress("• ${segment.name}$deps")
-                }
-
-                // Show graph statistics
-                if (opts.verbose) {
-                    val stats = graph.stats()
-                    Output.info("")
-                    Output.info("Graph statistics:")
-                    Output.info("  • Total dependencies: ${stats.totalEdges}")
-                    Output.info("  • Max dependencies per segment: ${stats.maxDependencies}")
-                    Output.info("  • Isolated segments: ${stats.isolatedSegments}")
-                }
-            }
+            // Validate and show execution plan
+            val graph = validateAndShowPlan(segmentsToExecute, missingSegments, loadResult.segments)
 
             // Dry run mode
             if (dryRun) {
@@ -316,6 +248,93 @@ class RideCommand : CliktCommand(
     }
 
     /**
+     * Validates the segment graph and shows execution plan.
+     *
+     * @return The validated SegmentGraph
+     * @throws Exception if validation fails
+     */
+    private fun validateAndShowPlan(
+        segmentsToExecute: List<Segment>,
+        missingSegments: Set<String>,
+        allSegments: List<Segment>,
+    ): SegmentGraph {
+        val opts = globalOptions
+
+        // Validate the segment graph before execution
+        if (!opts.quiet) {
+            Output.section("Validating Execution Plan")
+        }
+
+        val validationErrors = mutableListOf<String>()
+
+        // Check for missing segment references
+        if (missingSegments.isNotEmpty()) {
+            validationErrors.add("Missing segment references:")
+            for (segmentName in missingSegments) {
+                validationErrors.add("  • Segment '$segmentName' is referenced but not found")
+            }
+        }
+
+        // Build dependency graph and validate
+        val graph = SegmentGraph(segmentsToExecute)
+        val graphValidation = graph.validate()
+
+        if (!graphValidation.isValid) {
+            validationErrors.addAll(graphValidation.errors.map { "  • $it" })
+        }
+
+        // If there are validation errors, fail immediately
+        if (validationErrors.isNotEmpty()) {
+            Output.error("Validation failed:")
+            for (error in validationErrors) {
+                Output.error(error)
+            }
+
+            // Show helpful context
+            if (missingSegments.isNotEmpty()) {
+                val availableSegments = allSegments.map { it.name }.sorted()
+                Output.info("")
+                Output.info("Available segments: ${availableSegments.joinToString(", ")}")
+            }
+
+            throw Exception("Ride validation failed with ${validationErrors.size} error(s)")
+        }
+
+        if (opts.verbose) {
+            Output.info("✓ All segment references valid")
+            Output.info("✓ No circular dependencies detected")
+            Output.info("✓ Dependency graph is valid")
+        }
+
+        // Show execution plan
+        if (!opts.quiet) {
+            Output.section("Execution Plan")
+            Output.info("Segments to execute: ${segmentsToExecute.size}")
+            for (segment in segmentsToExecute) {
+                val deps =
+                    if (segment.dependsOn.isNotEmpty()) {
+                        " (depends on: ${segment.dependsOn.joinToString(", ")})"
+                    } else {
+                        ""
+                    }
+                Output.progress("• ${segment.name}$deps")
+            }
+
+            // Show graph statistics
+            if (opts.verbose) {
+                val stats = graph.stats()
+                Output.info("")
+                Output.info("Graph statistics:")
+                Output.info("  • Total dependencies: ${stats.totalEdges}")
+                Output.info("  • Max dependencies per segment: ${stats.maxDependencies}")
+                Output.info("  • Isolated segments: ${stats.isolatedSegments}")
+            }
+        }
+
+        return graph
+    }
+
+    /**
      * Recursively collect all segments from a flow node with validation tracking.
      *
      * Returns a pair of (found segments, missing segment names).
@@ -363,17 +382,7 @@ class RideCommand : CliktCommand(
         return Pair(segments, missingSegments)
     }
 
-    /**
-     * Recursively collect all segments from a flow node.
-     *
-     * @deprecated Use collectSegmentsWithValidation for better error tracking
-     */
-    private fun collectSegments(
-        flow: io.kite.core.FlowNode,
-        segmentMap: Map<String, Segment>,
-    ): List<Segment> {
-        return collectSegmentsWithValidation(flow, segmentMap).first
-    }
+
 
     /**
      * Apply ride overrides to a segment.
