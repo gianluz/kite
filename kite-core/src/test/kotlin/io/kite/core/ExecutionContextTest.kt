@@ -118,7 +118,8 @@ class ExecutionContextTest {
                 commitSha = "abc123",
                 environment = emptyMap(),
             )
-        val isNoMR = noMrContext.env("CI_MERGE_REQUEST_IID") == null &&
+        val isNoMR =
+            noMrContext.env("CI_MERGE_REQUEST_IID") == null &&
                 noMrContext.env("GITHUB_EVENT_NAME") != "pull_request"
         assertTrue(isNoMR)
     }

@@ -298,13 +298,11 @@ class PlatformDetectorTest {
     fun `GitLab CI takes precedence over generic CI`() {
         val env = mapOf("CI" to "true", "GITLAB_CI" to "true")
         val adapter = PlatformDetector.detect(env)
-
     }
 
     @Test
     fun `GitHub Actions takes precedence over generic CI`() {
         val env = mapOf("CI" to "true", "GITHUB_ACTIONS" to "true")
         val adapter = PlatformDetector.detect(env)
-
     }
 }

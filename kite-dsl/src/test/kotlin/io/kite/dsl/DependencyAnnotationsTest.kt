@@ -1,12 +1,8 @@
 package io.kite.dsl
 
-import io.kite.core.ExecutionContext
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.io.TempDir
-import java.io.File
-import java.nio.file.Path
-import kotlin.test.assertTrue
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 /**
  * Tests for dependency annotation resolution.
@@ -17,7 +13,6 @@ import kotlin.test.assertFalse
  * - Error messages are helpful
  */
 class DependencyAnnotationsTest {
-
     @Test
     fun `DependsOnJar annotation has correct metadata`() {
         val annotation = DependsOnJar::class

@@ -7,6 +7,7 @@ import kotlin.script.experimental.api.ScriptCollectedData
 import kotlin.script.experimental.api.ScriptCompilationConfiguration
 import kotlin.script.experimental.api.ScriptConfigurationRefinementContext
 import kotlin.script.experimental.api.ScriptEvaluationConfiguration
+import kotlin.script.experimental.api.ScriptSourceAnnotation
 import kotlin.script.experimental.api.acceptedLocations
 import kotlin.script.experimental.api.asSuccess
 import kotlin.script.experimental.api.collectedAnnotations
@@ -21,7 +22,6 @@ import kotlin.script.experimental.dependencies.DependsOn
 import kotlin.script.experimental.dependencies.FileSystemDependenciesResolver
 import kotlin.script.experimental.dependencies.Repository
 import kotlin.script.experimental.dependencies.resolveFromScriptSourceAnnotations
-import kotlin.script.experimental.api.ScriptSourceAnnotation
 import kotlin.script.experimental.jvm.JvmDependency
 import kotlin.script.experimental.jvm.dependenciesFromCurrentContext
 import kotlin.script.experimental.jvm.jvm
@@ -153,9 +153,9 @@ object KiteScriptEvaluationConfiguration : ScriptEvaluationConfiguration({
  */
 private val resolver by lazy {
     CompoundDependenciesResolver(
-        KiteDependenciesResolver(),        // @DependsOnJar, @DependsOnMavenLocal
-        FileSystemDependenciesResolver(),  // File paths
-        IvyDependenciesResolver(),         // @DependsOn (Maven Central)
+        KiteDependenciesResolver(), // @DependsOnJar, @DependsOnMavenLocal
+        FileSystemDependenciesResolver(), // File paths
+        IvyDependenciesResolver(), // @DependsOn (Maven Central)
     )
 }
 

@@ -1,10 +1,7 @@
 package io.kite.dsl
 
 import java.io.File
-import java.nio.file.Path
 import kotlin.io.path.exists
-import kotlin.io.path.fileSize
-import kotlin.io.path.isRegularFile
 import kotlin.script.experimental.api.ResultWithDiagnostics
 import kotlin.script.experimental.api.SourceCode
 import kotlin.script.experimental.api.asSuccess
@@ -44,7 +41,7 @@ class KiteDependenciesResolver : ExternalDependenciesResolver {
 
     override fun acceptsArtifact(artifactCoordinates: String): Boolean {
         return artifactCoordinates.startsWith(MAVEN_LOCAL_PREFIX) ||
-                artifactCoordinates.startsWith(LOCAL_JAR_PREFIX)
+            artifactCoordinates.startsWith(LOCAL_JAR_PREFIX)
     }
 
     override suspend fun resolve(
@@ -106,7 +103,7 @@ class KiteDependenciesResolver : ExternalDependenciesResolver {
                 Expected location: ${jarFile.absolutePath}
                 
                 To install this artifact to Maven Local, run:
-                  ./gradlew :${artifactId}:publishToMavenLocal
+                  ./gradlew :$artifactId:publishToMavenLocal
                 
                 Or if it's an external dependency:
                   mvn dependency:get -Dartifact=$coordinates
