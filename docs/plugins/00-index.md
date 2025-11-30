@@ -67,7 +67,9 @@ segments {
 
 ```kotlin
 // .kite/segments/build.kite.kts
-@file:DependsOnMavenLocal("io.kite.plugins:git:1.0.0-SNAPSHOT")
+
+// Use regular @DependsOn - Maven Local is checked automatically!
+@file:DependsOn("io.kite.plugins:git:1.0.0-SNAPSHOT")
 
 import io.kite.plugins.git.*
 ```
@@ -77,6 +79,9 @@ import io.kite.plugins.git.*
 ```bash
 ./gradlew :kite-plugins:git:publishToMavenLocal
 ```
+
+**Note:** Kite automatically checks Maven Local (~/.m2/repository) when resolving dependencies, so you don't need a
+special annotation. Just use regular `@file:DependsOn` and it works!
 
 ### From Local JAR
 
