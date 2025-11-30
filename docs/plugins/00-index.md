@@ -11,6 +11,7 @@ Plugins provide **type-safe DSLs** that replace raw `exec()` calls with structur
 execute {
     exec("git", "tag", "v1.0.0")
     exec("git", "push", "origin", "v1.0.0")
+    exec("./gradlew", "clean", "build", "--parallel")
 }
 
 // With plugin (type-safe DSL)
@@ -18,6 +19,12 @@ execute {
     git {
         tag("v1.0.0")
         push(tags = true)
+    }
+
+    gradle {
+        build {
+            parallel = true
+        }
     }
 }
 ```
@@ -34,12 +41,12 @@ execute {
 
 ## 📚 Official Plugins
 
-| Plugin | Description | Status |
-|--------|-------------|--------|
-| [Git](01-plugin-git.md) | Version control operations | 🚧 In Development |
-| [Gradle](02-plugin-gradle.md) | Build automation | 📋 Planned |
-| [Docker](03-plugin-docker.md) | Container operations | 📋 Planned |
-| [Maven](04-plugin-maven.md) | Maven publishing | 📋 Planned |
+| Plugin                        | Description                                                          | Status             |
+|-------------------------------|----------------------------------------------------------------------|--------------------|
+| [Git](01-plugin-git.md)       | Version control operations (tag, push, fetch, pull, merge, checkout) | ✅ Production Ready |
+| [Gradle](02-plugin-gradle.md) | Flexible Gradle task execution (build, test, Android, multi-module)  | ✅ Production Ready |
+| [Docker](03-plugin-docker.md) | Container operations                                                 | 📋 Planned         |
+| [Maven](04-plugin-maven.md)   | Maven publishing                                                     | 📋 Planned         |
 
 ## 🔌 Using Plugins
 
@@ -47,16 +54,29 @@ execute {
 
 ```kotlin
 // .kite/segments/build.kite.kts
-@file:DependsOn("io.kite.plugins:git:1.0.0")
+@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha")
+@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha")
 
 import io.kite.plugins.git.*
+import io.kite.plugins.gradle.*
 
 segments {
-    segment("tag-release") {
+    segment("release") {
         execute {
             git {
+                fetch()
+                checkout("main")
+                pull(rebase = true)
                 tag("v1.0.0")
                 push(tags = true)
+            }
+
+            gradle {
+                clean()
+                build {
+                    parallel = true
+                    stacktrace = true
+                }
             }
         }
     }
@@ -69,34 +89,53 @@ segments {
 // .kite/segments/build.kite.kts
 
 // Use regular @DependsOn - Maven Local is checked automatically!
-@file:DependsOn("io.kite.plugins:git:1.0.0-SNAPSHOT")
+@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha")
+@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha")
 
 import io.kite.plugins.git.*
+import io.kite.plugins.gradle.*
 ```
 
 **To publish to Maven Local:**
 
 ```bash
+# Publish Git plugin
 ./gradlew :kite-plugins:git:publishToMavenLocal
+
+# Publish Gradle plugin
+./gradlew :kite-plugins:gradle:publishToMavenLocal
+
+# Or publish all plugins
+./gradlew :kite-plugins:git:publishToMavenLocal :kite-plugins:gradle:publishToMavenLocal
 ```
 
 **Note:** Kite automatically checks Maven Local (~/.m2/repository) when resolving dependencies, so you don't need a
 special annotation. Just use regular `@file:DependsOn` and it works!
 
-### From Local JAR
+### From Local JAR (Quick Testing)
 
 ```kotlin
 // .kite/segments/build.kite.kts
-@file:DependsOnJar("../kite-plugins/git/build/libs/git-1.0.0.jar")
+@file:DependsOnJar("../kite-plugins/git/build/libs/git-0.1.0-alpha.jar")
+@file:DependsOnJar("../kite-plugins/gradle/build/libs/gradle-0.1.0-alpha.jar")
 
 import io.kite.plugins.git.*
+import io.kite.plugins.gradle.*
 ```
 
-**To build the JAR:**
+**To build the JARs:**
 
 ```bash
+# Build specific plugin
 ./gradlew :kite-plugins:git:build
+./gradlew :kite-plugins:gradle:build
+
+# Or build all plugins
+./gradlew :kite-plugins:git:build :kite-plugins:gradle:build
 ```
+
+**Note:** Using `@DependsOnJar` doesn't include transitive dependencies. For production use, prefer Maven Local (
+`@DependsOn`) which automatically resolves all dependencies.
 
 ## 🛠️ Creating Plugins
 
