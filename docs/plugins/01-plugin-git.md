@@ -2,6 +2,8 @@
 
 Type-safe Git operations for Kite workflows.
 
+**Status:** ✅ Complete (v0.1.0-alpha)
+
 ## Overview
 
 The Git plugin provides a type-safe DSL for common Git operations with full support for:

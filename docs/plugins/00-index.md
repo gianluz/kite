@@ -41,12 +41,12 @@ execute {
 
 ## 📚 Official Plugins
 
-| Plugin                        | Description                                                          | Status             |
-|-------------------------------|----------------------------------------------------------------------|--------------------|
-| [Git](01-plugin-git.md)       | Version control operations (tag, push, fetch, pull, merge, checkout) | ✅ Production Ready |
-| [Gradle](02-plugin-gradle.md) | Flexible Gradle task execution (build, test, Android, multi-module)  | ✅ Production Ready |
-| [Docker](03-plugin-docker.md) | Container operations                                                 | 📋 Planned         |
-| [Maven](04-plugin-maven.md)   | Maven publishing                                                     | 📋 Planned         |
+| Plugin                        | Description                                                          | Status     |
+|-------------------------------|----------------------------------------------------------------------|------------|
+| [Git](01-plugin-git.md)       | Version control operations (tag, push, fetch, pull, merge, checkout) | ✅ Complete |
+| [Gradle](02-plugin-gradle.md) | Flexible Gradle task execution (build, test, Android, multi-module)  | ✅ Complete |
+| [Docker](03-plugin-docker.md) | Container operations                                                 | 📋 Planned |
+| [Maven](04-plugin-maven.md)   | Maven publishing                                                     | 📋 Planned |
 
 ## 🔌 Using Plugins
 

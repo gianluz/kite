@@ -2,6 +2,8 @@
 
 Flexible Gradle task execution for Kite workflows.
 
+**Status:** ✅ Complete (v0.1.0-alpha)
+
 ## Overview
 
 The Gradle plugin provides a type-safe DSL for executing Gradle tasks with full support for:
