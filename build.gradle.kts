@@ -104,7 +104,7 @@ subprojects {
                         developer {
                             id.set("gianluz")
                             name.set("Gianluca Zuddas")
-                            email.set("gianluca.pezzilli@gmail.com")
+                            email.set("gianluca.zuddas@gmail.com")
                         }
                     }
 
