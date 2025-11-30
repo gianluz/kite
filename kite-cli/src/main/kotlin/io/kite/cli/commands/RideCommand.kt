@@ -14,6 +14,7 @@ import io.kite.core.SegmentOverrides
 import io.kite.core.restoreFromManifest
 import io.kite.core.saveManifest
 import io.kite.dsl.FileDiscovery
+import io.kite.runtime.graph.SegmentGraph
 import io.kite.runtime.scheduler.ParallelScheduler
 import io.kite.runtime.scheduler.SequentialScheduler
 import kotlinx.coroutines.runBlocking
@@ -125,17 +126,64 @@ class RideCommand : CliktCommand(
 
             // Build list of segments to execute
             val segmentMap = loadResult.segmentMap()
-            val segmentsToExecute = collectSegments(ride.flow, segmentMap)
+            val (segmentsToExecute, missingSegments) = collectSegmentsWithValidation(ride.flow, segmentMap)
 
             if (segmentsToExecute.isEmpty()) {
                 Output.warning("No segments to execute")
                 return
             }
 
+            // Validate the segment graph before execution
+            if (!opts.quiet) {
+                Output.section("Validating Execution Plan")
+            }
+
+            val validationErrors = mutableListOf<String>()
+
+            // Check for missing segment references
+            if (missingSegments.isNotEmpty()) {
+                validationErrors.add("Missing segment references:")
+                for (segmentName in missingSegments) {
+                    validationErrors.add("  • Segment '$segmentName' is referenced but not found")
+                }
+            }
+
+            // Build dependency graph and validate
+            val graph = SegmentGraph(segmentsToExecute)
+            val graphValidation = graph.validate()
+
+            if (!graphValidation.isValid) {
+                validationErrors.addAll(graphValidation.errors.map { "  • $it" })
+            }
+
+            // If there are validation errors, fail immediately
+            if (validationErrors.isNotEmpty()) {
+                Output.error("Validation failed:")
+                validationErrors.forEach { error ->
+                    Output.error(error)
+                }
+
+                // Show helpful context
+                if (missingSegments.isNotEmpty()) {
+                    val availableSegments = loadResult.segments.map { it.name }.sorted()
+                    Output.info("")
+                    Output.info("Available segments: ${availableSegments.joinToString(", ")}")
+                }
+
+                throw Exception("Ride validation failed with ${validationErrors.size} error(s)")
+            }
+
+            if (opts.verbose) {
+                Output.info("✓ All segment references valid")
+                Output.info("✓ No circular dependencies detected")
+                Output.info("✓ Dependency graph is valid")
+            }
+
+            // Show execution plan
             if (!opts.quiet) {
                 Output.section("Execution Plan")
                 Output.info("Segments to execute: ${segmentsToExecute.size}")
-                segmentsToExecute.forEach { segment ->
+                for (segment in segmentsToExecute) {
                     val deps =
                         if (segment.dependsOn.isNotEmpty()) {
                             " (depends on: ${segment.dependsOn.joinToString(", ")})"
@@ -144,10 +192,21 @@ class RideCommand : CliktCommand(
                         }
                     Output.progress("• ${segment.name}$deps")
                 }
+
+                // Show graph statistics
+                if (opts.verbose) {
+                    val stats = graph.stats()
+                    Output.info("")
+                    Output.info("Graph statistics:")
+                    Output.info("  • Total dependencies: ${stats.totalEdges}")
+                    Output.info("  • Max dependencies per segment: ${stats.maxDependencies}")
+                    Output.info("  • Isolated segments: ${stats.isolatedSegments}")
+                }
             }
 
             // Dry run mode
             if (dryRun) {
+                Output.info("")
                 Output.info("Dry run mode - execution skipped")
                 return
             }
@@ -257,45 +316,63 @@ class RideCommand : CliktCommand(
     }
 
     /**
+     * Recursively collect all segments from a flow node with validation tracking.
+     *
+     * Returns a pair of (found segments, missing segment names).
+     */
+    private fun collectSegmentsWithValidation(
+        flow: io.kite.core.FlowNode,
+        segmentMap: Map<String, Segment>,
+    ): Pair<List<Segment>, Set<String>> {
+        val segments = mutableListOf<Segment>()
+        val missingSegments = mutableSetOf<String>()
+
+        fun collectRecursive(node: io.kite.core.FlowNode) {
+            when (node) {
+                is io.kite.core.FlowNode.Sequential -> {
+                    node.nodes.forEach { childNode ->
+                        collectRecursive(childNode)
+                    }
+                }
+
+                is io.kite.core.FlowNode.Parallel -> {
+                    node.nodes.forEach { childNode ->
+                        collectRecursive(childNode)
+                    }
+                }
+
+                is io.kite.core.FlowNode.SegmentRef -> {
+                    val segment = segmentMap[node.segmentName]
+                    if (segment != null) {
+                        // Apply overrides if present
+                        val finalSegment =
+                            if (node.overrides != null) {
+                                applyOverrides(segment, node.overrides)
+                            } else {
+                                segment
+                            }
+                        segments.add(finalSegment)
+                    } else {
+                        missingSegments.add(node.segmentName)
+                    }
+                }
+            }
+        }
+
+        collectRecursive(flow)
+        return Pair(segments, missingSegments)
+    }
+
+    /**
      * Recursively collect all segments from a flow node.
+     *
+     * @deprecated Use collectSegmentsWithValidation for better error tracking
      */
     private fun collectSegments(
         flow: io.kite.core.FlowNode,
         segmentMap: Map<String, Segment>,
     ): List<Segment> {
-        val segments = mutableListOf<Segment>()
-
-        when (flow) {
-            is io.kite.core.FlowNode.Sequential -> {
-                flow.nodes.forEach { node ->
-                    segments.addAll(collectSegments(node, segmentMap))
-                }
-            }
-
-            is io.kite.core.FlowNode.Parallel -> {
-                flow.nodes.forEach { node ->
-                    segments.addAll(collectSegments(node, segmentMap))
-                }
-            }
-
-            is io.kite.core.FlowNode.SegmentRef -> {
-                val segment = segmentMap[flow.segmentName]
-                if (segment != null) {
-                    // Apply overrides if present
-                    val finalSegment =
-                        if (flow.overrides != null) {
-                            applyOverrides(segment, flow.overrides)
-                        } else {
-                            segment
-                        }
-                    segments.add(finalSegment)
-                } else {
-                    Output.error("Segment '${flow.segmentName}' referenced in ride but not found")
-                }
-            }
-        }
-
-        return segments
+        return collectSegmentsWithValidation(flow, segmentMap).first
     }
 
     /**
