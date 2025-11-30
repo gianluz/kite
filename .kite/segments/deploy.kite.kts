@@ -63,6 +63,11 @@ segments {
         description = "Build Docker image for Kite CLI"
         dependsOn("build")
 
+        condition { ctx ->
+            // Only build Docker image if Docker credentials are available
+            ctx.env("DOCKER_USERNAME") != null && ctx.env("DOCKER_PASSWORD") != null
+        }
+
         execute {
             logger.info("Building Docker image...")
 
@@ -89,7 +94,8 @@ segments {
         condition { ctx ->
             val isMainBranch = ctx.branch == "main"
             val hasReleaseTag = ctx.env("CI_COMMIT_TAG")?.startsWith("v") == true
-            isMainBranch && hasReleaseTag
+            val hasDockerCredentials = ctx.env("DOCKER_USERNAME") != null && ctx.env("DOCKER_PASSWORD") != null
+            isMainBranch && hasReleaseTag && hasDockerCredentials
         }
 
         execute {
@@ -183,7 +189,7 @@ segments {
 
     segment("publish-release-summary") {
         description = "Publish release summary to GitHub Actions"
-        dependsOn("create-github-release", "deploy-maven-central", "deploy-docker")
+        dependsOn("create-github-release", "deploy-maven-central")
 
         condition { ctx ->
             // Only in CI environment
