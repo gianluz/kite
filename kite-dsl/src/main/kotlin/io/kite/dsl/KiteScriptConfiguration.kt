@@ -21,6 +21,7 @@ import kotlin.script.experimental.dependencies.DependsOn
 import kotlin.script.experimental.dependencies.FileSystemDependenciesResolver
 import kotlin.script.experimental.dependencies.Repository
 import kotlin.script.experimental.dependencies.resolveFromScriptSourceAnnotations
+import kotlin.script.experimental.api.ScriptSourceAnnotation
 import kotlin.script.experimental.jvm.JvmDependency
 import kotlin.script.experimental.jvm.dependenciesFromCurrentContext
 import kotlin.script.experimental.jvm.jvm
@@ -92,6 +93,9 @@ object KiteScriptCompilationConfiguration : ScriptCompilationConfiguration({
         // Scripting annotations for dependency resolution
         "kotlin.script.experimental.dependencies.DependsOn",
         "kotlin.script.experimental.dependencies.Repository",
+        // Kite-specific dependency annotations
+        "io.kite.dsl.DependsOnJar",
+        "io.kite.dsl.DependsOnMavenLocal",
     )
 
     // Make current context dependencies available to scripts
@@ -104,10 +108,18 @@ object KiteScriptCompilationConfiguration : ScriptCompilationConfiguration({
         acceptedLocations(ScriptAcceptedLocation.Everywhere)
     }
 
-    // Enable Ivy dependency resolution via @DependsOn and @Repository
-    // Uses Apache Ivy which is Java 17 compatible (unlike Maven/Aether 3.6.x)
+    // Enable dependency resolution via annotations
+    // - @DependsOn / @Repository: Maven Central via Ivy (Java 17 compatible)
+    // - @DependsOnJar: Local JAR files
+    // - @DependsOnMavenLocal: Maven Local repository
     refineConfiguration {
-        onAnnotations(DependsOn::class, Repository::class, handler = ::configureDepsOnAnnotations)
+        onAnnotations(
+            DependsOn::class,
+            Repository::class,
+            DependsOnJar::class,
+            DependsOnMavenLocal::class,
+            handler = ::configureDepsOnAnnotations,
+        )
     }
 }) {
     // Ensure proper singleton behavior after deserialization
@@ -132,21 +144,28 @@ object KiteScriptEvaluationConfiguration : ScriptEvaluationConfiguration({
 }
 
 /**
- * Dependency resolver for @DependsOn and @Repository annotations.
- * Uses Ivy for Maven dependency resolution (Java 17 compatible).
- * Falls back to file system resolution.
+ * Dependency resolver chain for all annotation types.
+ *
+ * Resolution order:
+ * 1. KiteDependenciesResolver - Local JARs and Maven Local
+ * 2. FileSystemDependenciesResolver - File system paths
+ * 3. IvyDependenciesResolver - Maven Central via Ivy (Java 17 compatible)
  */
 private val resolver by lazy {
     CompoundDependenciesResolver(
-        FileSystemDependenciesResolver(),
-        // Java 17 compatible!
-        IvyDependenciesResolver(),
+        KiteDependenciesResolver(),        // @DependsOnJar, @DependsOnMavenLocal
+        FileSystemDependenciesResolver(),  // File paths
+        IvyDependenciesResolver(),         // @DependsOn (Maven Central)
     )
 }
 
 /**
- * Handler for @DependsOn and @Repository annotations.
- * Resolves dependencies dynamically using Ivy and makes them available to the script.
+ * Handler for dependency annotations.
+ *
+ * Processes:
+ * - @DependsOn / @Repository: Maven Central dependencies
+ * - @DependsOnJar: Local JAR files
+ * - @DependsOnMavenLocal: Maven Local repository
  *
  * This follows the official Kotlin scripting pattern from:
  * https://kotlinlang.org/docs/custom-script-deps-tutorial.html
@@ -158,8 +177,29 @@ private fun configureDepsOnAnnotations(
         context.collectedData?.get(ScriptCollectedData.collectedAnnotations)?.takeIf { it.isNotEmpty() }
             ?: return context.compilationConfiguration.asSuccess()
 
+    // Transform Kite annotations into formats the resolver understands
+    val transformedAnnotations =
+        annotations.map { scriptAnnotation ->
+            val annotation = scriptAnnotation.annotation
+            val location = scriptAnnotation.location
+
+            when (annotation) {
+                is DependsOnJar -> {
+                    // Prefix with localJar: so KiteDependenciesResolver can handle it
+                    ScriptSourceAnnotation(DependsOn("localJar:${annotation.path}"), location)
+                }
+
+                is DependsOnMavenLocal -> {
+                    // Prefix with mavenLocal: so KiteDependenciesResolver can handle it
+                    ScriptSourceAnnotation(DependsOn("mavenLocal:${annotation.coordinates}"), location)
+                }
+
+                else -> scriptAnnotation // Keep DependsOn and Repository as-is
+            }
+        }
+
     return runBlocking {
-        resolver.resolveFromScriptSourceAnnotations(annotations)
+        resolver.resolveFromScriptSourceAnnotations(transformedAnnotations)
     }.onSuccess {
         context.compilationConfiguration.with {
             dependencies.append(JvmDependency(it))
