@@ -13,13 +13,15 @@ import kotlin.script.experimental.dependencies.RepositoryCoordinates
  * Custom dependency resolver for Kite-specific dependency sources.
  *
  * Handles:
- * - Local JAR files (via @DependsOnJar)
- * - Maven Local repository (via @DependsOnMavenLocal)
+ * - Local JAR files (via @DependsOnJar) - single file, no transitives
+ * - Maven Local repository (via @DependsOnMavenLocal) - delegates to Ivy for transitive resolution
  *
  * This resolver is chained with FileSystemDependenciesResolver and IvyDependenciesResolver
  * to provide comprehensive dependency resolution.
  */
-class KiteDependenciesResolver : ExternalDependenciesResolver {
+class KiteDependenciesResolver(
+    private val ivyResolver: IvyDependenciesResolver = IvyDependenciesResolver(),
+) : ExternalDependenciesResolver {
     companion object {
         private const val MAVEN_LOCAL_PREFIX = "mavenLocal:"
         private const val LOCAL_JAR_PREFIX = "localJar:"
@@ -73,9 +75,14 @@ class KiteDependenciesResolver : ExternalDependenciesResolver {
     /**
      * Resolves a Maven Local artifact from ~/.m2/repository
      *
+     * This delegates to IvyDependenciesResolver which will:
+     * 1. Find the artifact in Maven Local
+     * 2. Parse its POM file
+     * 3. Resolve all transitive dependencies
+     *
      * Format: groupId:artifactId:version
      */
-    private fun resolveMavenLocal(
+    private suspend fun resolveMavenLocal(
         coordinates: String,
         sourceCodeLocation: SourceCode.LocationWithId?,
     ): ResultWithDiagnostics<List<File>> {
@@ -87,9 +94,8 @@ class KiteDependenciesResolver : ExternalDependenciesResolver {
             )
         }
 
+        // Quick existence check to provide better error messages
         val (groupId, artifactId, version) = parts
-
-        // Construct path: ~/.m2/repository/group/artifact/version/artifact-version.jar
         val m2Repository = File(System.getProperty("user.home"), ".m2/repository")
         val groupPath = groupId.replace('.', '/')
         val jarPath = "$groupPath/$artifactId/$version/$artifactId-$version.jar"
@@ -112,15 +118,8 @@ class KiteDependenciesResolver : ExternalDependenciesResolver {
             )
         }
 
-        if (!jarFile.isFile || !jarFile.name.endsWith(".jar")) {
-            return makeFailureResult(
-                "Maven Local artifact exists but is not a valid JAR: ${jarFile.absolutePath}",
-                sourceCodeLocation,
-            )
-        }
-
-        println("✅ Resolved from Maven Local: $coordinates (${formatFileSize(jarFile.length())})")
-        return listOf(jarFile).asSuccess()
+        // Delegate to Ivy for full transitive resolution (including transitives!)
+        return ivyResolver.resolve(coordinates, ExternalDependenciesResolver.Options.Empty, sourceCodeLocation)
     }
 
     /**

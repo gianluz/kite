@@ -136,6 +136,8 @@ class IvyDependenciesResolver : ExternalDependenciesResolver {
             this.name = name
             this.root = root
             isM2compatible = true
+            isUsepoms = true  // CRITICAL: Enable POM parsing for transitive deps!
+            setDescriptor(IBiblioResolver.DESCRIPTOR_OPTIONAL)  // Look for POM but don't fail if missing
         }
     }
 
@@ -146,14 +148,24 @@ class IvyDependenciesResolver : ExternalDependenciesResolver {
 
         // Parse and add dependency
         val depId = parseMavenCoordinate(coordinates)
+
+        // CRITICAL: Third parameter is 'transitive' - set to true!
+        // DefaultDependencyDescriptor(parent, moduleRevisionId, force, changing, transitive)
         val dependency = DefaultDependencyDescriptor(moduleDescriptor, depId, false, false, true)
-        dependency.addDependencyConfiguration("default", "default")
+
+        // Map all Maven-style configurations
+        // Maven uses: compile, runtime, provided, system, test
+        // Ivy default config should map to Maven's compile+runtime
+        dependency.addDependencyConfiguration("default", "compile")
+        dependency.addDependencyConfiguration("default", "runtime")
+        dependency.addDependencyConfiguration("default", "master")
+
         moduleDescriptor.addDependency(dependency)
 
-        // Resolve
+        // Resolve with transitives enabled
         val resolveOptions =
             ResolveOptions().apply {
-                isTransitive = true
+                isTransitive = true  // Enable transitive resolution
                 confs = arrayOf("default")
             }
 
@@ -164,15 +176,23 @@ class IvyDependenciesResolver : ExternalDependenciesResolver {
             throw IllegalStateException("Failed to resolve dependencies:\n$problems")
         }
 
-        // Collect resolved files
+        // Collect ALL resolved files (including transitive dependencies)
         val files = mutableListOf<File>()
+
+        // Get all artifacts from all configurations
         resolveReport.allArtifactsReports.forEach { artifactReport ->
-            if (artifactReport.localFile != null) {
+            if (artifactReport.localFile != null && artifactReport.localFile.exists()) {
                 files.add(artifactReport.localFile)
             }
         }
 
-        return files
+        // Log what was resolved
+        println("  ✅ Resolved ${files.size} total artifact(s)")
+        if (files.size > 1) {
+            println("     Including ${files.size - 1} transitive dependencies")
+        }
+
+        return files.distinct()  // Remove duplicates
     }
 
     private fun parseMavenCoordinate(coord: String): ModuleRevisionId {
