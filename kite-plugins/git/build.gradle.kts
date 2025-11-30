@@ -29,9 +29,6 @@ publishing {
         named<MavenPublication>("mavenJava") {
             artifactId = "git"
 
-            // Suppress default dependency mappings to avoid project dependency issues
-            from(components["java"])
-
             pom {
                 name.set("Kite Git Plugin")
                 description.set("Type-safe Git operations for Kite workflows")

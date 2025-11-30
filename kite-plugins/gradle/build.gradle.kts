@@ -29,9 +29,6 @@ publishing {
         named<MavenPublication>("mavenJava") {
             artifactId = "gradle"
 
-            // Suppress default dependency mappings to avoid project dependency issues
-            from(components["java"])
-
             pom {
                 name.set("Kite Gradle Plugin")
                 description.set("Flexible Gradle task execution for Kite workflows")
