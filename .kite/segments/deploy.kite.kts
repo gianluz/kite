@@ -4,10 +4,10 @@ segments {
         dependsOn("build")
 
         condition { ctx ->
-            // Only deploy on main branch with release tag
-            val isMainBranch = ctx.branch == "main"
+            // Only deploy when running on a release tag in CI
             val hasReleaseTag = ctx.env("CI_COMMIT_TAG")?.startsWith("v") == true
-            isMainBranch && hasReleaseTag
+            val isCI = ctx.isCI
+            hasReleaseTag && isCI
         }
 
         execute {
@@ -38,9 +38,9 @@ segments {
         dependsOn("build")
 
         condition { ctx ->
-            val isMainBranch = ctx.branch == "main"
             val hasReleaseTag = ctx.env("CI_COMMIT_TAG")?.startsWith("v") == true
-            isMainBranch && hasReleaseTag
+            val isCI = ctx.isCI
+            hasReleaseTag && isCI
         }
 
         execute {
@@ -92,10 +92,10 @@ segments {
         dependsOn("build-docker-image")
 
         condition { ctx ->
-            val isMainBranch = ctx.branch == "main"
             val hasReleaseTag = ctx.env("CI_COMMIT_TAG")?.startsWith("v") == true
+            val isCI = ctx.isCI
             val hasDockerCredentials = ctx.env("DOCKER_USERNAME") != null && ctx.env("DOCKER_PASSWORD") != null
-            isMainBranch && hasReleaseTag && hasDockerCredentials
+            hasReleaseTag && isCI && hasDockerCredentials
         }
 
         execute {
