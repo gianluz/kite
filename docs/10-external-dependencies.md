@@ -6,13 +6,14 @@ Learn how to use external libraries in your Kite scripts.
 
 ## Overview
 
-Kite supports using external libraries (Gson, OkHttp, Apache Commons, etc.) in your `.kite.kts` scripts using **two
+Kite supports using external libraries (Gson, OkHttp, Apache Commons, etc.) in your `.kite.kts` scripts using **three
 methods**:
 
-1. **`@DependsOn` Annotation** - For standalone, portable scripts
-2. **Classpath Dependencies** - For project-integrated workflows
+1. **`@DependsOn` Annotation** - For Maven Central dependencies (auto-checks Maven Local too!)
+2. **`@DependsOnJar` Annotation** - For local JAR files
+3. **Classpath Dependencies** - For project-integrated workflows
 
-Both approaches are fully supported with IDE autocomplete and work in CLI + CI/CD environments.
+All approaches are fully supported with IDE autocomplete and work in CLI + CI/CD environments.
 
 ---
 
@@ -100,9 +101,105 @@ segments {
 
 **Default repository:** Maven Central (`https://repo.maven.apache.org/maven2/`)
 
+**Note:** `@DependsOn` automatically checks Maven Local (`~/.m2/repository`) first, then Maven Central. This makes
+plugin development easy:
+
+```kotlin
+// After ./gradlew :my-plugin:publishToMavenLocal
+@file:DependsOn("com.company:my-plugin:1.0.0-SNAPSHOT")  // Uses Maven Local! ✅
+```
+
 ---
 
-## Method 2: Classpath Dependencies
+## Method 2: @DependsOnJar Annotation
+
+**Best for:** Local JARs, quick testing, pre-built binaries
+
+### Quick Example
+
+```kotlin
+// .kite/segments/custom-lib.kite.kts
+@file:DependsOnJar("./libs/company-utils.jar")
+
+import com.company.utils.*
+
+segments {
+    segment("use-company-lib") {
+        description = "Use company's internal library"
+        execute {
+            val result = CompanyUtils.doSomething()
+            logger.info("Result: $result")
+        }
+    }
+}
+```
+
+### Supported Path Formats
+
+```kotlin
+// Relative to script location
+@file:DependsOnJar("./libs/plugin.jar")
+
+// Relative to workspace root
+@file:DependsOnJar("../shared-libs/company-plugin.jar")
+
+// Absolute path
+@file:DependsOnJar("/opt/company/libs/internal.jar")
+
+// Home directory
+@file:DependsOnJar("~/.kite/plugins/my-plugin.jar")
+```
+
+### Plugin Development Workflow
+
+```bash
+# Build plugin locally
+./gradlew :my-plugin:build
+
+# Use immediately in Kite scripts (no Maven Local needed!)
+```
+
+```kotlin
+@file:DependsOnJar("../my-plugin/build/libs/my-plugin-1.0.0.jar")
+
+import com.company.myplugin.*
+
+execute {
+    myPlugin {
+        doSomething()
+    }
+}
+```
+
+### Important Notes
+
+**⚠️ No Transitive Dependencies:**
+
+Local JARs don't include their dependencies. You must declare them separately:
+
+```kotlin
+// Plugin depends on JGit
+@file:DependsOnJar("./my-git-plugin.jar")
+@file:DependsOn("org.eclipse.jgit:org.eclipse.jgit:6.7.0")  // Declare manually!
+```
+
+**💡 Better Alternative for Plugin Development:**
+
+For a better experience with automatic transitive dependencies, use Maven Local instead:
+
+```bash
+# Publish to Maven Local
+./gradlew :my-plugin:publishToMavenLocal
+```
+
+```kotlin
+// Regular @DependsOn includes all transitive deps automatically! ✅
+@file:DependsOn("com.company:my-plugin:1.0.0-SNAPSHOT")
+```
+
+---
+
+## Method 3: Classpath Dependencies
 
 **Best for:** Production builds, centralized dependency management, version catalogs
 
@@ -150,15 +247,16 @@ segments {
 
 ## Comparison
 
-| Feature | @DependsOn | Classpath |
-|---------|-----------|-----------|
-| **Setup** | None | Add to build.gradle.kts |
-| **Portability** | ✅ Standalone | ⚠️ Needs project |
-| **Speed (first run)** | Slower (downloads) | Fast |
-| **Speed (subsequent)** | Fast (cached) | Fast |
-| **IDE Autocomplete** | ✅ After first run | ✅ Immediate |
-| **Version Management** | Per-script | Centralized |
-| **Best For** | Standalone scripts | Project builds |
+| Feature                | @DependsOn         | @DependsOnJar | Classpath               |
+|------------------------|--------------------|---------------|-------------------------|
+| **Setup**              | None               | None          | Add to build.gradle.kts |
+| **Portability**        | ✅ Standalone       | ✅ Standalone  | ⚠️ Needs project        |
+| **Speed (first run)**  | Slower (downloads) | Fast          | Fast                    |
+| **Speed (subsequent)** | Fast (cached)      | Fast          | Fast                    |
+| **IDE Autocomplete**   | ✅ After first run  | ✅ Immediate   | ✅ Immediate             |
+| **Transitive Deps**    | ✅ Automatic        | ❌ Manual      | ✅ Automatic             |
+| **Version Management** | Per-script         | Per-JAR       | Centralized             |
+| **Best For**           | Maven deps         | Local JARs    | Project builds          |
 
 ---
 
@@ -577,24 +675,28 @@ Kite uses **Apache Ivy** for dependency resolution:
 
 ## Summary
 
-**Two Ways to Add Dependencies:**
+**Three Ways to Add Dependencies:**
 
-1. **`@DependsOn`** - Standalone scripts, portable, no setup
-2. **Classpath** - Project builds, centralized, faster
+1. **`@DependsOn`** - Maven Central/Maven Local dependencies (auto-resolves transitives)
+2. **`@DependsOnJar`** - Local JAR files (no transitive resolution)
+3. **Classpath** - Project builds, centralized management
 
-**Both approaches:**
+**All approaches:**
 
-- ✅ Full IDE support
+- ✅ Full IDE support (after first run or Gradle sync)
 - ✅ Work in CLI and CI/CD
-- ✅ Resolve transitive dependencies
-- ✅ Support Maven Central + custom repos
+- ✅ Support custom repositories
 
 **Choose based on your use case:**
 
-- **Sharing scripts?** → Use `@DependsOn`
-- **Building projects?** → Use classpath
-- **Quick prototype?** → Use `@DependsOn`
-- **Production CI/CD?** → Use classpath
+| Scenario                            | Recommended Method             |
+|-------------------------------------|--------------------------------|
+| **External library** (Gson, OkHttp) | `@DependsOn`                   |
+| **Plugin development**              | `@DependsOn` (via Maven Local) |
+| **Quick JAR testing**               | `@DependsOnJar`                |
+| **Company internal JAR**            | `@DependsOnJar` or Maven Local |
+| **Production project**              | Classpath (build.gradle.kts)   |
+| **CI/CD**                           | Classpath (reproducible)       |
 
 **Example:**
 
