@@ -30,6 +30,13 @@ compose reusable segments, and run them locally or in any CI platform.
 12. [CLI Reference](12-cli-reference.md) - Command-line usage
 99. [Troubleshooting](99-troubleshooting.md) - Common issues and solutions
 
+### Plugins
+
+- [Plugin Overview](plugins/00-index.md) - What are plugins and how to use them
+- [Git Plugin](plugins/01-plugin-git.md) - Version control operations
+- [Gradle Plugin](plugins/02-plugin-gradle.md) - Build automation (Planned)
+- [Docker Plugin](plugins/03-plugin-docker.md) - Container operations (Planned)
+
 ### API Documentation
 
 - [API Overview](api/00-index.md) - API documentation index
@@ -43,6 +50,7 @@ compose reusable segments, and run them locally or in any CI platform.
 - [Code Quality](dev/code-quality.md) - Quality standards
 - [Architecture](dev/architecture.md) - System design
 - [Testing](dev/testing.md) - Testing strategy
+- [Plugin Development](dev/05-plugin-development.md) - Creating plugins
 
 ## What is Kite?
 

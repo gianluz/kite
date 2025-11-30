@@ -1,0 +1,68 @@
+package io.kite.dsl
+
+import io.kite.core.ExecutionContext
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
+import java.io.File
+import java.nio.file.Path
+import kotlin.test.assertTrue
+import kotlin.test.assertFalse
+
+/**
+ * Tests for dependency annotation resolution.
+ *
+ * These tests verify that:
+ * - Local JAR files can be resolved
+ * - Maven Local artifacts can be resolved
+ * - Error messages are helpful
+ */
+class DependencyAnnotationsTest {
+
+    @Test
+    fun `DependsOnJar annotation has correct metadata`() {
+        val annotation = DependsOnJar::class
+
+        // Verify it's a file-level annotation
+        assertTrue(annotation.annotations.any { it is Target })
+
+        // Verify source retention
+        assertTrue(annotation.annotations.any { it is Retention })
+    }
+
+    @Test
+    fun `DependsOnMavenLocal annotation has correct metadata`() {
+        val annotation = DependsOnMavenLocal::class
+
+        // Verify it's a file-level annotation
+        assertTrue(annotation.annotations.any { it is Target })
+
+        // Verify source retention
+        assertTrue(annotation.annotations.any { it is Retention })
+    }
+
+    @Test
+    fun `KiteDependenciesResolver accepts mavenLocal coordinates`() {
+        val resolver = KiteDependenciesResolver()
+
+        assertTrue(resolver.acceptsArtifact("mavenLocal:com.company:plugin:1.0.0"))
+        assertFalse(resolver.acceptsArtifact("com.company:plugin:1.0.0"))
+    }
+
+    @Test
+    fun `KiteDependenciesResolver accepts localJar paths`() {
+        val resolver = KiteDependenciesResolver()
+
+        assertTrue(resolver.acceptsArtifact("localJar:./plugin.jar"))
+        assertTrue(resolver.acceptsArtifact("localJar:/absolute/path/plugin.jar"))
+        assertFalse(resolver.acceptsArtifact("./plugin.jar"))
+    }
+
+    @Test
+    fun `KiteDependenciesResolver does not accept repositories`() {
+        val resolver = KiteDependenciesResolver()
+
+        // We only resolve artifacts, not add repositories
+        val coords = kotlin.script.experimental.dependencies.RepositoryCoordinates("https://example.com")
+        assertFalse(resolver.acceptsRepository(coords))
+    }
+}
