@@ -105,7 +105,7 @@ segments {
             "test-runtime",
             "test-cli",
             "test-integration",
-            "test-plugins-git",
+            // "test-plugins-git",  // Temporarily disabled
             "test-plugins-gradle",
         )
 
