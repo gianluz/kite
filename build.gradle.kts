@@ -103,7 +103,7 @@ subprojects {
                     developers {
                         developer {
                             id.set("gianluz")
-                            name.set("Gianluca Pezzilli")
+                            name.set("Gianluca Zuddas")
                             email.set("gianluca.pezzilli@gmail.com")
                         }
                     }
