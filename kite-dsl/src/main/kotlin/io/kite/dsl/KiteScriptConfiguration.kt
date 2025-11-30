@@ -95,7 +95,6 @@ object KiteScriptCompilationConfiguration : ScriptCompilationConfiguration({
         "kotlin.script.experimental.dependencies.Repository",
         // Kite-specific dependency annotations
         "io.kite.dsl.DependsOnJar",
-        "io.kite.dsl.DependsOnMavenLocal",
     )
 
     // Make current context dependencies available to scripts
@@ -109,15 +108,13 @@ object KiteScriptCompilationConfiguration : ScriptCompilationConfiguration({
     }
 
     // Enable dependency resolution via annotations
-    // - @DependsOn / @Repository: Maven Central via Ivy (Java 17 compatible)
+    // - @DependsOn / @Repository: Maven Central via Ivy (Java 17 compatible, auto-checks Maven Local too!)
     // - @DependsOnJar: Local JAR files
-    // - @DependsOnMavenLocal: Maven Local repository
     refineConfiguration {
         onAnnotations(
             DependsOn::class,
             Repository::class,
             DependsOnJar::class,
-            DependsOnMavenLocal::class,
             handler = ::configureDepsOnAnnotations,
         )
     }
@@ -147,15 +144,18 @@ object KiteScriptEvaluationConfiguration : ScriptEvaluationConfiguration({
  * Dependency resolver chain for all annotation types.
  *
  * Resolution order:
- * 1. KiteDependenciesResolver - Local JARs and Maven Local
+ * 1. KiteDependenciesResolver - Local JARs (@DependsOnJar)
  * 2. FileSystemDependenciesResolver - File system paths
- * 3. IvyDependenciesResolver - Maven Central via Ivy (Java 17 compatible)
+ * 3. IvyDependenciesResolver - Maven Central + Maven Local (@DependsOn)
+ *
+ * Note: Maven Local is automatically checked by IvyDependenciesResolver!
+ * Just use @file:DependsOn("group:artifact:version") and it will check both Maven Central and Maven Local.
  */
 private val resolver by lazy {
     CompoundDependenciesResolver(
-        KiteDependenciesResolver(), // @DependsOnJar, @DependsOnMavenLocal
+        KiteDependenciesResolver(), // @DependsOnJar (local JAR files)
         FileSystemDependenciesResolver(), // File paths
-        IvyDependenciesResolver(), // @DependsOn (Maven Central)
+        IvyDependenciesResolver(), // @DependsOn (Maven Central + Maven Local)
     )
 }
 
@@ -163,9 +163,8 @@ private val resolver by lazy {
  * Handler for dependency annotations.
  *
  * Processes:
- * - @DependsOn / @Repository: Maven Central dependencies
+ * - @DependsOn / @Repository: Maven dependencies (auto-checks Maven Local!)
  * - @DependsOnJar: Local JAR files
- * - @DependsOnMavenLocal: Maven Local repository
  *
  * This follows the official Kotlin scripting pattern from:
  * https://kotlinlang.org/docs/custom-script-deps-tutorial.html
@@ -187,11 +186,6 @@ private fun configureDepsOnAnnotations(
                 is DependsOnJar -> {
                     // Prefix with localJar: so KiteDependenciesResolver can handle it
                     ScriptSourceAnnotation(DependsOn("localJar:${annotation.path}"), location)
-                }
-
-                is DependsOnMavenLocal -> {
-                    // Prefix with mavenLocal: so KiteDependenciesResolver can handle it
-                    ScriptSourceAnnotation(DependsOn("mavenLocal:${annotation.coordinates}"), location)
                 }
 
                 else -> scriptAnnotation // Keep DependsOn and Repository as-is

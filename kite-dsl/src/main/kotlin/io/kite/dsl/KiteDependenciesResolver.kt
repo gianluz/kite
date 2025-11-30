@@ -14,16 +14,15 @@ import kotlin.script.experimental.dependencies.RepositoryCoordinates
  *
  * Handles:
  * - Local JAR files (via @DependsOnJar) - single file, no transitives
- * - Maven Local repository (via @DependsOnMavenLocal) - delegates to Ivy for transitive resolution
+ *
+ * Note: Maven Local is handled automatically by IvyDependenciesResolver.
+ * Just use regular @file:DependsOn and Ivy will check Maven Local automatically!
  *
  * This resolver is chained with FileSystemDependenciesResolver and IvyDependenciesResolver
  * to provide comprehensive dependency resolution.
  */
-class KiteDependenciesResolver(
-    private val ivyResolver: IvyDependenciesResolver = IvyDependenciesResolver(),
-) : ExternalDependenciesResolver {
+class KiteDependenciesResolver : ExternalDependenciesResolver {
     companion object {
-        private const val MAVEN_LOCAL_PREFIX = "mavenLocal:"
         private const val LOCAL_JAR_PREFIX = "localJar:"
     }
 
@@ -42,8 +41,7 @@ class KiteDependenciesResolver(
     }
 
     override fun acceptsArtifact(artifactCoordinates: String): Boolean {
-        return artifactCoordinates.startsWith(MAVEN_LOCAL_PREFIX) ||
-            artifactCoordinates.startsWith(LOCAL_JAR_PREFIX)
+        return artifactCoordinates.startsWith(LOCAL_JAR_PREFIX)
     }
 
     override suspend fun resolve(
@@ -52,13 +50,6 @@ class KiteDependenciesResolver(
         sourceCodeLocation: SourceCode.LocationWithId?,
     ): ResultWithDiagnostics<List<File>> {
         return when {
-            artifactCoordinates.startsWith(MAVEN_LOCAL_PREFIX) -> {
-                resolveMavenLocal(
-                    artifactCoordinates.removePrefix(MAVEN_LOCAL_PREFIX),
-                    sourceCodeLocation,
-                )
-            }
-
             artifactCoordinates.startsWith(LOCAL_JAR_PREFIX) -> {
                 resolveLocalJar(
                     artifactCoordinates.removePrefix(LOCAL_JAR_PREFIX),
@@ -70,56 +61,6 @@ class KiteDependenciesResolver(
                 makeFailureResult("Unsupported artifact coordinates: $artifactCoordinates", sourceCodeLocation)
             }
         }
-    }
-
-    /**
-     * Resolves a Maven Local artifact from ~/.m2/repository
-     *
-     * This delegates to IvyDependenciesResolver which will:
-     * 1. Find the artifact in Maven Local
-     * 2. Parse its POM file
-     * 3. Resolve all transitive dependencies
-     *
-     * Format: groupId:artifactId:version
-     */
-    private suspend fun resolveMavenLocal(
-        coordinates: String,
-        sourceCodeLocation: SourceCode.LocationWithId?,
-    ): ResultWithDiagnostics<List<File>> {
-        val parts = coordinates.split(":")
-        if (parts.size != 3) {
-            return makeFailureResult(
-                "Invalid Maven coordinates: $coordinates (expected format: groupId:artifactId:version)",
-                sourceCodeLocation,
-            )
-        }
-
-        // Quick existence check to provide better error messages
-        val (groupId, artifactId, version) = parts
-        val m2Repository = File(System.getProperty("user.home"), ".m2/repository")
-        val groupPath = groupId.replace('.', '/')
-        val jarPath = "$groupPath/$artifactId/$version/$artifactId-$version.jar"
-        val jarFile = File(m2Repository, jarPath)
-
-        if (!jarFile.exists()) {
-            return makeFailureResult(
-                """
-                Maven Local artifact not found: $coordinates
-                
-                Expected location: ${jarFile.absolutePath}
-                
-                To install this artifact to Maven Local, run:
-                  ./gradlew :$artifactId:publishToMavenLocal
-                
-                Or if it's an external dependency:
-                  mvn dependency:get -Dartifact=$coordinates
-                """.trimIndent(),
-                sourceCodeLocation,
-            )
-        }
-
-        // Delegate to Ivy for full transitive resolution (including transitives!)
-        return ivyResolver.resolve(coordinates, ExternalDependenciesResolver.Options.Empty, sourceCodeLocation)
     }
 
     /**

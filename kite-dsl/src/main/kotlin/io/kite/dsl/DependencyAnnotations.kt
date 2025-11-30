@@ -11,7 +11,7 @@ package io.kite.dsl
  *
  * ## Examples:
  *
- * ### Local plugin development:
+ * ### Quick plugin testing (no Maven Local needed):
  * ```kotlin
  * @file:DependsOnJar("../kite-plugin-gradle/build/libs/gradle-1.0.0.jar")
  *
@@ -31,92 +31,36 @@ package io.kite.dsl
  * @file:DependsOnJar("./.kite/lib/company-plugin.jar")
  * ```
  *
- * ### Testing plugins before publishing:
- * ```kotlin
- * // Build plugin
- * // ./gradlew :my-plugin:build
+ * ## Important Notes:
  *
- * @file:DependsOnJar("./my-plugin/build/libs/my-plugin-1.0.0.jar")
+ * **Transitive Dependencies:**
+ * This annotation does NOT resolve transitive dependencies. The JAR must be
+ * self-contained or you must declare dependencies separately:
+ *
+ * ```kotlin
+ * @file:DependsOnJar("./my-plugin.jar")
+ * @file:DependsOn("org.eclipse.jgit:org.eclipse.jgit:6.7.0")  // Manual transitive dep
+ * ```
+ *
+ * **Better Alternative for Plugin Development:**
+ * For a better development experience with automatic transitive resolution,
+ * publish to Maven Local and use regular `@file:DependsOn`:
+ *
+ * ```bash
+ * # Publish plugin to Maven Local
+ * ./gradlew :my-plugin:publishToMavenLocal
+ * ```
+ *
+ * ```kotlin
+ * // Regular @DependsOn checks Maven Local automatically!
+ * // Includes all transitive dependencies ✅
+ * @file:DependsOn("com.company:my-plugin:1.0.0")
  *
  * import com.company.myplugin.*
  * ```
  *
  * @param path Path to the JAR file (must end with .jar)
- * @see DependsOnMavenLocal for Maven Local dependencies
  */
 @Target(AnnotationTarget.FILE)
 @Retention(AnnotationRetention.SOURCE)
 annotation class DependsOnJar(val path: String)
-
-/**
- * Declares a dependency from Maven Local repository (~/.m2/repository).
- *
- * Format: `groupId:artifactId:version`
- *
- * ## Use Cases:
- *
- * ### 1. Testing plugins before publishing to Maven Central:
- * ```kotlin
- * // In plugin project:
- * // ./gradlew publishToMavenLocal
- *
- * // In Kite script:
- * @file:DependsOnMavenLocal("io.kite.plugins:gradle:1.0.0")
- *
- * import io.kite.plugins.gradle.*
- * ```
- *
- * ### 2. Private company artifacts:
- * ```kotlin
- * @file:DependsOnMavenLocal("com.company:internal-tools:2.0.0-SNAPSHOT")
- *
- * import com.company.tools.*
- * ```
- *
- * ### 3. Development workflow:
- * ```kotlin
- * // Step 1: Publish to Maven Local
- * // ./gradlew :kite-plugin-git:publishToMavenLocal
- *
- * // Step 2: Use in scripts immediately
- * @file:DependsOnMavenLocal("io.kite.plugins:git:1.0.0-SNAPSHOT")
- *
- * import io.kite.plugins.git.*
- *
- * segments {
- *     segment("tag-release") {
- *         execute {
- *             git {
- *                 tag("v1.0.0")
- *                 push(tags = true)
- *             }
- *         }
- *     }
- * }
- * ```
- *
- * ## Publishing to Maven Local:
- *
- * ```gradle
- * // build.gradle.kts
- * plugins {
- *     `maven-publish`
- * }
- *
- * publishing {
- *     publications {
- *         create<MavenPublication>("mavenJava") {
- *             from(components["java"])
- *         }
- *     }
- * }
- * ```
- *
- * Then run: `./gradlew publishToMavenLocal`
- *
- * @param coordinates Maven coordinates in format groupId:artifactId:version
- * @see DependsOnJar for local JAR files
- */
-@Target(AnnotationTarget.FILE)
-@Retention(AnnotationRetention.SOURCE)
-annotation class DependsOnMavenLocal(val coordinates: String)
