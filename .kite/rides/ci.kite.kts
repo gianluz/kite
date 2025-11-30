@@ -7,6 +7,9 @@ ride {
         segment("clean")
         segment("compile")
 
+        // Publish plugins to Maven Local so they can be used by other segments
+        segment("publish-plugins-local")
+
         // Run quality checks and tests in parallel
         parallel {
             // Code quality checks

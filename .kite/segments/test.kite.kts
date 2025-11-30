@@ -1,7 +1,3 @@
-@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha")
-
-import io.kite.plugins.gradle.*
-
 segments {
     segment("test-core") {
         description = "Run kite-core module tests"
@@ -13,9 +9,7 @@ segments {
         }
 
         execute {
-            gradle {
-                task(":kite-core:test")
-            }
+            exec("./gradlew", ":kite-core:test")
         }
     }
 
@@ -29,9 +23,7 @@ segments {
         }
 
         execute {
-            gradle {
-                task(":kite-dsl:test")
-            }
+            exec("./gradlew", ":kite-dsl:test")
         }
     }
 
@@ -45,9 +37,7 @@ segments {
         }
 
         execute {
-            gradle {
-                task(":kite-runtime:test")
-            }
+            exec("./gradlew", ":kite-runtime:test")
         }
     }
 
@@ -61,9 +51,7 @@ segments {
         }
 
         execute {
-            gradle {
-                task(":kite-cli:test")
-            }
+            exec("./gradlew", ":kite-cli:test")
         }
     }
 
@@ -77,9 +65,7 @@ segments {
         }
 
         execute {
-            gradle {
-                task(":kite-integration-tests:test")
-            }
+            exec("./gradlew", ":kite-integration-tests:test")
         }
     }
 
@@ -93,9 +79,7 @@ segments {
         }
 
         execute {
-            gradle {
-                task(":kite-plugins:git:test")
-            }
+            exec("./gradlew", ":kite-plugins:git:test")
         }
     }
 
@@ -109,9 +93,7 @@ segments {
         }
 
         execute {
-            gradle {
-                task(":kite-plugins:gradle:test")
-            }
+            exec("./gradlew", ":kite-plugins:gradle:test")
         }
     }
 
@@ -141,7 +123,6 @@ segments {
             logger.info("\n📊 Test Results Summary")
             logger.info("============================================================")
 
-            // Read each module's test results
             val modules =
                 listOf(
                     "core",

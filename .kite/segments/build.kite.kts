@@ -1,14 +1,8 @@
-@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha")
-
-import io.kite.plugins.gradle.*
-
 segments {
     segment("clean") {
         description = "Clean build artifacts"
         execute {
-            gradle {
-                clean()
-            }
+            exec("./gradlew", "clean")
         }
     }
 
@@ -16,9 +10,7 @@ segments {
         description = "Compile all Kotlin modules"
         dependsOn("clean")
         execute {
-            gradle {
-                task("compileKotlin", "compileTestKotlin")
-            }
+            exec("./gradlew", "compileKotlin", "compileTestKotlin")
         }
     }
 
@@ -26,9 +18,21 @@ segments {
         description = "Build all modules (assemble JARs)"
         dependsOn("compile")
         execute {
-            gradle {
-                task("assemble")
-            }
+            exec("./gradlew", "assemble")
+        }
+    }
+
+    segment("publish-plugins-local") {
+        description = "Publish plugins to Maven Local for use in other segments"
+        dependsOn("compile")
+        execute {
+            logger.info("📦 Publishing plugins to Maven Local...")
+            exec(
+                "./gradlew",
+                ":kite-plugins:git:publishToMavenLocal",
+                ":kite-plugins:gradle:publishToMavenLocal",
+            )
+            logger.info("✅ Plugins published to Maven Local")
         }
     }
 }
