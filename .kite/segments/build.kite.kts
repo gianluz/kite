@@ -1,8 +1,14 @@
+@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha")
+
+import io.kite.plugins.gradle.*
+
 segments {
     segment("clean") {
         description = "Clean build artifacts"
         execute {
-            shell("./gradlew clean")
+            gradle {
+                clean()
+            }
         }
     }
 
@@ -10,7 +16,9 @@ segments {
         description = "Compile all Kotlin modules"
         dependsOn("clean")
         execute {
-            exec("./gradlew", "compileKotlin", "compileTestKotlin")
+            gradle {
+                task("compileKotlin", "compileTestKotlin")
+            }
         }
     }
 
@@ -18,8 +26,9 @@ segments {
         description = "Build all modules (assemble JARs)"
         dependsOn("compile")
         execute {
-            // Just assemble - don't run tests or quality checks
-            exec("./gradlew", "assemble")
+            gradle {
+                task("assemble")
+            }
         }
     }
 }

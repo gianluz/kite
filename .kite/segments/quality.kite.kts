@@ -1,10 +1,15 @@
+@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha")
+
+import io.kite.plugins.gradle.*
+
 segments {
     segment("ktlint") {
         description = "Run ktlint code style checks on main sources"
         dependsOn("compile")
         execute {
-            // Check main sources only (not tests)
-            exec("./gradlew", "ktlintMainSourceSetCheck", "ktlintKotlinScriptCheck")
+            gradle {
+                task("ktlintMainSourceSetCheck", "ktlintKotlinScriptCheck")
+            }
         }
     }
 
@@ -12,7 +17,9 @@ segments {
         description = "Run detekt static analysis"
         dependsOn("compile")
         execute {
-            exec("./gradlew", "detekt")
+            gradle {
+                task("detekt")
+            }
         }
     }
 
@@ -20,7 +27,7 @@ segments {
         description = "Run all code quality checks"
         dependsOn("ktlint", "detekt")
         execute {
-            println("✅ All quality checks passed!")
+            logger.info("✅ All quality checks passed!")
         }
     }
 }

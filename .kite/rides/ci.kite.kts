@@ -13,12 +13,16 @@ ride {
             segment("ktlint")
             segment("detekt")
 
-            // Tests
+            // Core module tests
             segment("test-core")
             segment("test-dsl")
             segment("test-runtime")
             segment("test-cli")
             segment("test-integration")
+
+            // Plugin tests
+            segment("test-plugins-git")
+            segment("test-plugins-gradle")
         }
 
         // Publish combined test results

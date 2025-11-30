@@ -153,9 +153,12 @@ object KiteScriptEvaluationConfiguration : ScriptEvaluationConfiguration({
  */
 private val resolver by lazy {
     CompoundDependenciesResolver(
-        KiteDependenciesResolver(), // @DependsOnJar (local JAR files)
-        FileSystemDependenciesResolver(), // File paths
-        IvyDependenciesResolver(), // @DependsOn (Maven Central + Maven Local)
+        // @DependsOnJar (local JAR files)
+        KiteDependenciesResolver(),
+        // File paths
+        FileSystemDependenciesResolver(),
+        // @DependsOn (Maven Central + Maven Local)
+        IvyDependenciesResolver(),
     )
 }
 
