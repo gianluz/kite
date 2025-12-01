@@ -69,23 +69,37 @@ jobs:
         if: always()
         run: |
           echo "📦 Creating execution artifacts archive..."
-          echo "Files to include:"
-          echo "  • deployment.log"
-          echo "  • .kite/artifacts/ ($(find .kite/artifacts/ -type f 2>/dev/null | wc -l) files)"
-          echo "  • .kite/logs/ ($(find .kite/logs/ -type f 2>/dev/null | wc -l) files)"
+          
+          # Check what exists
+          echo "Checking directories..."
+          ls -la .kite/ || echo "❌ .kite/ doesn't exist"
+          test -d .kite/artifacts && echo "✅ .kite/artifacts/ exists" || echo "❌ .kite/artifacts/ missing"
+          test -d .kite/logs && echo "✅ .kite/logs/ exists" || echo "❌ .kite/logs/ missing"
+          test -f deployment.log && echo "✅ deployment.log exists" || echo "❌ deployment.log missing"
+          
+          echo ""
+          echo "File counts:"
+          echo "  • deployment.log: $(test -f deployment.log && echo "exists" || echo "missing")"
+          echo "  • .kite/artifacts/: $(find .kite/artifacts/ -type f 2>/dev/null | wc -l) files"
+          echo "  • .kite/logs/: $(find .kite/logs/ -type f 2>/dev/null | wc -l) files"
           echo ""
           
+          # Create archive with verbose output and no trailing slashes
+          echo "Creating tar archive..."
           tar -czf kite-execution-artifacts.tar.gz \
             deployment.log \
-            .kite/artifacts/ \
-            .kite/logs/ \
-            2>/dev/null || true
+            .kite/artifacts \
+            .kite/logs
           
+          echo ""
           echo "✅ Archive created:"
           ls -lh kite-execution-artifacts.tar.gz
           echo ""
-          echo "📋 Archive contents:"
-          tar -tzf kite-execution-artifacts.tar.gz | head -30
+          echo "📋 Archive contents (first 50):"
+          tar -tzf kite-execution-artifacts.tar.gz | head -50
+          echo ""
+          echo "📊 Total files in archive:"
+          tar -tzf kite-execution-artifacts.tar.gz | wc -l
 
       - name: Upload Execution Artifacts
         if: always()
