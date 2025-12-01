@@ -63,20 +63,33 @@ jobs:
           VERSION: ${{ github.ref_name }}
         run: |
           export PATH="$PWD/kite-cli/build/install/kite-cli/bin:$PATH"
-          kite-cli ride Deploy
+          kite-cli ride Deploy 2>&1 | tee deployment.log
 
-      - name: Upload Kite Artifacts
+      - name: Upload Deployment Logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kite-artifacts-release
-          path: .kite/artifacts/
+          name: deployment-logs
+          path: |
+            deployment.log
+            .kite/artifacts/
           retention-days: 90
 
-      - name: Upload Build Artifacts
+      - name: Upload Test Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kite-cli-release
-          path: kite-cli/build/install/kite-cli/
+          name: test-reports
+          path: |
+            **/build/reports/tests/
+            **/build/test-results/
+          retention-days: 30
+
+      - name: Upload Distribution Archives
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: distribution-archives
+          path: |
+            kite-cli/build/distributions/
           retention-days: 90
