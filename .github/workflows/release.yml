@@ -65,6 +65,30 @@ jobs:
           export PATH="$PWD/kite-cli/build/install/kite-cli/bin:$PATH"
           kite-cli ride Deploy 2>&1 | tee deployment.log
 
+      - name: Debug - List Kite Directories
+        if: always()
+        run: |
+          echo "📂 Workspace root contents:"
+          ls -la
+          echo ""
+          echo "📂 .kite/ directory structure:"
+          ls -laR .kite/ || echo "❌ .kite/ doesn't exist"
+          echo ""
+          echo "📂 File count in .kite/artifacts/:"
+          find .kite/artifacts/ -type f 2>/dev/null | wc -l || echo "0"
+          echo ""
+          echo "📂 Files in .kite/artifacts/ (first 20):"
+          find .kite/artifacts/ -type f 2>/dev/null | head -20 || echo "❌ No files"
+          echo ""
+          echo "📂 File count in .kite/logs/:"
+          find .kite/logs/ -type f 2>/dev/null | wc -l || echo "0"
+          echo ""
+          echo "📂 Files in .kite/logs/ (first 20):"
+          find .kite/logs/ -type f 2>/dev/null | head -20 || echo "❌ No files"
+          echo ""
+          echo "📂 Total size of .kite/:"
+          du -sh .kite/ 2>/dev/null || echo "❌ Can't calculate"
+
       - name: Upload Kite Execution Artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -72,8 +96,8 @@ jobs:
           name: kite-execution-artifacts
           path: |
             deployment.log
-            .kite/artifacts/
-            .kite/logs/
+            .kite/artifacts/**
+            .kite/logs/**
           retention-days: 90
           if-no-files-found: warn
 
