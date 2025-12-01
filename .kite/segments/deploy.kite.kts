@@ -7,6 +7,14 @@ segments {
             // Only deploy when running on a release tag in CI
             val hasReleaseTag = ctx.env("CI_COMMIT_TAG")?.startsWith("v") == true
             val isCI = ctx.isCI
+
+            // Print debug info to console (will be captured in deployment.log)
+            println("🔍 Maven Central deployment condition check:")
+            println("   CI_COMMIT_TAG: ${ctx.env("CI_COMMIT_TAG")}")
+            println("   hasReleaseTag: $hasReleaseTag")
+            println("   isCI: $isCI")
+            println("   Result: ${hasReleaseTag && isCI}")
+
             hasReleaseTag && isCI
         }
 

@@ -65,31 +65,23 @@ jobs:
           export PATH="$PWD/kite-cli/build/install/kite-cli/bin:$PATH"
           kite-cli ride Deploy 2>&1 | tee deployment.log
 
-      - name: Upload Deployment Logs
+      - name: Upload Kite Execution Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: deployment-logs
+          name: kite-execution-artifacts
           path: |
             deployment.log
             .kite/artifacts/
+            .kite/logs/
           retention-days: 90
-
-      - name: Upload Test Reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-reports
-          path: |
-            **/build/reports/tests/
-            **/build/test-results/
-          retention-days: 30
+          if-no-files-found: warn
 
       - name: Upload Distribution Archives
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: distribution-archives
-          path: |
-            kite-cli/build/distributions/
+          path: kite-cli/build/distributions/
           retention-days: 90
+          if-no-files-found: error
