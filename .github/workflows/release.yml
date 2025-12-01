@@ -65,41 +65,36 @@ jobs:
           export PATH="$PWD/kite-cli/build/install/kite-cli/bin:$PATH"
           kite-cli ride Deploy 2>&1 | tee deployment.log
 
-      - name: Debug - List Kite Directories
+      - name: Create Execution Artifacts Archive
         if: always()
         run: |
-          echo "📂 Workspace root contents:"
-          ls -la
+          echo "📦 Creating execution artifacts archive..."
+          echo "Files to include:"
+          echo "  • deployment.log"
+          echo "  • .kite/artifacts/ ($(find .kite/artifacts/ -type f 2>/dev/null | wc -l) files)"
+          echo "  • .kite/logs/ ($(find .kite/logs/ -type f 2>/dev/null | wc -l) files)"
           echo ""
-          echo "📂 .kite/ directory structure:"
-          ls -laR .kite/ || echo "❌ .kite/ doesn't exist"
+          
+          tar -czf kite-execution-artifacts.tar.gz \
+            deployment.log \
+            .kite/artifacts/ \
+            .kite/logs/ \
+            2>/dev/null || true
+          
+          echo "✅ Archive created:"
+          ls -lh kite-execution-artifacts.tar.gz
           echo ""
-          echo "📂 File count in .kite/artifacts/:"
-          find .kite/artifacts/ -type f 2>/dev/null | wc -l || echo "0"
-          echo ""
-          echo "📂 Files in .kite/artifacts/ (first 20):"
-          find .kite/artifacts/ -type f 2>/dev/null | head -20 || echo "❌ No files"
-          echo ""
-          echo "📂 File count in .kite/logs/:"
-          find .kite/logs/ -type f 2>/dev/null | wc -l || echo "0"
-          echo ""
-          echo "📂 Files in .kite/logs/ (first 20):"
-          find .kite/logs/ -type f 2>/dev/null | head -20 || echo "❌ No files"
-          echo ""
-          echo "📂 Total size of .kite/:"
-          du -sh .kite/ 2>/dev/null || echo "❌ Can't calculate"
+          echo "📋 Archive contents:"
+          tar -tzf kite-execution-artifacts.tar.gz | head -30
 
-      - name: Upload Kite Execution Artifacts
+      - name: Upload Execution Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: kite-execution-artifacts
-          path: |
-            deployment.log
-            .kite/artifacts/**
-            .kite/logs/**
+          path: kite-execution-artifacts.tar.gz
           retention-days: 90
-          if-no-files-found: warn
+          if-no-files-found: error
 
       - name: Upload Distribution Archives
         if: always()
