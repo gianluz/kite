@@ -107,7 +107,11 @@ object SegmentExecutor {
         var finalException: Throwable? = null
 
         try {
-            // Set up process execution provider for this segment
+            // Set up process execution provider for this segment.
+            // The provider is stored BOTH on the context (coroutine-safe: travels with the
+            // object closure regardless of which thread the coroutine resumes on) AND in the
+            // ThreadLocal (for backward compatibility with any code that calls
+            // ProcessExecutionContext.getProvider() directly).
             val provider = ProcessExecutionProviderImpl()
             ProcessExecutionContext.setProvider(provider)
 
@@ -125,7 +129,7 @@ object SegmentExecutor {
             }
 
             try {
-                val contextWithLogger = context.copy(logger = logger)
+                val contextWithLogger = context.copy(logger = logger, processExecutionProvider = provider)
 
                 // Execute with timeout if specified
                 val timeout = segment.timeout

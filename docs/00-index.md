@@ -10,7 +10,7 @@ compose reusable segments, and run them locally or in any CI platform.
 - 💡 [Core Concepts](03-core-concepts.md) - Understand rides, segments, and flows
 - 📖 [API Reference](api/00-index.md) - Complete API documentation
 
-> **Latest release:** `v0.1.0-alpha7` — available on [Maven Central](https://central.sonatype.com/search?q=com.gianluz.kite)
+> **Latest release:** `v0.1.0-alpha8` — available on [Maven Central](https://central.sonatype.com/search?q=com.gianluz.kite)
 
 ## Documentation Sections
 

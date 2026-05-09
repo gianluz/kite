@@ -13,9 +13,9 @@ repositories {
 }
 
 dependencies {
-    implementation("com.gianluz.kite:kite-core:0.1.0-alpha7")
-    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha7")
-    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha7")
+    implementation("com.gianluz.kite:kite-core:0.1.0-alpha8")
+    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha8")
+    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha8")
 }
 ```
 
@@ -39,9 +39,9 @@ repositories {
 
 dependencies {
     // Kite dependencies
-    implementation("com.gianluz.kite:kite-core:0.1.0-alpha7")
-    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha7")
-    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha7")
+    implementation("com.gianluz.kite:kite-core:0.1.0-alpha8")
+    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha8")
+    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha8")
 }
 ```
 
@@ -129,7 +129,7 @@ tools/kite/kite-cli/build/install/kite-cli/bin/kite-cli ride CI
 
 | Kite Version  | Min Java | Min Kotlin | Min Gradle |
 |---------------|----------|------------|------------|
-| 0.1.0-alpha7  | 17       | 2.1        | 8.0        |
+| 0.1.0-alpha8  | 17       | 2.1        | 8.0        |
 
 ## Verify Installation
 
@@ -280,9 +280,9 @@ cd /path/to/your-project
 
    Should show:
    ```
-   +--- com.gianluz.kite:kite-core:0.1.0-alpha7
-   +--- com.gianluz.kite:kite-dsl:0.1.0-alpha7
-   +--- com.gianluz.kite:kite-runtime:0.1.0-alpha7
+   +--- com.gianluz.kite:kite-core:0.1.0-alpha8
+   +--- com.gianluz.kite:kite-dsl:0.1.0-alpha8
+   +--- com.gianluz.kite:kite-runtime:0.1.0-alpha8
    ```
 
 4. **Verify Script Definition**:
@@ -347,7 +347,7 @@ cd /path/to/your-project
    ```
 
 2. **Check Version**:
-   Ensure you're using a published version (e.g., `0.1.0-alpha7`, not `0.1.0-SNAPSHOT`)
+   Ensure you're using a published version (e.g., `0.1.0-alpha8`, not `0.1.0-SNAPSHOT`)
 
 3. **Refresh Dependencies**:
    ```bash

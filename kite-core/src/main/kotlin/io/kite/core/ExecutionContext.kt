@@ -39,6 +39,13 @@ data class ExecutionContext(
     val workspace: Path = Paths.get("."),
     val artifacts: ArtifactManager = InMemoryArtifactManager(),
     val logger: SegmentLoggerInterface = NoOpLogger,
+    /**
+     * The process execution provider for this segment.
+     * Stored directly on the context so it travels with the coroutine closure
+     * rather than relying on ThreadLocal (which breaks when coroutines switch threads).
+     * Set by the runtime before invoking a segment's execute block.
+     */
+    val processExecutionProvider: ProcessExecutionProvider? = null,
 ) {
     /**
      * Gets an environment variable value.

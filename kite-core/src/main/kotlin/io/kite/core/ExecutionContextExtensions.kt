@@ -49,7 +49,13 @@ data class ProcessExecutionResult(
 
 /**
  * Thread-local storage for the process execution provider.
- * This will be set by the runtime when executing segments.
+ *
+ * NOTE: Prefer storing the provider directly on [ExecutionContext.processExecutionProvider]
+ * instead of using this. ThreadLocal does not propagate across coroutine thread switches,
+ * which causes "Process execution not available" errors when a suspended segment resumes
+ * on a different dispatcher thread.
+ *
+ * This object is kept for backward compatibility only.
  */
 object ProcessExecutionContext {
     private val provider = ThreadLocal<ProcessExecutionProvider>()
@@ -78,7 +84,8 @@ suspend fun ExecutionContext.exec(
     timeout: Duration? = null,
 ): ProcessExecutionResult {
     val provider =
-        ProcessExecutionContext.getProvider()
+        processExecutionProvider
+            ?: ProcessExecutionContext.getProvider()
             ?: throw IllegalStateException("Process execution not available. Are you running outside a segment?")
 
     // Log command execution
@@ -112,7 +119,8 @@ suspend fun ExecutionContext.execOrNull(
     timeout: Duration? = null,
 ): ProcessExecutionResult? {
     val provider =
-        ProcessExecutionContext.getProvider()
+        processExecutionProvider
+            ?: ProcessExecutionContext.getProvider()
             ?: throw IllegalStateException("Process execution not available. Are you running outside a segment?")
 
     // Log command execution
@@ -141,7 +149,8 @@ suspend fun ExecutionContext.shell(
     timeout: Duration? = null,
 ): ProcessExecutionResult {
     val provider =
-        ProcessExecutionContext.getProvider()
+        processExecutionProvider
+            ?: ProcessExecutionContext.getProvider()
             ?: throw IllegalStateException("Process execution not available. Are you running outside a segment?")
 
     // Log command execution

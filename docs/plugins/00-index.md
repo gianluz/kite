@@ -54,8 +54,8 @@ execute {
 
 ```kotlin
 // .kite/segments/build.kite.kts
-@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha7")
-@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha7")
+@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha8")
+@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha8")
 
 import io.kite.plugins.git.*
 import io.kite.plugins.gradle.*
@@ -105,8 +105,8 @@ import io.kite.plugins.git.*
 
 ```kotlin
 // .kite/segments/build.kite.kts
-@file:DependsOnJar("../kite-plugins/git/build/libs/git-0.1.0-alpha7.jar")
-@file:DependsOnJar("../kite-plugins/gradle/build/libs/gradle-0.1.0-alpha7.jar")
+@file:DependsOnJar("../kite-plugins/git/build/libs/git-0.1.0-alpha8.jar")
+@file:DependsOnJar("../kite-plugins/gradle/build/libs/gradle-0.1.0-alpha8.jar")
 
 import io.kite.plugins.git.*
 import io.kite.plugins.gradle.*
