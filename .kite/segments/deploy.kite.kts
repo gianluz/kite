@@ -32,7 +32,8 @@ segments {
                 "./gradlew",
                 "publishToSonatype",
                 "closeAndReleaseSonatypeStagingRepository",
-                "--no-daemon"
+                "--no-daemon",
+                "--no-configuration-cache"
             )
 
             logger.info("✅ Published to Maven Central!")
@@ -60,7 +61,8 @@ segments {
                 "./gradlew",
                 "publish",
                 "-Pgithub=true",
-                "--no-daemon"
+                "--no-daemon",
+                "--no-configuration-cache"
             )
 
             logger.info("✅ Published to GitHub Packages!")
