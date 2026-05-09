@@ -27,11 +27,10 @@ segments {
             requireSecret("SIGNING_KEY")
             requireSecret("SIGNING_PASSWORD")
 
-            // Publish to Sonatype OSSRH
+            // Publish to Maven Central via the Central Portal API
             exec(
                 "./gradlew",
-                "publishToSonatype",
-                "closeAndReleaseSonatypeStagingRepository",
+                "publishAggregationToCentralPortal",
                 "--no-daemon",
                 "--no-configuration-cache"
             )

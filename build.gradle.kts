@@ -4,7 +4,7 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1" apply false
     id("io.gitlab.arturbosch.detekt") version "1.23.8" apply false
     id("com.github.johnrengelman.shadow") version "8.1.1" apply false
-    id("io.github.gradle-nexus.publish-plugin") version "2.0.0"
+    id("com.gradleup.nmcp.aggregation") version "1.4.4"
 }
 
 allprojects {
@@ -19,16 +19,22 @@ allprojects {
 // Auto-install git hooks before any build
 apply(from = "gradle/git-hooks.gradle.kts")
 
-// Configure Nexus publishing for Maven Central
-nexusPublishing {
-    repositories {
-        sonatype {
-            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
-            username.set(System.getenv("OSSRH_USERNAME") ?: project.findProperty("ossrhUsername") as String?)
-            password.set(System.getenv("OSSRH_PASSWORD") ?: project.findProperty("ossrhPassword") as String?)
-        }
+// Configure Maven Central publishing via the new Central Portal API
+nmcpAggregation {
+    centralPortal {
+        username = System.getenv("OSSRH_USERNAME") ?: project.findProperty("ossrhUsername") as String? ?: ""
+        password = System.getenv("OSSRH_PASSWORD") ?: project.findProperty("ossrhPassword") as String? ?: ""
+        publishingType = "AUTOMATIC"
     }
+}
+
+dependencies {
+    nmcpAggregation(project(":kite-core"))
+    nmcpAggregation(project(":kite-dsl"))
+    nmcpAggregation(project(":kite-runtime"))
+    nmcpAggregation(project(":kite-cli"))
+    nmcpAggregation(project(":kite-plugins:git"))
+    nmcpAggregation(project(":kite-plugins:gradle"))
 }
 
 subprojects {
