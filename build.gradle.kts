@@ -4,6 +4,7 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1" apply false
     id("io.gitlab.arturbosch.detekt") version "1.23.8" apply false
     id("com.github.johnrengelman.shadow") version "8.1.1" apply false
+    id("com.gradleup.nmcp") version "1.4.4" apply false
     id("com.gradleup.nmcp.aggregation") version "1.4.4"
 }
 

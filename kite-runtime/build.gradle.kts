@@ -1,3 +1,7 @@
+plugins {
+    id("com.gradleup.nmcp")
+}
+
 dependencies {
     // Depend on core and dsl
     api(project(":kite-core"))

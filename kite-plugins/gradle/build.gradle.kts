@@ -1,3 +1,7 @@
+plugins {
+    id("com.gradleup.nmcp")
+}
+
 description = "Gradle operations plugin for Kite"
 
 repositories {
@@ -6,21 +10,13 @@ repositories {
 }
 
 dependencies {
-    // Plugin depends on Kite core
-    // For compilation, prefer local project
-    compileOnly(project(":kite-core"))
+    // Plugin depends on Kite core (api so it appears as a compile dependency in POM)
+    api(project(":kite-core"))
 
     // Test dependencies
     testImplementation(kotlin("test"))
     testImplementation("io.mockk:mockk:1.13.8")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
-    testImplementation(project(":kite-core"))
-}
-
-// Add kite-core as a compile-time dependency in POM (will be resolved from Maven)
-configurations.create("kiteApi")
-dependencies {
-    add("kiteApi", "com.gianluz.kite:kite-core:${project.version}")
 }
 
 // Customize publication
@@ -44,18 +40,6 @@ publishing {
                     connection.set("scm:git:git://github.com/gianluz/kite.git")
                     developerConnection.set("scm:git:ssh://github.com/gianluz/kite.git")
                     url.set("https://github.com/gianluz/kite")
-                }
-
-                // Manually add kite-core
-                withXml {
-                    val dependenciesNode = asNode().appendNode("dependencies")
-                    configurations.getByName("kiteApi").allDependencies.forEach { dep ->
-                        val dependencyNode = dependenciesNode.appendNode("dependency")
-                        dependencyNode.appendNode("groupId", dep.group)
-                        dependencyNode.appendNode("artifactId", dep.name)
-                        dependencyNode.appendNode("version", dep.version)
-                        dependencyNode.appendNode("scope", "compile")
-                    }
                 }
             }
         }

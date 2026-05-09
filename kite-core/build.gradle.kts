@@ -1,5 +1,6 @@
 plugins {
     kotlin("plugin.serialization")
+    id("com.gradleup.nmcp")
 }
 
 dependencies {
