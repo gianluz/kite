@@ -32,7 +32,6 @@ dependencies {
     nmcpAggregation(project(":kite-core"))
     nmcpAggregation(project(":kite-dsl"))
     nmcpAggregation(project(":kite-runtime"))
-    nmcpAggregation(project(":kite-cli"))
     nmcpAggregation(project(":kite-plugins:git"))
     nmcpAggregation(project(":kite-plugins:gradle"))
 }
@@ -46,6 +45,11 @@ subprojects {
 
     configure<org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension> {
         jvmToolchain(21)
+    }
+
+    configure<JavaPluginExtension> {
+        withSourcesJar()
+        withJavadocJar()
     }
 
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
