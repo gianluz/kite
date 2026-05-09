@@ -121,12 +121,10 @@ segments {
         execute {
             logger.info("Pushing Docker image to Docker Hub...")
 
+            // Docker Hub login is handled by the docker/login-action step in the workflow YAML
+            // (using DOCKER_USERNAME and DOCKER_PASSWORD secrets) — no need to login here
             requireSecret("DOCKER_USERNAME")
-            val dockerPassword = requireSecret("DOCKER_PASSWORD")
-            val dockerUsername = requireSecret("DOCKER_USERNAME")
-
-            // Login to Docker Hub (password via stdin)
-            shell("echo '$dockerPassword' | docker login -u $dockerUsername --password-stdin")
+            requireSecret("DOCKER_PASSWORD")
 
             val tag = env("CI_COMMIT_TAG")?.removePrefix("v") ?: "latest"
 
@@ -136,6 +134,7 @@ segments {
 
             logger.info("✅ Docker image pushed to Docker Hub!")
             logger.info("  docker pull gianluz/kite:$tag")
+            logger.info("  docker pull gianluz/kite:latest")
         }
     }
 

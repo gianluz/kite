@@ -165,9 +165,9 @@ repositories {
 }
 
 dependencies {
-    implementation("com.gianluz.kite:kite-core:0.1.0-alpha5")
-    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha5")
-    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha5")
+    implementation("com.gianluz.kite:kite-core:0.1.0-alpha6")
+    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha6")
+    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha6")
 }
 ```
 
@@ -177,17 +177,17 @@ All artifacts are available on **[Maven Central](https://central.sonatype.com/na
 
 | Artifact | Coordinates | Description | Portal |
 |----------|-------------|-------------|--------|
-| `kite-core` | `com.gianluz.kite:kite-core:0.1.0-alpha5` | Core domain models and interfaces | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-core) |
-| `kite-dsl` | `com.gianluz.kite:kite-dsl:0.1.0-alpha5` | DSL and Kotlin scripting engine | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-dsl) |
-| `kite-runtime` | `com.gianluz.kite:kite-runtime:0.1.0-alpha5` | Execution runtime and schedulers | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-runtime) |
-| `git` plugin | `com.gianluz.kite:git:0.1.0-alpha5` | Type-safe Git operations | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/git) |
-| `gradle` plugin | `com.gianluz.kite:gradle:0.1.0-alpha5` | Flexible Gradle task execution | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/gradle) |
+| `kite-core` | `com.gianluz.kite:kite-core:0.1.0-alpha6` | Core domain models and interfaces | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-core) |
+| `kite-dsl` | `com.gianluz.kite:kite-dsl:0.1.0-alpha6` | DSL and Kotlin scripting engine | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-dsl) |
+| `kite-runtime` | `com.gianluz.kite:kite-runtime:0.1.0-alpha6` | Execution runtime and schedulers | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-runtime) |
+| `git` plugin | `com.gianluz.kite:git:0.1.0-alpha6` | Type-safe Git operations | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/git) |
+| `gradle` plugin | `com.gianluz.kite:gradle:0.1.0-alpha6` | Flexible Gradle task execution | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/gradle) |
 
 Plugins are used via `@file:DependsOn` in your `.kite.kts` scripts:
 
 ```kotlin
-@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha5")
-@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha5")
+@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha6")
+@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha6")
 ```
 
 ### Docker (No Installation Required)
@@ -204,7 +204,7 @@ docker run --rm \
 # Using Docker Hub (alternative)
 docker run --rm \
   -v $(pwd):/workspace \
-  gianluz/kite:0.1.0-alpha5 \
+  gianluz/kite:0.1.0-alpha6 \
   ride CI
 ```
 

@@ -7,7 +7,7 @@ Type-safe Git operations for Kite workflows.
 ### From Maven Central (Recommended)
 
 ```kotlin
-@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha5")
+@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha6")
 
 import io.kite.plugins.git.*
 ```
@@ -31,7 +31,7 @@ import io.kite.plugins.git.*
 ```
 
 ```kotlin
-@file:DependsOnJar("./kite-plugins/git/build/libs/git-0.1.0-alpha5.jar")
+@file:DependsOnJar("./kite-plugins/git/build/libs/git-0.1.0-alpha6.jar")
 
 import io.kite.plugins.git.*
 ```
