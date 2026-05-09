@@ -195,16 +195,16 @@ Plugins are used via `@file:DependsOn` in your `.kite.kts` scripts:
 Run Kite directly without cloning the repo — just mount your project directory:
 
 ```bash
-# Using GitHub Container Registry (always available)
+# GitHub Container Registry
 docker run --rm \
   -v $(pwd):/workspace \
   ghcr.io/gianluz/kite:latest \
   ride CI
 
-# Using Docker Hub (alternative)
+# Docker Hub
 docker run --rm \
   -v $(pwd):/workspace \
-  gianluz/kite:0.1.0-alpha8 \
+  gianluz/kite:latest \
   ride CI
 ```
 
@@ -219,10 +219,10 @@ docker run --rm \
   ride Deploy
 ```
 
-| Registry | Image | Always Available |
-|----------|-------|-----------------|
-| GitHub Container Registry | `ghcr.io/gianluz/kite` | ✅ Yes |
-| Docker Hub | `gianluz/kite` | ✅ Yes |
+| Registry | Image | Link |
+|----------|-------|------|
+| GitHub Container Registry | `ghcr.io/gianluz/kite` | [ghcr.io/gianluz/kite](https://github.com/gianluz/kite/pkgs/container/kite) |
+| Docker Hub | `gianluz/kite` | [hub.docker.com/r/gianluz/kite](https://hub.docker.com/r/gianluz/kite) |
 
 ### CLI Binary
 

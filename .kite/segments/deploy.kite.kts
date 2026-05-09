@@ -108,31 +108,48 @@ segments {
     }
 
     segment("deploy-docker") {
-        description = "Push Docker image to Docker Hub"
+        description = "Log in and push Docker image to GHCR (always in CI) and Docker Hub (if credentials set)"
         dependsOn("build-docker-image")
 
         condition { ctx ->
             val hasReleaseTag = ctx.env("CI_COMMIT_TAG")?.startsWith("v") == true
             val isCI = ctx.isCI
-            val hasDockerCredentials = ctx.env("DOCKER_USERNAME") != null && ctx.env("DOCKER_PASSWORD") != null
-            hasReleaseTag && isCI && hasDockerCredentials
+            hasReleaseTag && isCI
         }
 
         execute {
-            logger.info("Pushing Docker image to Docker Hub...")
-
-            // Docker Hub login is already handled by docker/login-action in the workflow YAML
-            requireSecret("DOCKER_USERNAME")
-            requireSecret("DOCKER_PASSWORD")
-
             val tag = env("CI_COMMIT_TAG")?.removePrefix("v") ?: "latest"
 
-            exec("docker", "push", "gianluz/kite:$tag")
-            exec("docker", "push", "gianluz/kite:latest")
+            // ── GHCR (GitHub Container Registry) ───────────────────────────
+            // GITHUB_TOKEN is always available in CI; GITHUB_ACTOR is set automatically
+            // by GitHub Actions and inherited via System.getenv()
+            val githubToken = requireSecret("GITHUB_TOKEN")
+            val githubActor = env("GITHUB_ACTOR") ?: "gianluz"
 
-            logger.info("✅ Docker image pushed to Docker Hub!")
-            logger.info("   docker pull gianluz/kite:$tag")
-            logger.info("   docker pull gianluz/kite:latest")
+            logger.info("Logging in to ghcr.io as $githubActor...")
+            exec("docker", "login", "--username", githubActor, "--password", githubToken, "ghcr.io")
+
+            exec("docker", "push", "ghcr.io/gianluz/kite:$tag")
+            exec("docker", "push", "ghcr.io/gianluz/kite:latest")
+            logger.info("✅ Pushed to GHCR:")
+            logger.info("   docker pull ghcr.io/gianluz/kite:$tag")
+
+            // ── Docker Hub (optional) ───────────────────────────────────────
+            // Runs only when DOCKER_USERNAME and DOCKER_PASSWORD secrets are set
+            val dockerUsername = env("DOCKER_USERNAME")
+            val dockerPassword = env("DOCKER_PASSWORD")
+
+            if (dockerUsername != null && dockerPassword != null) {
+                logger.info("Logging in to Docker Hub as $dockerUsername...")
+                exec("docker", "login", "--username", dockerUsername, "--password", dockerPassword)
+
+                exec("docker", "push", "gianluz/kite:$tag")
+                exec("docker", "push", "gianluz/kite:latest")
+                logger.info("✅ Pushed to Docker Hub:")
+                logger.info("   docker pull gianluz/kite:$tag")
+            } else {
+                logger.info("⚠️  DOCKER_USERNAME/DOCKER_PASSWORD not set — skipping Docker Hub push")
+            }
         }
     }
 
