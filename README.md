@@ -5,7 +5,7 @@ A modern, type-safe CI/CD workflow runner for Kotlin projects.
 [![Version](https://img.shields.io/badge/version-0.1.0--alpha3-blue.svg)](https://github.com/gianluz/kite/releases)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Kotlin](https://img.shields.io/badge/kotlin-2.1.20-blue.svg?logo=kotlin)](http://kotlinlang.org)
-[![Maven Central](https://img.shields.io/maven-central/v/com.gianluz.kite/kite-core.svg?label=Maven%20Central)](https://central.sonatype.com/search?q=com.gianluz.kite)
+[![Maven Central](https://img.shields.io/maven-central/v/com.gianluz.kite/kite-core.svg?label=Maven%20Central)](https://central.sonatype.com/namespace/com.gianluz.kite)
 [![Java](https://img.shields.io/badge/Java-17+-orange.svg)](https://openjdk.java.net/)
 
 ---
@@ -172,13 +172,15 @@ dependencies {
 
 ### Published Artifacts
 
-| Artifact | Coordinates | Description |
-|----------|-------------|-------------|
-| `kite-core` | `com.gianluz.kite:kite-core:0.1.0-alpha3` | Core domain models and interfaces |
-| `kite-dsl` | `com.gianluz.kite:kite-dsl:0.1.0-alpha3` | DSL and Kotlin scripting engine |
-| `kite-runtime` | `com.gianluz.kite:kite-runtime:0.1.0-alpha3` | Execution runtime and schedulers |
-| `git` plugin | `com.gianluz.kite:git:0.1.0-alpha3` | Type-safe Git operations |
-| `gradle` plugin | `com.gianluz.kite:gradle:0.1.0-alpha3` | Flexible Gradle task execution |
+All artifacts are available on **[Maven Central](https://central.sonatype.com/namespace/com.gianluz.kite)** under the group `com.gianluz.kite`.
+
+| Artifact | Coordinates | Description | Portal |
+|----------|-------------|-------------|--------|
+| `kite-core` | `com.gianluz.kite:kite-core:0.1.0-alpha3` | Core domain models and interfaces | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-core) |
+| `kite-dsl` | `com.gianluz.kite:kite-dsl:0.1.0-alpha3` | DSL and Kotlin scripting engine | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-dsl) |
+| `kite-runtime` | `com.gianluz.kite:kite-runtime:0.1.0-alpha3` | Execution runtime and schedulers | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-runtime) |
+| `git` plugin | `com.gianluz.kite:git:0.1.0-alpha3` | Type-safe Git operations | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/git) |
+| `gradle` plugin | `com.gianluz.kite:gradle:0.1.0-alpha3` | Flexible Gradle task execution | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/gradle) |
 
 Plugins are used via `@file:DependsOn` in your `.kite.kts` scripts:
 
