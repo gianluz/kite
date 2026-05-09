@@ -276,7 +276,7 @@ kite-cli run test-plugin
 
 ```kotlin
 plugins {
-    kotlin("jvm") version "2.0.21"
+    kotlin("jvm") version "2.1.20"
     `maven-publish`
 }
 
@@ -289,7 +289,7 @@ repositories {
 
 dependencies {
     // Plugin depends on Kite core (compile-only)
-    compileOnly("io.kite:kite-core:0.1.0-alpha")
+    compileOnly("com.gianluz.kite:kite-core:0.1.0-alpha3")
     
     // Plugin-specific dependencies
     implementation("org.eclipse.jgit:org.eclipse.jgit:6.7.0.202309050840-r")

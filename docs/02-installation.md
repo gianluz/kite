@@ -9,13 +9,13 @@ Add Kite to your Gradle project:
 ```kotlin
 // build.gradle.kts
 repositories {
-    mavenCentral() // Once published
+    mavenCentral()
 }
 
 dependencies {
-    implementation("io.kite:kite-core:0.1.0-alpha")
-    implementation("io.kite:kite-dsl:0.1.0-alpha")
-    implementation("io.kite:kite-runtime:0.1.0-alpha")
+    implementation("com.gianluz.kite:kite-core:0.1.0-alpha3")
+    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha3")
+    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha3")
 }
 ```
 
@@ -30,7 +30,7 @@ That's it! IntelliJ will automatically provide full IDE support for `.kite.kts` 
 ```kotlin
 // build.gradle.kts
 plugins {
-    kotlin("jvm") version "2.0.21"  // Kotlin plugin
+    kotlin("jvm") version "2.1.20"
 }
 
 repositories {
@@ -39,9 +39,9 @@ repositories {
 
 dependencies {
     // Kite dependencies
-    implementation("io.kite:kite-core:0.1.0-alpha")
-    implementation("io.kite:kite-dsl:0.1.0-alpha")
-    implementation("io.kite:kite-runtime:0.1.0-alpha")
+    implementation("com.gianluz.kite:kite-core:0.1.0-alpha3")
+    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha3")
+    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha3")
 }
 ```
 
@@ -63,7 +63,7 @@ dependencies {
 
 ### Method 2: Composite Build (Development)
 
-**For development** or using unreleased versions of Kite.
+**For development** — contributing to Kite or testing unreleased changes locally.
 
 ```kotlin
 // settings.gradle.kts
@@ -71,9 +71,9 @@ includeBuild("/path/to/kite")
 
 // build.gradle.kts
 dependencies {
-    implementation("io.kite:kite-core")
-    implementation("io.kite:kite-dsl")
-    implementation("io.kite:kite-runtime")
+    implementation("com.gianluz.kite:kite-core")
+    implementation("com.gianluz.kite:kite-dsl")
+    implementation("com.gianluz.kite:kite-runtime")
 }
 ```
 
@@ -127,9 +127,9 @@ tools/kite/kite-cli/build/install/kite-cli/bin/kite-cli ride CI
 
 ### Compatibility
 
-| Kite Version | Min Java | Min Kotlin | Min Gradle |
-|--------------|----------|------------|------------|
-| 0.1.0-alpha  | 17       | 2.0        | 9.2        |
+| Kite Version  | Min Java | Min Kotlin | Min Gradle |
+|---------------|----------|------------|------------|
+| 0.1.0-alpha3  | 17       | 2.1        | 8.0        |
 
 ## Verify Installation
 
@@ -234,9 +234,9 @@ Kite automatically discovers all `.kite.kts` files in:
 ```kotlin
 // build.gradle.kts
 dependencies {
-    implementation("io.kite:kite-core:0.2.0") // ← Update version
-    implementation("io.kite:kite-dsl:0.2.0")
-    implementation("io.kite:kite-runtime:0.2.0")
+    implementation("com.gianluz.kite:kite-core:0.2.0") // ← Update version
+    implementation("com.gianluz.kite:kite-dsl:0.2.0")
+    implementation("com.gianluz.kite:kite-runtime:0.2.0")
 }
 ```
 
@@ -280,9 +280,9 @@ cd /path/to/your-project
 
    Should show:
    ```
-   +--- io.kite:kite-core:0.1.0-alpha
-   +--- io.kite:kite-dsl:0.1.0-alpha
-   +--- io.kite:kite-runtime:0.1.0-alpha
+   +--- com.gianluz.kite:kite-core:0.1.0-alpha3
+   +--- com.gianluz.kite:kite-dsl:0.1.0-alpha3
+   +--- com.gianluz.kite:kite-runtime:0.1.0-alpha3
    ```
 
 4. **Verify Script Definition**:
@@ -347,7 +347,7 @@ cd /path/to/your-project
    ```
 
 2. **Check Version**:
-   Ensure you're using a published version (e.g., `0.1.0-alpha`, not `0.1.0-SNAPSHOT`)
+   Ensure you're using a published version (e.g., `0.1.0-alpha3`, not `0.1.0-SNAPSHOT`)
 
 3. **Refresh Dependencies**:
    ```bash
@@ -361,9 +361,9 @@ To remove Kite from your project:
 1. **Remove dependencies** from `build.gradle.kts`:
    ```kotlin
    // Remove these:
-   // implementation("io.kite:kite-core:...")
-   // implementation("io.kite:kite-dsl:...")
-   // implementation("io.kite:kite-runtime:...")
+   // implementation("com.gianluz.kite:kite-core:...")
+   // implementation("com.gianluz.kite:kite-dsl:...")
+   // implementation("com.gianluz.kite:kite-runtime:...")
    ```
 
 2. **Delete Kite files**:

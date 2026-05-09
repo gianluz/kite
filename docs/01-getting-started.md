@@ -21,10 +21,14 @@ Add Kite to your project:
 
 ```kotlin
 // build.gradle.kts
+repositories {
+    mavenCentral()
+}
+
 dependencies {
-    implementation("io.kite:kite-core:0.1.0-alpha")
-    implementation("io.kite:kite-dsl:0.1.0-alpha")
-    implementation("io.kite:kite-runtime:0.1.0-alpha")
+    implementation("com.gianluz.kite:kite-core:0.1.0-alpha3")
+    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha3")
+    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha3")
 }
 ```
 

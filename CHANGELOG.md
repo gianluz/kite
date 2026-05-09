@@ -327,25 +327,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Phase 6: Documentation (90% - 12 comprehensive guides)
 - **Phase 7: Integration Testing (70%)** - 64 tests covering all features
 
-## [0.1.0-SNAPSHOT] - Work in Progress
+## [0.1.0-alpha3] - 2026-05-09
 
-### Status
+### Fixed
 
-Under active development - specification and initial implementation phase.
+- `kite-core` now correctly included in Maven Central upload (added `--no-build-cache` to publishing command to prevent stale Gradle build cache from excluding it from the aggregation ZIP)
 
-### Roadmap
+## [0.1.0-alpha2] - 2026-05-09
 
-See [DEVELOPMENT_PLAN.md](./DEVELOPMENT_PLAN.md) for detailed implementation roadmap:
+### Added
 
-- Phase 1: Foundation & Core DSL (Weeks 1-2)
-- Phase 2: Segment Graph & Execution Engine (Weeks 3-4)
-- Phase 3: CLI & File Discovery (Weeks 5-6)
-- Phase 4: Platform Adapters (Week 7)
-- Phase 5: Built-in Helpers & Features (Week 8)
-- Phase 6: Documentation & Examples (Week 9)
-- Phase 7: Testing & Refinement (Week 10)
-- Phase 8: Plugin System MVP (Weeks 11-12) - Optional
+- Published to **Maven Central** (`com.gianluz.kite`) — all library and plugin modules now available via `mavenCentral()`
+- Git and Gradle plugins available via `@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha3")` etc.
 
-[Unreleased]: https://github.com/gianluz/kite/compare/v0.1.0...HEAD
+### Fixed
 
-[0.1.0-SNAPSHOT]: https://github.com/gianluz/kite/releases/tag/v0.1.0
+- `RideCommand` and `RunCommand` now pass `System.getenv()` to `ExecutionContext` instead of `emptyMap()` — previously caused all CI deployment conditions to silently evaluate to `false`
+- Aligned Java and Kotlin compile targets to JVM 17 (Gradle 8.x requirement)
+- Fixed duplicate `<dependencies>` tag in plugin POMs
+
+### Changed
+
+- Migrated publishing from legacy Sonatype OSSRH (`s01.oss.sonatype.org`) to the new **Central Portal** (`central.sonatype.com`) using `com.gradleup.nmcp`
+- Upgraded Kotlin from `2.0.21` → `2.1.20`
+- Upgraded detekt from `1.23.7` → `1.23.8`
+- Downgraded Gradle wrapper from `9.2.0` → `8.12.1` for stability
+
+[Unreleased]: https://github.com/gianluz/kite/compare/v0.1.0-alpha3...HEAD
+
+[0.1.0-alpha3]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha3
+[0.1.0-alpha2]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha2

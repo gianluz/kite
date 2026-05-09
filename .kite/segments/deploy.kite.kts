@@ -28,11 +28,13 @@ segments {
             requireSecret("SIGNING_PASSWORD")
 
             // Publish to Maven Central via the Central Portal API
+            // --no-build-cache ensures all 5 modules are freshly staged (avoids stale cache skipping kite-core)
             exec(
                 "./gradlew",
                 "publishAggregationToCentralPortal",
                 "--no-daemon",
-                "--no-configuration-cache"
+                "--no-configuration-cache",
+                "--no-build-cache"
             )
 
             logger.info("✅ Published to Maven Central!")

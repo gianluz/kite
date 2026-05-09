@@ -42,7 +42,7 @@ io.kite.plugins.playstore.PlayStorePlugin
 ```kotlin
 // Project's build.gradle.kts
 dependencies {
-    kitePlugin("io.kite.plugins:playstore:1.0.0")
+    kitePlugin("com.gianluz.kite:playstore:1.0.0")
 }
 ```
 
@@ -52,12 +52,12 @@ dependencies {
 // .kite/settings.kite.kts
 settings {
     plugins {
-        plugin("io.kite.plugins:playstore:1.0.0") {
+        plugin("com.gianluz.kite:playstore:1.0.0") {
             serviceAccountJson = env("GOOGLE_SERVICE_ACCOUNT_JSON")
             packageName = "com.example.app"
         }
         
-        plugin("io.kite.plugins:slack:1.0.0") {
+        plugin("com.gianluz.kite:slack:1.0.0") {
             webhook = env("SLACK_WEBHOOK")
             channel = "#ci-notifications"
         }
@@ -92,7 +92,7 @@ segment("uploadToPlayStoreInternal") {
 // Configuration
 settings {
     plugins {
-        plugin("io.kite.plugins:translations:1.0.0") {
+        plugin("com.gianluz.kite:translations:1.0.0") {
             provider = "crowdin"
             apiKey = env("CROWDIN_API_KEY")
             projectId = env("CROWDIN_PROJECT_ID")

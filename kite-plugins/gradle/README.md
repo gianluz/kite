@@ -7,22 +7,22 @@ Kotlin, Android, custom plugins, multi-module projects, etc.
 
 ## Installation
 
-### From Maven Central
+### From Maven Central (Recommended)
 
 ```kotlin
-@file:DependsOn("io.kite.plugins:gradle:1.0.0")
+@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha3")
 
 import io.kite.plugins.gradle.*
 ```
 
-### From Maven Local (Development)
+### From Maven Local (Plugin Development Only)
 
 ```bash
 ./gradlew :kite-plugins:gradle:publishToMavenLocal
 ```
 
 ```kotlin
-@file:DependsOn("io.kite.plugins:gradle:1.0.0-SNAPSHOT")
+@file:DependsOn("com.gianluz.kite:gradle:0.1.0-SNAPSHOT")
 
 import io.kite.plugins.gradle.*
 ```

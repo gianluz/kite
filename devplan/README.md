@@ -17,6 +17,7 @@ detailed tasks, story points, and deliverables.
 | [Phase 6: Documentation](phase-6-documentation.md)         | ✅ Complete   | 100%       |
 | [Phase 7: Testing & Refinement](phase-7-testing.md)        | ✅ Complete   | 100%       |
 | [Phase 8: Plugin System](phase-8-plugins.md)               | 📋 Planned   | 0%         |
+| Maven Central Distribution                                 | ✅ Complete   | 100%       |
 
 **Additional**: [Security Roadmap](security-roadmap.md) - Cross-phase security features
 
@@ -29,13 +30,6 @@ detailed tasks, story points, and deliverables.
 **Tests Passing**: 150+ tests ✅
 
 ## Current Roadmap (Post-MVP)
-
-### 🚧 In Progress
-
-- **Maven Central Distribution** - Publish artifacts for easy dependency management
-    - Setup Sonatype OSSRH account
-    - Configure signing and publishing
-    - Automate release process
 
 ### 🔮 Next Up
 

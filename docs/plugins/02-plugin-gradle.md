@@ -2,7 +2,7 @@
 
 Flexible Gradle task execution for Kite workflows.
 
-**Status:** ✅ Complete (v0.1.0-alpha)
+**Status:** ✅ Complete (v0.1.0-alpha3)
 
 ## Overview
 
@@ -20,7 +20,7 @@ methods for common operations.
 ## Installation
 
 ```kotlin
-@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha")
+@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha3")
 
 import io.kite.plugins.gradle.*
 ```
@@ -298,7 +298,7 @@ segment("release") {
                 property("version", version)
             }
             
-            task("publishToSonatype", "closeAndReleaseSonatypeStagingRepository") {
+            task("publishAggregationToCentralPortal") {
                 property("version", version)
             }
         }
@@ -344,8 +344,8 @@ segment("android-release") {
 ### Full Build + Release Pipeline
 
 ```kotlin
-@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha")
-@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha")
+@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha3")
+@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha3")
 
 import io.kite.plugins.gradle.*
 import io.kite.plugins.git.*

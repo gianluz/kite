@@ -54,8 +54,8 @@ execute {
 
 ```kotlin
 // .kite/segments/build.kite.kts
-@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha")
-@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha")
+@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha3")
+@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha3")
 
 import io.kite.plugins.git.*
 import io.kite.plugins.gradle.*
@@ -83,41 +83,30 @@ segments {
 }
 ```
 
-### From Maven Local (Development)
+### From Maven Local (Plugin Development Only)
 
-```kotlin
-// .kite/segments/build.kite.kts
-
-// Use regular @DependsOn - Maven Local is checked automatically!
-@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha")
-@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha")
-
-import io.kite.plugins.git.*
-import io.kite.plugins.gradle.*
-```
-
-**To publish to Maven Local:**
+When developing a plugin locally, you can publish it to Maven Local and use it immediately:
 
 ```bash
-# Publish Git plugin
+# Publish your plugin to Maven Local
 ./gradlew :kite-plugins:git:publishToMavenLocal
-
-# Publish Gradle plugin
-./gradlew :kite-plugins:gradle:publishToMavenLocal
-
-# Or publish all plugins
-./gradlew :kite-plugins:git:publishToMavenLocal :kite-plugins:gradle:publishToMavenLocal
 ```
 
-**Note:** Kite automatically checks Maven Local (~/.m2/repository) when resolving dependencies, so you don't need a
-special annotation. Just use regular `@file:DependsOn` and it works!
+```kotlin
+// Kite checks Maven Local automatically before Maven Central
+@file:DependsOn("com.gianluz.kite:git:0.1.0-SNAPSHOT")
+
+import io.kite.plugins.git.*
+```
+
+**Note:** This workflow is only needed when working on the plugins themselves. For normal usage, just use Maven Central.
 
 ### From Local JAR (Quick Testing)
 
 ```kotlin
 // .kite/segments/build.kite.kts
-@file:DependsOnJar("../kite-plugins/git/build/libs/git-0.1.0-alpha.jar")
-@file:DependsOnJar("../kite-plugins/gradle/build/libs/gradle-0.1.0-alpha.jar")
+@file:DependsOnJar("../kite-plugins/git/build/libs/git-0.1.0-alpha3.jar")
+@file:DependsOnJar("../kite-plugins/gradle/build/libs/gradle-0.1.0-alpha3.jar")
 
 import io.kite.plugins.git.*
 import io.kite.plugins.gradle.*

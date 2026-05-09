@@ -4,34 +4,34 @@ Type-safe Git operations for Kite workflows.
 
 ## Installation
 
-### From Maven Central
+### From Maven Central (Recommended)
 
 ```kotlin
-@file:DependsOn("io.kite.plugins:git:1.0.0")
+@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha3")
 
 import io.kite.plugins.git.*
 ```
 
-### From Maven Local (Development)
+### From Maven Local (Plugin Development Only)
 
 ```bash
 ./gradlew :kite-plugins:git:publishToMavenLocal
 ```
 
 ```kotlin
-@file:DependsOnMavenLocal("io.kite.plugins:git:1.0.0-SNAPSHOT")
+@file:DependsOn("com.gianluz.kite:git:0.1.0-SNAPSHOT")
 
 import io.kite.plugins.git.*
 ```
 
-### From Local JAR
+### From Local JAR (Quick Testing)
 
 ```bash
 ./gradlew :kite-plugins:git:build
 ```
 
 ```kotlin
-@file:DependsOnJar("./kite-plugins/git/build/libs/git-1.0.0.jar")
+@file:DependsOnJar("./kite-plugins/git/build/libs/git-0.1.0-alpha3.jar")
 
 import io.kite.plugins.git.*
 ```

@@ -2,9 +2,10 @@
 
 A modern, type-safe CI/CD workflow runner for Kotlin projects.
 
-[![Version](https://img.shields.io/badge/version-0.1.0--alpha2-blue.svg)](https://github.com/gianluz/kite/releases)
+[![Version](https://img.shields.io/badge/version-0.1.0--alpha3-blue.svg)](https://github.com/gianluz/kite/releases)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Kotlin](https://img.shields.io/badge/kotlin-2.0.21-blue.svg?logo=kotlin)](http://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/kotlin-2.1.20-blue.svg?logo=kotlin)](http://kotlinlang.org)
+[![Maven Central](https://img.shields.io/maven-central/v/com.gianluz.kite/kite-core.svg?label=Maven%20Central)](https://central.sonatype.com/search?q=com.gianluz.kite)
 [![Java](https://img.shields.io/badge/Java-17+-orange.svg)](https://openjdk.java.net/)
 
 ---
@@ -154,75 +155,48 @@ See **[GitHub Actions documentation](.github/actions/README.md)** for more examp
 
 ## Installation
 
-> **Note:** Kite is under active development and not yet published to Maven Central. To try it out, you'll need to build
-> from source.
+Kite is published to **Maven Central**. Add the libraries to your Gradle project:
 
-### Try It Out (From Source)
+```kotlin
+// build.gradle.kts
+repositories {
+    mavenCentral()
+}
 
-**1. Clone and build Kite:**
+dependencies {
+    implementation("com.gianluz.kite:kite-core:0.1.0-alpha3")
+    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha3")
+    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha3")
+}
+```
+
+### Published Artifacts
+
+| Artifact | Coordinates | Description |
+|----------|-------------|-------------|
+| `kite-core` | `com.gianluz.kite:kite-core:0.1.0-alpha3` | Core domain models and interfaces |
+| `kite-dsl` | `com.gianluz.kite:kite-dsl:0.1.0-alpha3` | DSL and Kotlin scripting engine |
+| `kite-runtime` | `com.gianluz.kite:kite-runtime:0.1.0-alpha3` | Execution runtime and schedulers |
+| `git` plugin | `com.gianluz.kite:git:0.1.0-alpha3` | Type-safe Git operations |
+| `gradle` plugin | `com.gianluz.kite:gradle:0.1.0-alpha3` | Flexible Gradle task execution |
+
+Plugins are used via `@file:DependsOn` in your `.kite.kts` scripts:
+
+```kotlin
+@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha3")
+@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha3")
+```
+
+### CLI Binary
+
+Download the latest `kite-cli` binary from [GitHub Releases](https://github.com/gianluz/kite/releases), or build from source:
 
 ```bash
 git clone https://github.com/gianluz/kite.git
 cd kite
-./gradlew build
 ./gradlew :kite-cli:installDist
-```
-
-**2. Add to your PATH (recommended):**
-
-Choose one of these options:
-
-```bash
-# Option A: Add to PATH (recommended)
-# Add to ~/.bashrc or ~/.zshrc:
-export PATH="$PATH:/path/to/kite/kite-cli/build/install/kite-cli/bin"
-# Then run: kite-cli run hello
-
-# Option B: Create an alias
-# Add to ~/.bashrc or ~/.zshrc:
-alias kite='/path/to/kite/kite-cli/build/install/kite-cli/bin/kite-cli'
-# Then run: kite run hello
-
-# Option C: Use full path (no setup needed)
-# /path/to/kite/kite-cli/build/install/kite-cli/bin/kite-cli run hello
-```
-
-**Note:** The executable is named `kite-cli`. Examples in this README use `kite-cli` unless an alias is mentioned.
-
-**3. Create a sample project:**
-
-```bash
-mkdir my-kite-project
-cd my-kite-project
-mkdir -p .kite/segments .kite/rides
-```
-
-**4. Define your first segment:**
-
-```kotlin
-// .kite/segments/hello.kite.kts
-segments {
-    segment("hello") {
-        description = "My first Kite segment"
-        execute {
-            logger.info("Hello from Kite!")
-            exec("echo", "This works!")
-        }
-    }
-}
-```
-
-**5. Run it:**
-
-```bash
-# If you set up the alias (step 2):
-kite run hello
-
-# Or use the full path:
-/path/to/kite/kite-cli/build/install/kite-cli/bin/kite-cli run hello
-
-# Or if you added to PATH:
-kite-cli run hello
+export PATH="$PATH:$(pwd)/kite-cli/build/install/kite-cli/bin"
+kite-cli --version
 ```
 
 See **[Installation Guide](docs/02-installation.md)** for complete setup instructions and troubleshooting.
@@ -450,7 +424,7 @@ kite/
 ## Requirements
 
 - **Java:** 17 or higher (LTS)
-- **Kotlin:** 2.0.21
+- **Kotlin:** 2.1.20
 - **Gradle:** 8.0+ (wrapper included)
 
 ---
@@ -467,10 +441,7 @@ kite/
 - [x] CI/CD integration (GitHub Actions, GitLab CI)
 - [x] Timeout and retry mechanisms
 - [x] Platform-agnostic design
-
-### 🚧 In Progress
-
-- [ ] **Maven Central distribution** - Publish to Maven Central for easy dependency management
+- [x] Maven Central distribution (`com.gianluz.kite`)
 
 ### 🔮 Planned
 
