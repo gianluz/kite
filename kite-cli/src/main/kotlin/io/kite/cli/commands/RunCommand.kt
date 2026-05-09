@@ -49,7 +49,7 @@ class RunCommand : CliktCommand(
                 Output.progress("Detecting platform...")
             }
             val platform = PlatformDetector.detect()
-            val context = platform.createContext(emptyMap())
+            val context = platform.createContext(System.getenv())
 
             if (opts.verbose) {
                 Output.info("Branch: ${context.branch}, CI: ${context.isCI}")

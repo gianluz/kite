@@ -68,7 +68,7 @@ class RideCommand : CliktCommand(
                 Output.info("Restored $restoredCount artifacts from previous ride")
             }
 
-            val context = platform.createContext(emptyMap(), artifactManager)
+            val context = platform.createContext(System.getenv(), artifactManager)
 
             if (opts.verbose) {
                 Output.info("Branch: ${context.branch}, CI: ${context.isCI}")

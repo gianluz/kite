@@ -9,7 +9,7 @@ plugins {
 
 allprojects {
     group = "com.gianluz.kite"  // Maven Central namespace (project-specific)
-    version = "0.1.0-alpha"
+    version = "0.1.0-alpha2"
 
     repositories {
         mavenCentral()
@@ -39,7 +39,7 @@ subprojects {
     apply(plugin = "signing")
 
     configure<org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension> {
-        jvmToolchain(17)
+        jvmToolchain(21)
     }
 
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
