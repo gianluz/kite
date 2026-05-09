@@ -2,10 +2,11 @@
 
 A modern, type-safe CI/CD workflow runner for Kotlin projects.
 
-[![Version](https://img.shields.io/badge/version-0.1.0--alpha3-blue.svg)](https://github.com/gianluz/kite/releases)
+[![Version](https://img.shields.io/badge/version-0.1.0--alpha4-blue.svg)](https://github.com/gianluz/kite/releases)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Kotlin](https://img.shields.io/badge/kotlin-2.1.20-blue.svg?logo=kotlin)](http://kotlinlang.org)
 [![Maven Central](https://img.shields.io/maven-central/v/com.gianluz.kite/kite-core.svg?label=Maven%20Central)](https://central.sonatype.com/namespace/com.gianluz.kite)
+[![Docker](https://img.shields.io/badge/Docker-ghcr.io%2Fgianluz%2Fkite-blue.svg?logo=docker)](https://ghcr.io/gianluz/kite)
 [![Java](https://img.shields.io/badge/Java-17+-orange.svg)](https://openjdk.java.net/)
 
 ---
@@ -164,9 +165,9 @@ repositories {
 }
 
 dependencies {
-    implementation("com.gianluz.kite:kite-core:0.1.0-alpha3")
-    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha3")
-    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha3")
+    implementation("com.gianluz.kite:kite-core:0.1.0-alpha4")
+    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha4")
+    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha4")
 }
 ```
 
@@ -176,18 +177,52 @@ All artifacts are available on **[Maven Central](https://central.sonatype.com/na
 
 | Artifact | Coordinates | Description | Portal |
 |----------|-------------|-------------|--------|
-| `kite-core` | `com.gianluz.kite:kite-core:0.1.0-alpha3` | Core domain models and interfaces | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-core) |
-| `kite-dsl` | `com.gianluz.kite:kite-dsl:0.1.0-alpha3` | DSL and Kotlin scripting engine | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-dsl) |
-| `kite-runtime` | `com.gianluz.kite:kite-runtime:0.1.0-alpha3` | Execution runtime and schedulers | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-runtime) |
-| `git` plugin | `com.gianluz.kite:git:0.1.0-alpha3` | Type-safe Git operations | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/git) |
-| `gradle` plugin | `com.gianluz.kite:gradle:0.1.0-alpha3` | Flexible Gradle task execution | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/gradle) |
+| `kite-core` | `com.gianluz.kite:kite-core:0.1.0-alpha4` | Core domain models and interfaces | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-core) |
+| `kite-dsl` | `com.gianluz.kite:kite-dsl:0.1.0-alpha4` | DSL and Kotlin scripting engine | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-dsl) |
+| `kite-runtime` | `com.gianluz.kite:kite-runtime:0.1.0-alpha4` | Execution runtime and schedulers | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-runtime) |
+| `git` plugin | `com.gianluz.kite:git:0.1.0-alpha4` | Type-safe Git operations | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/git) |
+| `gradle` plugin | `com.gianluz.kite:gradle:0.1.0-alpha4` | Flexible Gradle task execution | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/gradle) |
 
 Plugins are used via `@file:DependsOn` in your `.kite.kts` scripts:
 
 ```kotlin
-@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha3")
-@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha3")
+@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha4")
+@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha4")
 ```
+
+### Docker (No Installation Required)
+
+Run Kite directly without cloning the repo — just mount your project directory:
+
+```bash
+# Using GitHub Container Registry (always available)
+docker run --rm \
+  -v $(pwd):/workspace \
+  ghcr.io/gianluz/kite:latest \
+  ride CI
+
+# Using Docker Hub (alternative)
+docker run --rm \
+  -v $(pwd):/workspace \
+  gianluz/kite:0.1.0-alpha4 \
+  ride CI
+```
+
+Pass secrets and environment variables with `-e`:
+
+```bash
+docker run --rm \
+  -v $(pwd):/workspace \
+  -e DEPLOY_TOKEN=$DEPLOY_TOKEN \
+  -e CI_COMMIT_TAG=v1.0.0 \
+  ghcr.io/gianluz/kite:latest \
+  ride Deploy
+```
+
+| Registry | Image | Always Available |
+|----------|-------|-----------------|
+| GitHub Container Registry | `ghcr.io/gianluz/kite` | ✅ Yes |
+| Docker Hub | `gianluz/kite` | ✅ Yes |
 
 ### CLI Binary
 
@@ -444,6 +479,7 @@ kite/
 - [x] Timeout and retry mechanisms
 - [x] Platform-agnostic design
 - [x] Maven Central distribution (`com.gianluz.kite`)
+- [x] Docker image (`ghcr.io/gianluz/kite`, `gianluz/kite`)
 
 ### 🔮 Planned
 

@@ -71,35 +71,44 @@ segments {
     }
 
     segment("build-docker-image") {
-        description = "Build Docker image for Kite CLI"
+        description = "Build Docker image for Kite CLI (tagged for both GHCR and Docker Hub)"
         dependsOn("build")
 
         condition { ctx ->
-            // Only build Docker image if Docker credentials are available
-            ctx.env("DOCKER_USERNAME") != null && ctx.env("DOCKER_PASSWORD") != null
+            // Build Docker image if we have Docker credentials OR if running in CI (for GHCR)
+            val hasDockerCredentials = ctx.env("DOCKER_USERNAME") != null && ctx.env("DOCKER_PASSWORD") != null
+            val isCI = ctx.isCI
+            hasDockerCredentials || isCI
         }
 
         execute {
             logger.info("Building Docker image...")
 
-            // Ensure kite-cli is built
+            // Ensure kite-cli installDist output is present
             exec("./gradlew", ":kite-cli:installDist")
 
-            // Build Docker image
-            val version = env("VERSION") ?: "latest"
+            val tag = env("CI_COMMIT_TAG")?.removePrefix("v") ?: env("VERSION")?.removePrefix("v") ?: "latest"
+
+            // Build image tagged for Docker Hub
             exec(
                 "docker", "build",
-                "-t", "gianluz/kite:$version",
+                "-t", "gianluz/kite:$tag",
+                "-t", "gianluz/kite:latest",
+                // Also tag for GHCR
+                "-t", "ghcr.io/gianluz/kite:$tag",
+                "-t", "ghcr.io/gianluz/kite:latest",
                 "-f", "Dockerfile",
                 "."
             )
 
-            logger.info("✅ Docker image built: gianluz/kite:$version")
+            logger.info("✅ Docker image built:")
+            logger.info("   gianluz/kite:$tag")
+            logger.info("   ghcr.io/gianluz/kite:$tag")
         }
     }
 
     segment("deploy-docker") {
-        description = "Push Docker image to Docker Hub"
+        description = "Push Docker image to Docker Hub (optional) — GHCR push is handled by the workflow"
         dependsOn("build-docker-image")
 
         condition { ctx ->
@@ -119,19 +128,14 @@ segments {
             // Login to Docker Hub (password via stdin)
             shell("echo '$dockerPassword' | docker login -u $dockerUsername --password-stdin")
 
-            // Get version from tag (v1.0.0 -> 1.0.0)
             val tag = env("CI_COMMIT_TAG")?.removePrefix("v") ?: "latest"
 
-            // Tag with version
-            exec("docker", "tag", "gianluz/kite:latest", "gianluz/kite:$tag")
-
-            // Push both tags
+            // Push both tags to Docker Hub
             exec("docker", "push", "gianluz/kite:$tag")
             exec("docker", "push", "gianluz/kite:latest")
 
-            logger.info("✅ Docker image pushed!")
+            logger.info("✅ Docker image pushed to Docker Hub!")
             logger.info("  docker pull gianluz/kite:$tag")
-            logger.info("  docker pull gianluz/kite:latest")
         }
     }
 
