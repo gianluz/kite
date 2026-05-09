@@ -26,9 +26,9 @@ repositories {
 }
 
 dependencies {
-    implementation("com.gianluz.kite:kite-core:0.1.0-alpha4")
-    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha4")
-    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha4")
+    implementation("com.gianluz.kite:kite-core:0.1.0-alpha5")
+    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha5")
+    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha5")
 }
 ```
 

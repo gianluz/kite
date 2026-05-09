@@ -289,7 +289,7 @@ repositories {
 
 dependencies {
     // Plugin depends on Kite core (compile-only)
-    compileOnly("com.gianluz.kite:kite-core:0.1.0-alpha4")
+    compileOnly("com.gianluz.kite:kite-core:0.1.0-alpha5")
     
     // Plugin-specific dependencies
     implementation("org.eclipse.jgit:org.eclipse.jgit:6.7.0.202309050840-r")

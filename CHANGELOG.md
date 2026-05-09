@@ -327,6 +327,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Phase 6: Documentation (90% - 12 comprehensive guides)
 - **Phase 7: Integration Testing (70%)** - 64 tests covering all features
 
+## [0.1.0-alpha5] - 2026-05-09
+
+### Added
+
+- Docker Hub (`gianluz/kite`) publishing enabled via `DOCKER_USERNAME`/`DOCKER_PASSWORD` GitHub secrets
+
 ## [0.1.0-alpha4] - 2026-05-09
 
 ### Added
@@ -361,8 +367,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Upgraded detekt from `1.23.7` → `1.23.8`
 - Downgraded Gradle wrapper from `9.2.0` → `8.12.1` for stability
 
-[Unreleased]: https://github.com/gianluz/kite/compare/v0.1.0-alpha4...HEAD
+[Unreleased]: https://github.com/gianluz/kite/compare/v0.1.0-alpha5...HEAD
 
+[0.1.0-alpha5]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha5
 [0.1.0-alpha4]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha4
 [0.1.0-alpha3]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha3
 [0.1.0-alpha2]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha2
