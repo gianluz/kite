@@ -58,6 +58,16 @@ jobs:
             ghcr.io/gianluz/kite:${{ github.ref_name }}
             ghcr.io/gianluz/kite:latest
 
+      - name: Push Docker image to Docker Hub
+        continue-on-error: true
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            gianluz/kite:${{ github.ref_name }}
+            gianluz/kite:latest
+
       - name: Run Full Deployment
         env:
           # Maven Central credentials

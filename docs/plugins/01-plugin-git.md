@@ -2,7 +2,7 @@
 
 Type-safe Git operations for Kite workflows.
 
-**Status:** ✅ Complete (v0.1.0-alpha6)
+**Status:** ✅ Complete (v0.1.0-alpha7)
 
 ## Overview
 
@@ -19,7 +19,7 @@ The Git plugin provides a type-safe DSL for common Git operations with full supp
 ## Installation
 
 ```kotlin
-@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha6")
+@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha7")
 
 import io.kite.plugins.git.*
 ```
@@ -457,8 +457,8 @@ segment("gitlab-deploy") {
 ### Full Release Pipeline with Git + Gradle
 
 ```kotlin
-@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha6")
-@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha6")
+@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha7")
+@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha7")
 
 import io.kite.plugins.git.*
 import io.kite.plugins.gradle.*

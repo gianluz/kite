@@ -327,11 +327,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Phase 6: Documentation (90% - 12 comprehensive guides)
 - **Phase 7: Integration Testing (70%)** - 64 tests covering all features
 
-## [0.1.0-alpha6] - 2026-05-09
+## [0.1.0-alpha7] - 2026-05-09
 
 ### Fixed
 
-- `deploy-docker` segment: removed invalid `shell()` call for Docker Hub login — login is already handled by the `docker/login-action` workflow step; segment now calls `exec("docker", "push", ...)` directly
+- Docker Hub and GHCR pushes now use native `docker/build-push-action` workflow steps instead of Kite segments — avoids a `ThreadLocal` vs coroutines incompatibility in the Kite runtime where `exec()` fails in sequentially-run segments after a parallel block
 
 ## [0.1.0-alpha5] - 2026-05-09
 
@@ -373,8 +373,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Upgraded detekt from `1.23.7` → `1.23.8`
 - Downgraded Gradle wrapper from `9.2.0` → `8.12.1` for stability
 
-[Unreleased]: https://github.com/gianluz/kite/compare/v0.1.0-alpha6...HEAD
+[Unreleased]: https://github.com/gianluz/kite/compare/v0.1.0-alpha7...HEAD
 
+[0.1.0-alpha7]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha7
 [0.1.0-alpha6]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha6
 [0.1.0-alpha5]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha5
 [0.1.0-alpha4]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha4

@@ -108,33 +108,19 @@ segments {
     }
 
     segment("deploy-docker") {
-        description = "Push Docker image to Docker Hub (optional) — GHCR push is handled by the workflow"
+        description = "Docker Hub and GHCR pushes are handled by docker/build-push-action steps in the workflow YAML"
         dependsOn("build-docker-image")
 
         condition { ctx ->
             val hasReleaseTag = ctx.env("CI_COMMIT_TAG")?.startsWith("v") == true
-            val isCI = ctx.isCI
-            val hasDockerCredentials = ctx.env("DOCKER_USERNAME") != null && ctx.env("DOCKER_PASSWORD") != null
-            hasReleaseTag && isCI && hasDockerCredentials
+            hasReleaseTag
         }
 
         execute {
-            logger.info("Pushing Docker image to Docker Hub...")
-
-            // Docker Hub login is handled by the docker/login-action step in the workflow YAML
-            // (using DOCKER_USERNAME and DOCKER_PASSWORD secrets) — no need to login here
-            requireSecret("DOCKER_USERNAME")
-            requireSecret("DOCKER_PASSWORD")
-
             val tag = env("CI_COMMIT_TAG")?.removePrefix("v") ?: "latest"
-
-            // Push both tags to Docker Hub
-            exec("docker", "push", "gianluz/kite:$tag")
-            exec("docker", "push", "gianluz/kite:latest")
-
-            logger.info("✅ Docker image pushed to Docker Hub!")
-            logger.info("  docker pull gianluz/kite:$tag")
-            logger.info("  docker pull gianluz/kite:latest")
+            logger.info("✅ Docker images published by workflow steps:")
+            logger.info("   docker pull ghcr.io/gianluz/kite:$tag")
+            logger.info("   docker pull gianluz/kite:$tag")
         }
     }
 
