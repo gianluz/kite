@@ -52,12 +52,13 @@ class GitPluginTest {
 
         // Build a real ExecutionContext pointing at the temp git repo
         logger = mockk<SegmentLoggerInterface>(relaxed = true)
-        ctx = ExecutionContext(
-            branch = "main",
-            commitSha = git.repository.resolve("HEAD").name,
-            workspace = tempDir,
-            logger = logger,
-        )
+        ctx =
+            ExecutionContext(
+                branch = "main",
+                commitSha = git.repository.resolve("HEAD").name,
+                workspace = tempDir,
+                logger = logger,
+            )
 
         plugin = GitPlugin(ctx)
     }

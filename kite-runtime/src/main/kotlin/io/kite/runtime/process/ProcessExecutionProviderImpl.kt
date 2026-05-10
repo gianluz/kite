@@ -21,7 +21,7 @@ class ProcessExecutionProviderImpl : ProcessExecutionProvider {
         val result =
             executor.execute(
                 command = command,
-                args = *args,
+                args = args,
                 workingDir = workingDir,
                 env = env,
                 timeout = timeout,
@@ -45,7 +45,7 @@ class ProcessExecutionProviderImpl : ProcessExecutionProvider {
         val result =
             executor.executeOrNull(
                 command = command,
-                args = *args,
+                args = args,
                 workingDir = workingDir,
                 env = env,
                 timeout = timeout,

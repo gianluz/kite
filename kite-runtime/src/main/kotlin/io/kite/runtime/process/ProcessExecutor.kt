@@ -87,6 +87,7 @@ class ProcessExecutor {
     /**
      * Internal execution method.
      */
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     private suspend fun executeInternal(
         command: String,
         args: List<String>,

@@ -72,8 +72,7 @@ class RideCommand : CliktCommand(
 
             if (opts.verbose) {
                 Output.info("Branch: ${context.branch}, CI: ${context.isCI}")
-                Output.info("Branch: ${context.branch}")
-                if (context.commitSha != null) Output.info("Commit: ${context.commitSha}")
+                Output.info("Commit: ${context.commitSha}")
             }
 
             // Discover and load files
@@ -363,13 +362,8 @@ class RideCommand : CliktCommand(
                 is io.kite.core.FlowNode.SegmentRef -> {
                     val segment = segmentMap[node.segmentName]
                     if (segment != null) {
-                        // Apply overrides if present
-                        val finalSegment =
-                            if (node.overrides != null) {
-                                applyOverrides(segment, node.overrides)
-                            } else {
-                                segment
-                            }
+                        // Apply overrides (empty SegmentOverrides is a no-op)
+                        val finalSegment = applyOverrides(segment, node.overrides)
                         segments.add(finalSegment)
                     } else {
                         missingSegments.add(node.segmentName)

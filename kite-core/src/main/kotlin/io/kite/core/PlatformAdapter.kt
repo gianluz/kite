@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package io.kite.core
 
 import java.nio.file.Paths
