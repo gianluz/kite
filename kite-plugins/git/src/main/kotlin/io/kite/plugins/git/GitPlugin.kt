@@ -26,9 +26,10 @@ class GitPlugin(private val ctx: ExecutionContext) {
                 // git worktree: .git is a file containing "gitdir: /path/to/real/.git"
                 val gitdirLine = dotGit.readText().trim()
                 val gitdirPath = gitdirLine.removePrefix("gitdir:").trim()
-                val resolvedGitDir = File(gitdirPath).let { f ->
-                    if (f.isAbsolute) f else File(workTree, gitdirPath)
-                }
+                val resolvedGitDir =
+                    File(gitdirPath).let { f ->
+                        if (f.isAbsolute) f else File(workTree, gitdirPath)
+                    }
                 builder.setGitDir(resolvedGitDir)
             }
             else -> error("No .git directory found in workspace: $workTree")
