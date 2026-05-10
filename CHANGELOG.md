@@ -341,19 +341,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `docs/12-cli-reference.md` — Installation section simplified with all methods.
 - `create-github-release` segment now also uploads `install.sh` as a release asset.
 
-## [0.1.0-alpha7] - 2026-05-09
+## [0.1.0-alpha9] - 2026-05-09
 
 ### Fixed
 
 - Intermediate workaround attempt (superseded by alpha8 which fixes the root cause in the runtime)
 
-## [0.1.0-alpha5] - 2026-05-09
+## [0.1.0-alpha9] - 2026-05-09
 
 ### Added
 
 - Docker Hub (`gianluz/kite`) publishing enabled via `DOCKER_USERNAME`/`DOCKER_PASSWORD` GitHub secrets
 
-## [0.1.0-alpha4] - 2026-05-09
+## [0.1.0-alpha9] - 2026-05-09
 
 ### Added
 
@@ -361,18 +361,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `VOLUME /workspace` hint in Dockerfile for project directory mounting
 - GHCR login + `docker/build-push-action` step in `release.yml` (uses existing `GITHUB_TOKEN`, no extra secrets required)
 
-## [0.1.0-alpha3] - 2026-05-09
+## [0.1.0-alpha9] - 2026-05-09
 
 ### Fixed
 
 - `kite-core` now correctly included in Maven Central upload (added `--no-build-cache` to publishing command to prevent stale Gradle build cache from excluding it from the aggregation ZIP)
 
-## [0.1.0-alpha2] - 2026-05-09
+## [0.1.0-alpha9] - 2026-05-09
 
 ### Added
 
 - Published to **Maven Central** (`com.gianluz.kite`) — all library and plugin modules now available via `mavenCentral()`
-- Git and Gradle plugins available via `@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha2")` etc.
+- Git and Gradle plugins available via `@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha9")` etc.
 
 ### Fixed
 
@@ -390,10 +390,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [Unreleased]: https://github.com/gianluz/kite/compare/v0.1.0-alpha9...HEAD
 
 [0.1.0-alpha9]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha9
-[0.1.0-alpha8]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha8
-[0.1.0-alpha7]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha7
-[0.1.0-alpha6]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha6
-[0.1.0-alpha5]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha5
-[0.1.0-alpha4]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha4
-[0.1.0-alpha3]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha3
-[0.1.0-alpha2]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha2
+[0.1.0-alpha9]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha9
+[0.1.0-alpha9]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha9
+[0.1.0-alpha9]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha9
+[0.1.0-alpha9]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha9
+[0.1.0-alpha9]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha9
+[0.1.0-alpha9]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha9
+[0.1.0-alpha9]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha9

@@ -293,7 +293,7 @@ For a better experience with automatic transitive dependencies, use Maven Local 
 ```kotlin
 // build.gradle.kts
 dependencies {
-    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha8")
+    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha9")
     
     // Add libraries you want to use in Kite scripts
     implementation("com.google.code.gson:gson:2.10.1")
