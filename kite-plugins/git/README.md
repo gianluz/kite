@@ -19,7 +19,7 @@ import io.kite.plugins.git.*
 ```
 
 ```kotlin
-@file:DependsOn("com.gianluz.kite:git:0.1.0-SNAPSHOT")
+@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha9")
 
 import io.kite.plugins.git.*
 ```

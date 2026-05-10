@@ -94,7 +94,7 @@ When developing a plugin locally, you can publish it to Maven Local and use it i
 
 ```kotlin
 // Kite checks Maven Local automatically before Maven Central
-@file:DependsOn("com.gianluz.kite:git:0.1.0-SNAPSHOT")
+@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha9")
 
 import io.kite.plugins.git.*
 ```

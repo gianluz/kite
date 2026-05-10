@@ -22,7 +22,7 @@ import io.kite.plugins.gradle.*
 ```
 
 ```kotlin
-@file:DependsOn("com.gianluz.kite:gradle:0.1.0-SNAPSHOT")
+@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha9")
 
 import io.kite.plugins.gradle.*
 ```

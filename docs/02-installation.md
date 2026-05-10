@@ -299,9 +299,9 @@ Kite automatically discovers all `.kite.kts` files in:
 ```kotlin
 // build.gradle.kts
 dependencies {
-    implementation("com.gianluz.kite:kite-core:0.2.0") // ← Update version
-    implementation("com.gianluz.kite:kite-dsl:0.2.0")
-    implementation("com.gianluz.kite:kite-runtime:0.2.0")
+    implementation("com.gianluz.kite:kite-core:0.1.0-alpha9") // ← Update version
+    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha9")
+    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha9")
 }
 ```
 

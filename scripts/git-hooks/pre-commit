@@ -1,70 +1,69 @@
 #!/bin/sh
 #
-# Git pre-commit hook to check version synchronization
+# Git pre-commit hook — Version reference synchronization
 #
-# Ensures that when build.gradle.kts version is changed,
-# the README.md version badge is also updated.
+# When build.gradle.kts is modified (version bump), ensures that ALL tracked
+# files (README, docs, install.sh, plugin READMEs, etc.) are updated before
+# the commit is accepted.
 #
-# To install:
-#   ./gradlew build  (hooks install automatically)
-#
-# To bypass (use sparingly):
-#   git commit --no-verify
+# To install:  ./gradlew build  (hooks install automatically)
+# To bypass:   git commit --no-verify  (use sparingly)
 #
 
-# Check if ROOT build.gradle.kts is being committed (not subproject)
+# Only run if root build.gradle.kts (not a subproject one) is staged
 CHANGED_FILES=$(git diff --cached --name-only)
 
-# Only check if the root build.gradle.kts is modified (version is there)
 if echo "$CHANGED_FILES" | grep -q "^build.gradle.kts$"; then
-    echo "🔍 Detected build.gradle.kts change, checking version synchronization..."
-    
-    # Check if kite-cli is built
+    echo "🔍 build.gradle.kts changed — checking all version references..."
+
+    # Build the CLI if not already present
     if [ ! -f "kite-cli/build/install/kite-cli/bin/kite-cli" ]; then
-        echo "📦 Building Kite CLI..."
+        echo "📦 Building Kite CLI first..."
+        JAVA_HOME=${JAVA_HOME:-$(java -XshowSettings:all -version 2>&1 | grep java.home | awk '{print $3}' | sed 's|/jre||')}
         ./gradlew :kite-cli:installDist --quiet --no-daemon > /dev/null 2>&1
         if [ $? -ne 0 ]; then
-            echo "❌ Failed to build Kite CLI"
+            echo "❌ Failed to build Kite CLI. Commit blocked."
             exit 1
         fi
     fi
-    
-    # Run version sync check (capture both stdout and stderr)
-    CHECK_OUTPUT=$(kite-cli/build/install/kite-cli/bin/kite-cli run check-version-sync 2>&1)
+
+    KITE="kite-cli/build/install/kite-cli/bin/kite-cli"
+
+    # Run full version-sync check (checks ALL tracked files)
+    CHECK_OUTPUT=$($KITE run check-version-sync 2>&1)
     CHECK_EXIT=$?
-    
-    # Filter out JVM warnings
-    FILTERED_OUTPUT=$(echo "$CHECK_OUTPUT" | grep -v "^Picked up\|^OpenJDK\|^WARNING:")
-    
+
+    # Strip JVM/tooling noise
+    FILTERED=$(echo "$CHECK_OUTPUT" | grep -v "^Picked up\|^OpenJDK\|^WARNING:")
+
     if [ $CHECK_EXIT -eq 0 ]; then
-        echo ""
-        echo "✅ Version synchronization OK!"
+        echo "✅ All version references are in sync!"
     else
-        # Only show output if there's an actual error (not just warnings)
-        if echo "$FILTERED_OUTPUT" | grep -q "Version mismatch"; then
+        if echo "$FILTERED" | grep -q "out of sync\|Version references"; then
             echo ""
-            echo "$FILTERED_OUTPUT"
+            echo "$FILTERED"
             echo ""
-            echo "💡 Quick fix:"
-            echo "   kite-cli/build/install/kite-cli/bin/kite-cli run update-version-badge"
-            echo "   git add README.md"
+            echo "─────────────────────────────────────────────────────"
+            echo "💡 Auto-fix: run the following, then re-commit"
             echo ""
-            echo "⚠️  To bypass this check (not recommended):"
+            echo "   $KITE run update-version-refs"
+            echo "   git add -A"
+            echo ""
+            echo "⚠️  To skip this check (not recommended):"
             echo "   git commit --no-verify"
             echo ""
             exit 1
         else
-            # Other error, show it
+            # Unexpected error — show output but don't block commit
             echo ""
-            echo "$FILTERED_OUTPUT"
+            echo "$FILTERED"
             echo ""
-            echo "⚠️  Version check failed. To bypass:"
-            echo "   git commit --no-verify"
+            echo "⚠️  Version check encountered an unexpected error (shown above)."
+            echo "   To bypass: git commit --no-verify"
             echo ""
             exit 1
         fi
     fi
 fi
 
-# All good!
 exit 0

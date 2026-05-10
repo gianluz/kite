@@ -214,34 +214,100 @@ kite/
 
 ```bash
 ./gradlew :kite-cli:installDist
+export PATH="$PWD/kite-cli/build/install/kite-cli/bin:$PATH"
+kite-cli --version
 ```
-
-Binary located at: `kite-cli/build/install/kite-cli/bin/kite-cli`
 
 ### Running Kite Itself
 
 Kite uses itself for CI/CD! Try:
 
 ```bash
-# Run CI workflow
-kite-cli/build/install/kite-cli/bin/kite-cli ride CI
-
-# Run PR validation
-kite-cli/build/install/kite-cli/bin/kite-cli ride MR
-
-# List all workflows
-kite-cli/build/install/kite-cli/bin/kite-cli rides
+kite-cli ride CI       # Run CI workflow
+kite-cli ride MR       # Run PR validation
+kite-cli rides         # List all workflows
 ```
 
 ### Quality Checks
 
 ```bash
-# All checks
-kite-cli/build/install/kite-cli/bin/kite-cli run quality-checks
+kite-cli run quality-checks   # All checks via Kite
 
-# Individual checks
+# Or directly via Gradle:
 ./gradlew ktlintCheck
 ./gradlew detekt
+```
+
+---
+
+## 🚀 Release Process (maintainers only)
+
+Releases are fully automated via GitHub Actions. The flow is:
+
+### 1. Bump the version
+
+Edit **one file** — `build.gradle.kts`:
+
+```kotlin
+// build.gradle.kts
+allprojects {
+    version = "0.2.0"   // ← change this
+}
+```
+
+### 2. Sync all version references
+
+A single command updates every version string across the entire repo
+(docs, READMEs, `install.sh`, plugin docs) in one shot:
+
+```bash
+kite-cli run update-version-refs
+```
+
+This rewrites Kite-specific version strings (Maven coordinates, Docker image tags,
+shields.io badge, archive names, etc.) while leaving Kotlin/Gradle/Java versions untouched.
+
+### 3. Update the CHANGELOG
+
+Add a new section at the top of `CHANGELOG.md`:
+
+```markdown
+## [0.2.0] - YYYY-MM-DD
+
+### Added
+- ...
+
+### Fixed
+- ...
+```
+
+### 4. Commit and tag
+
+```bash
+git add -A
+git commit -m "chore: Release v0.2.0"
+git tag -a v0.2.0 -m "Release v0.2.0"
+git push origin main v0.2.0
+```
+
+The `v*` tag triggers the `Release & Deploy` GitHub Actions workflow which:
+- Builds and tests everything
+- Publishes to **Maven Central** (`com.gianluz.kite`)
+- Publishes to **GitHub Packages**
+- Builds and pushes the **Docker image** to GHCR and Docker Hub
+- Creates a **GitHub Release** with the CLI binary archives and `install.sh`
+
+### Pre-commit enforcement
+
+The pre-commit hook runs `kite-cli run check-version-sync` automatically when
+`build.gradle.kts` is staged. If any tracked file has a stale version, it will
+block the commit and show you the fix command:
+
+```
+❌ Out of sync: docs/02-installation.md
+💡 Fix with:
+   kite-cli run update-version-refs
+   git add -A
 ```
 
 ---
