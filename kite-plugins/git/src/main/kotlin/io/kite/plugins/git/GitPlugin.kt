@@ -5,6 +5,7 @@ import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.eclipse.jgit.transport.RefSpec
+import java.io.File
 
 /**
  * Git plugin for Kite providing type-safe Git operations.
@@ -12,11 +13,27 @@ import org.eclipse.jgit.transport.RefSpec
 @Suppress("TooManyFunctions") // Git operations naturally require many functions
 class GitPlugin(private val ctx: ExecutionContext) {
     private val repository: Repository by lazy {
-        FileRepositoryBuilder()
-            .setWorkTree(ctx.workspace.toFile())
-            .readEnvironment()
-            .findGitDir()
-            .build()
+        val workTree = ctx.workspace.toFile()
+        // Resolve .git: could be a directory (normal) or a file (git worktree)
+        // We explicitly set the git dir rather than using readEnvironment()/findGitDir(),
+        // which can walk up past the workspace and open the wrong repository (e.g. a parent
+        // repo) or be influenced by GIT_DIR environment variables set by the shell/CI.
+        val dotGit = File(workTree, ".git")
+        val builder = FileRepositoryBuilder().setWorkTree(workTree)
+        when {
+            dotGit.isDirectory -> builder.setGitDir(dotGit)
+            dotGit.isFile -> {
+                // git worktree: .git is a file containing "gitdir: /path/to/real/.git"
+                val gitdirLine = dotGit.readText().trim()
+                val gitdirPath = gitdirLine.removePrefix("gitdir:").trim()
+                val resolvedGitDir = File(gitdirPath).let { f ->
+                    if (f.isAbsolute) f else File(workTree, gitdirPath)
+                }
+                builder.setGitDir(resolvedGitDir)
+            }
+            else -> error("No .git directory found in workspace: $workTree")
+        }
+        builder.build()
     }
 
     private val git: Git by lazy {

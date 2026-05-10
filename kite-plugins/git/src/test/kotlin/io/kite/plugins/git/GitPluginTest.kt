@@ -2,7 +2,6 @@ package io.kite.plugins.git
 
 import io.kite.core.ExecutionContext
 import io.kite.core.SegmentLoggerInterface
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.eclipse.jgit.api.Git
@@ -30,6 +29,7 @@ class GitPluginTest {
     private lateinit var git: Git
     private lateinit var ctx: ExecutionContext
     private lateinit var plugin: GitPlugin
+    private lateinit var logger: SegmentLoggerInterface
 
     @BeforeEach
     fun setup() {
@@ -50,13 +50,14 @@ class GitPluginTest {
         git.add().addFilepattern("test.txt").call()
         git.commit().setMessage("Initial commit").call()
 
-        // Mock ExecutionContext
-        val logger = mockk<SegmentLoggerInterface>(relaxed = true)
-        ctx =
-            mockk<ExecutionContext>(relaxed = true) {
-                every { workspace } returns tempDir
-                every { this@mockk.logger } returns logger
-            }
+        // Build a real ExecutionContext pointing at the temp git repo
+        logger = mockk<SegmentLoggerInterface>(relaxed = true)
+        ctx = ExecutionContext(
+            branch = "main",
+            commitSha = git.repository.resolve("HEAD").name,
+            workspace = tempDir,
+            logger = logger,
+        )
 
         plugin = GitPlugin(ctx)
     }
@@ -122,8 +123,8 @@ class GitPluginTest {
         assertEquals(1, tags.size)
         assertEquals("refs/tags/test-tag-1", tags.first().name)
 
-        verify { ctx.logger.info("🏷️  Creating tag: test-tag-1") }
-        verify { ctx.logger.info("✅ Tag created: test-tag-1") }
+        verify { logger.info("🏷️  Creating tag: test-tag-1") }
+        verify { logger.info("✅ Tag created: test-tag-1") }
     }
 
     @Test
@@ -197,7 +198,7 @@ class GitPluginTest {
         assertEquals(2, commits.size)
         assertEquals("Update test file", commits.first().fullMessage)
 
-        verify { ctx.logger.info("💾 Committing: Update test file") }
-        verify { ctx.logger.info("✅ Changes committed") }
+        verify { logger.info("💾 Committing: Update test file") }
+        verify { logger.info("✅ Changes committed") }
     }
 }
