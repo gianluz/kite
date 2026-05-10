@@ -24,8 +24,7 @@ ride {
             segment("test-integration")
 
             // Plugin tests
-            // TODO: Fix Git plugin test stability issues (7/13 failing)
-            // segment("test-plugins-git")
+            segment("test-plugins-git")
             segment("test-plugins-gradle")
         }
 
