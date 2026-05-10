@@ -7,27 +7,30 @@ detailed tasks, story points, and deliverables.
 
 ## Quick Status
 
-| Phase                                                      | Status       | Completion |
-|------------------------------------------------------------|--------------|------------|
-| [Phase 1: Foundation & Core DSL](phase-1-foundation.md)    | ✅ Complete   | 100%       |
-| [Phase 2: Graph & Execution Engine](phase-2-execution.md)  | ✅ Complete   | 100%       |
-| [Phase 3: CLI & File Discovery](phase-3-cli.md)            | ✅ Complete   | 100%       |
-| [Phase 4: Platform Adapters](phase-4-platform-adapters.md) | ✅ Refactored | 100%       |
-| [Phase 5: Built-in Features](phase-5-features.md)          | ✅ Complete   | 100%       |
-| [Phase 6: Documentation](phase-6-documentation.md)         | ✅ Complete   | 100%       |
-| [Phase 7: Testing & Refinement](phase-7-testing.md)        | ✅ Complete   | 100%       |
-| [Phase 8: Plugin System](phase-8-plugins.md)               | 📋 Planned   | 0%         |
-| Maven Central Distribution                                 | ✅ Complete   | 100%       |
+| Phase                                                      | Status        | Completion |
+|------------------------------------------------------------|---------------|------------|
+| [Phase 1: Foundation & Core DSL](phase-1-foundation.md)    | ✅ Complete    | 100%       |
+| [Phase 2: Graph & Execution Engine](phase-2-execution.md)  | ✅ Complete    | 100%       |
+| [Phase 3: CLI & File Discovery](phase-3-cli.md)            | ✅ Complete    | 100%       |
+| [Phase 4: Platform Adapters](phase-4-platform-adapters.md) | ✅ Refactored  | 100%       |
+| [Phase 5: Built-in Features](phase-5-features.md)          | ✅ Complete    | 100%       |
+| [Phase 6: Documentation](phase-6-documentation.md)         | ✅ Complete    | 100%       |
+| [Phase 7: Testing & Refinement](phase-7-testing.md)        | ✅ Complete    | 100%       |
+| [Phase 8: Plugin System](phase-8-plugins.md)               | 📋 Planned    | 0%         |
+| Maven Central Distribution                                  | ✅ Complete    | 100%       |
+| Docker Distribution (GHCR + Docker Hub)                     | ✅ Complete    | 100%       |
+| Binary distribution (install script + GitHub Releases)      | ✅ Complete    | 100%       |
 
 **Additional**: [Security Roadmap](security-roadmap.md) - Cross-phase security features
 
-## Overall Progress
+## Live Status
 
-**MVP Status**: ✅ **Complete!** All core phases done  
-**Production Code**: 7,200+ lines  
-**Test Code**: 6,400+ lines  
-**Documentation**: 8,500+ lines  
-**Tests Passing**: 150+ tests ✅
+Real-time build and test status — no hardcoded counts:
+
+[![CI](https://github.com/gianluz/kite/actions/workflows/ci.yml/badge.svg)](https://github.com/gianluz/kite/actions/workflows/ci.yml)
+[![Maven Central](https://img.shields.io/maven-central/v/com.gianluz.kite/kite-core.svg?label=Maven%20Central)](https://central.sonatype.com/namespace/com.gianluz.kite)
+
+Tests pass or they don't — the badge tells the truth. Line counts and test counts go stale the moment they're written.
 
 ## Current Roadmap (Post-MVP)
 
@@ -47,6 +50,7 @@ detailed tasks, story points, and deliverables.
 
 ### 🌟 Future Enhancements
 
+- Homebrew tap for macOS/Linux (`brew install gianluz/kite/kite-cli`)
 - Remote caching for distributed teams
 - Distributed execution across multiple machines
 - Web dashboard for visualization
@@ -63,17 +67,16 @@ detailed tasks, story points, and deliverables.
 ```
 kite/
 ├── devplan/                       # This directory - development plans
-├── specs/                         # Complete specifications (9 documents)
-├── docs/                          # User documentation (12 guides)
+├── docs/                          # User documentation
 ├── kite-core/                     # Core domain models
 ├── kite-dsl/                      # Kotlin DSL and scripting
 ├── kite-runtime/                  # Execution runtime
 ├── kite-cli/                      # CLI interface
 ├── kite-integration-tests/        # Integration tests
+├── kite-plugins/                  # Official plugins (git, gradle)
 ├── .kite/                         # Kite's own CI/CD
 │   ├── segments/                  # Reusable segments
-│   └── rides/                     # CI and MR rides
-├── DEVELOPMENT_PLAN.md            # Legacy - see devplan/
+│   └── rides/                     # CI, MR, and Deploy rides
 └── CHANGELOG.md                   # Version history
 ```
 
@@ -84,14 +87,14 @@ kite/
 - Type-safe Kotlin DSL for segments and rides
 - Complete graph theory (DAG, topological sort, cycle detection)
 - Sequential AND parallel execution engines
-- Real process execution with timeout
+- Real process execution with timeout and retry
 - Beautiful CLI with colors and emojis
 - File discovery and script compilation
 
 ✅ **Built-in Features** (Phase 5)
 
 - 20+ file operation helpers
-- Process execution helpers
+- Process execution helpers (`exec`, `shell`, `execOrNull`)
 - Artifact management with cross-ride sharing
 - Per-segment logging system
 - Lifecycle hooks (onSuccess/onFailure/onComplete)
@@ -99,34 +102,27 @@ kite/
 
 ✅ **Testing & Integration** (Phase 7)
 
-- 64 tests (43 unit + 21 integration)
-- Integration test framework
-- GitHub Actions workflows
-- Kite managing its own CI/CD
+- Unit tests across all modules
+- Integration test framework (`kite-integration-tests`)
+- GitHub Actions workflows (`ci.yml` on push, `pr.yml` on PR, `release.yml` on tag)
+- Kite managing its own CI/CD — eats its own dog food
 
 ✅ **Documentation** (Phase 6)
 
-- 12 comprehensive guides (7,350+ lines)
+- 12+ comprehensive guides
 - IDE setup and troubleshooting
 - External dependencies guide
-- Artifact management guides
-- CI integration guides
+- CI/CD integration guide
 - Security documentation
 
-## Recent Achievements (November 2025)
+✅ **Distribution** (Post-MVP)
 
-### MVP Complete! 🎉
-
-- ✅ **All 7 Core Phases Complete** - Foundation through Testing
-- ✅ **Timeout & Retry** - Full implementation with 18 tests
-- ✅ **Platform-Agnostic Refactor** - Removed vendor-specific properties
-- ✅ **Segment Overrides** - Runtime override support in rides
-- ✅ **GitHub Actions Integration** - Composite actions for easy CI setup
-- ✅ **Comprehensive Documentation** - 29 docs, consistent and accurate
-- ✅ **Command Consistency** - Standardized to `kite-cli` throughout
-- ✅ **Fastlane Comparison** - Clear value proposition in README
-- ✅ **150+ Tests Passing** - Unit, integration, and end-to-end coverage
+- **Maven Central** — `com.gianluz.kite:kite-core`, `kite-dsl`, `kite-runtime`, `git`, `gradle`
+- **Docker** — `ghcr.io/gianluz/kite` (GHCR) and `gianluz/kite` (Docker Hub), both auto-published on every release
+- **GitHub Releases** — CLI binary archives (`.tar` / `.zip`) attached to every tag
+- **Install script** — `curl -sSL .../install.sh | bash` for macOS/Linux
+- **Automated version sync** — `kite-cli run update-version-refs` keeps all docs current from a single source of truth in `build.gradle.kts`
 
 ## Contact
 
-For questions or contributions, see the main README.md.
+For questions or contributions, see the main [README.md](../README.md) and [CONTRIBUTING.md](../CONTRIBUTING.md).

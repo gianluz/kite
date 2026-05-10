@@ -1,6 +1,6 @@
 # Phase 7: Testing & Refinement
 
-**Status**: 🔄 **IN PROGRESS (85% Complete)**  
+**Status**: ✅ **COMPLETE**  
 **Goal**: Comprehensive testing, bug fixes, and release preparation  
 **Duration**: 1 week
 
@@ -155,18 +155,11 @@ Phase 7 ensures Kite is production-ready through comprehensive testing, bug fixe
 
 ### Test Statistics
 
-**Overall**:
+Exact counts are tracked by CI — see the live badge rather than stale numbers here:
 
-- Integration tests: 25 tests (1,828 lines)
-- Unit tests: ~43 tests (3,639+ lines)
-- **Total**: ~68 tests
-- **All passing** ✅
+[![CI](https://github.com/gianluz/kite/actions/workflows/ci.yml/badge.svg)](https://github.com/gianluz/kite/actions/workflows/ci.yml)
 
-**Test-to-Code Ratio**:
-
-- Production: ~6,850 lines
-- Tests: ~5,467 lines
-- Ratio: 0.80:1 (good coverage)
+Integration tests, unit tests across `kite-core`, `kite-runtime`, `kite-dsl`, `kite-cli`, and `kite-integration-tests` — all passing on every push to `main`.
 
 ---
 
@@ -248,115 +241,37 @@ Time saved: 10.6s (42.6% faster)
 
 ---
 
-## Epic 7.5: Release Preparation ⏳ PENDING
+## Epic 7.5: Release Preparation ✅ COMPLETE
 
-**Story Points**: 5 | **Duration**: 2 days  
-**Status**: ⏳ Ready to execute
+**Story Points**: 5  
+**Status**: ✅ Complete
 
-### Tasks Remaining
+### What Was Delivered
 
-- [ ] **Version bump to 1.0.0**
-    - Update all build.gradle.kts files
-    - Update version strings
-    - Update CHANGELOG.md
-    - **Estimate**: 1 hour
-
-- [ ] **Build distribution**
-    - Create fat JAR with dependencies
-    - Test on clean system
-    - Create installation instructions
-    - **Estimate**: 4 hours
-
-- [ ] **Release notes**
-    - Write comprehensive release notes
-    - Document breaking changes (none expected)
-    - List all features
-    - **Estimate**: 2 hours
-
-- [ ] **Tag release**
-    - Create v1.0.0 git tag
-    - Push to GitHub
-    - Create GitHub release
-    - Attach distribution artifacts
-    - **Estimate**: 1 hour
-
-### Distribution Options
-
-**Planned for v1.0.0**:
-
-1. ✅ Fat JAR - Self-contained executable
-2. ✅ Installation script - Simple setup
-3. ✅ GitHub release - With artifacts
-
-**Future Versions**:
-
-- Homebrew formula (v1.1.0+)
-- Docker image (v1.1.0+)
-- Maven Central publication (v1.x.x+)
+- ✅ **Versioning** — single source of truth in `build.gradle.kts`; `kite-cli run update-version-refs` syncs all docs automatically
+- ✅ **Maven Central** — `com.gianluz.kite:*` published on every release tag
+- ✅ **Docker** — `ghcr.io/gianluz/kite` (GHCR) and `gianluz/kite` (Docker Hub), `:latest` always tracks newest release
+- ✅ **GitHub Releases** — CLI binary archives (`.tar` / `.zip`) + `install.sh` attached automatically
+- ✅ **Install script** — `curl -sSL .../install.sh | bash` for macOS/Linux with Java version check
+- ✅ **Release automation** — push a `v*` tag → CI builds, tests, publishes to all channels, creates GitHub Release
 
 ---
 
 ## Phase 7 Summary
 
-### Verified Statistics
+### Status
 
-**Tests**: 68+ tests across all modules
+✅ **100% Complete** — all epics done, release infrastructure live.
 
-- Integration: 25 tests (1,828 lines)
-- Unit (core): 8 test files (2,007 lines)
-- Unit (runtime): 1,632 lines
-- Unit (dsl): ~500 lines
-- **Total test code**: ~5,467 lines
-- **All passing** ✅
+| Epic | Status |
+|------|--------|
+| 7.1 Integration Testing | ✅ Complete |
+| 7.2 Unit Testing | ✅ Complete |
+| 7.3 Bug Fixes & Polish | ✅ No known bugs |
+| 7.4 Performance | ✅ All targets exceeded by 50% |
+| 7.5 Release Preparation | ✅ Complete — Maven Central, Docker, GHCR, install.sh, GitHub Releases |
 
-**Performance**: All targets exceeded by 50%
-
-**Bugs**: None known (pre-release)
-
-**Progress**: 85% complete
-
-- ✅ Integration testing (complete)
-- ✅ Unit testing (complete)
-- ✅ Performance (exceeds targets)
-- ⏳ Bug fixes (reactive, no bugs yet)
-- ⏳ Release prep (ready to execute)
-
-### Key Achievements
-
-✅ **Comprehensive Test Suite** - 68+ tests  
-✅ **Integration Tests** - 25 real-world scenarios  
-✅ **All Tests Passing** - No failures  
-✅ **Fixed Flaky Tests** - Reliable execution  
-✅ **Performance Targets** - All exceeded  
-✅ **Test Infrastructure** - Rich assertion API
-
-### What's Missing
-
-⏳ **Release Preparation** (2 days):
-
-- Version bump
-- Distribution build
-- Release notes
-- Git tag and GitHub release
-
-⏳ **Bug Fixes** (reactive):
-
-- No bugs currently known
-- Will fix as users report issues
-
-### Timeline to v1.0.0
-
-**Remaining Work**:
-
-1. Complete Phase 6 docs (CLI/DSL reference) - 2 days
-2. Release preparation - 2 days
-3. **Total**: ~4 days to v1.0.0 🚀
-
-**Critical Path**:
-
-- CLI reference (1 day)
-- DSL reference (1 day)
-- Release prep (2 days)
+For live test pass/fail status see the CI badge in the main README — that's the authoritative signal, not this document.
 
 ---
 
@@ -384,21 +299,10 @@ Time saved: 10.6s (42.6% faster)
 
 ---
 
-## Next Steps
-
-**Immediate**:
-
-1. Complete Phase 6 (CLI/DSL reference) - 2 days
-2. Final polish based on docs review
-3. Release preparation - 2 days
-
-**Then**: Release v1.0.0! 🎉
-
 See [devplan/README.md](README.md) for overall progress.
 
 ---
 
-**Last Updated**: November 18, 2025  
-**Status**: 🔄 85% Complete (testing done, release prep pending)  
-**Tests**: 68+ tests - all passing ✅  
-**Performance**: All targets exceeded by 50% ✅
+**Last Updated**: May 2026  
+**Status**: ✅ Complete  
+**CI**: [![CI](https://github.com/gianluz/kite/actions/workflows/ci.yml/badge.svg)](https://github.com/gianluz/kite/actions/workflows/ci.yml)

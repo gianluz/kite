@@ -2,10 +2,11 @@
 
 A modern, type-safe CI/CD workflow runner for Kotlin projects.
 
+[![CI](https://github.com/gianluz/kite/actions/workflows/ci.yml/badge.svg)](https://github.com/gianluz/kite/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/badge/version-0.1.0--alpha9-blue.svg)](https://github.com/gianluz/kite/releases)
+[![Maven Central](https://img.shields.io/maven-central/v/com.gianluz.kite/kite-core.svg?label=Maven%20Central)](https://central.sonatype.com/namespace/com.gianluz.kite)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Kotlin](https://img.shields.io/badge/kotlin-2.1.20-blue.svg?logo=kotlin)](http://kotlinlang.org)
-[![Maven Central](https://img.shields.io/maven-central/v/com.gianluz.kite/kite-core.svg?label=Maven%20Central)](https://central.sonatype.com/namespace/com.gianluz.kite)
 [![Docker](https://img.shields.io/badge/Docker-ghcr.io%2Fgianluz%2Fkite-blue.svg?logo=docker)](https://ghcr.io/gianluz/kite)
 [![Java](https://img.shields.io/badge/Java-17+-orange.svg)](https://openjdk.java.net/)
 
