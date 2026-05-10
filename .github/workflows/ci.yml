@@ -37,7 +37,16 @@ jobs:
         with:
           name: test-results-ci
           path: .kite/artifacts/
-          retention-days: 30  # Keep longer for main branch
+          retention-days: 30
+
+      - name: Upload Ride Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ride-logs-ci
+          path: .kite/logs/
+          retention-days: 30
+          if-no-files-found: warn
 
       - name: Upload Build Artifacts
         if: success()

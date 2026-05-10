@@ -50,12 +50,18 @@ class KiteCli : CliktCommand(
     }
 
     override fun run() {
+        // Environment overrides for CI automation
+        val envDebug = System.getenv("KITE_DEBUG")?.equals("true", ignoreCase = true) == true
+        val envVerbose = System.getenv("KITE_VERBOSE")?.equals("true", ignoreCase = true) == true
+        val envQuiet = System.getenv("KITE_QUIET")?.equals("true", ignoreCase = true) == true
+
         // Store global options in context for subcommands
+        // CLI flags take precedence, then env vars
         currentContext.obj =
             GlobalOptions(
-                debug = debug,
-                verbose = verbose,
-                quiet = quiet,
+                debug = debug || envDebug,
+                verbose = verbose || envVerbose,
+                quiet = quiet || envQuiet,
             )
     }
 }

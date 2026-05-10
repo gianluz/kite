@@ -40,6 +40,15 @@ jobs:
           path: .kite/artifacts/
           retention-days: 7
 
+      - name: Upload Ride Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ride-logs-pr
+          path: .kite/logs/
+          retention-days: 7
+          if-no-files-found: warn
+
       - name: Publish Test Report
         if: always()
         uses: dorny/test-reporter@v1
