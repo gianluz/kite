@@ -23,39 +23,34 @@ Installation section below).
 
 ## Installation
 
-First, build the Kite CLI:
+See the full [Installation Guide](02-installation.md#method-3-cli-binary-cicd-and-local) for all options. Quick summary:
+
+### Recommended: Docker (no Java required)
 
 ```bash
-./gradlew :kite-cli:installDist
+docker run --rm -v $(pwd):/workspace ghcr.io/gianluz/kite:latest ride CI
 ```
 
-The CLI is installed to:
-
-```
-kite-cli/build/install/kite-cli/bin/kite-cli
-```
-
-**Option 1: Add to your PATH (recommended):**
+### Install script (macOS / Linux)
 
 ```bash
-export PATH="$PWD/kite-cli/build/install/kite-cli/bin:$PATH"
-```
-
-Then run commands with `kite-cli`:
-
-```bash
+curl -sSL https://github.com/gianluz/kite/releases/latest/download/install.sh | bash
+export PATH="$HOME/.kite/bin:$PATH"
 kite-cli ride CI
 ```
 
-**Option 2: Create an alias (optional):**
+### Build from source
 
 ```bash
-alias kite='kite-cli/build/install/kite-cli/bin/kite-cli'
+./gradlew :kite-cli:installDist
+export PATH="$PWD/kite-cli/build/install/kite-cli/bin:$PATH"
+kite-cli ride CI
 ```
 
-Then you can use the shorter `kite` command:
+### Create a `kite` alias (optional shortcut)
 
 ```bash
+alias kite='kite-cli'
 kite ride CI
 ```
 

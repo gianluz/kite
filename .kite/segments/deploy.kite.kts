@@ -198,15 +198,20 @@ segments {
                 
                 ### Docker
                 ```bash
-                docker pull gianluz/kite:${tag.removePrefix("v")}
+                # GitHub Container Registry (no login needed)
+                docker run --rm -v $(pwd):/workspace ghcr.io/gianluz/kite:${tag.removePrefix("v")} ride CI
+                
+                # Docker Hub
+                docker run --rm -v $(pwd):/workspace gianluz/kite:${tag.removePrefix("v")} ride CI
                 ```
             """.trimIndent()
 
-            // Create release using GitHub CLI
+            // Create release using GitHub CLI — attach binaries and the install script
             exec(
                 "gh", "release", "create", tag,
                 "kite-cli/build/distributions/kite-cli-${tag.removePrefix("v")}.tar",
                 "kite-cli/build/distributions/kite-cli-${tag.removePrefix("v")}.zip",
+                "install.sh",
                 "--title", "Kite $tag",
                 "--notes", releaseNotes
             )

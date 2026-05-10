@@ -13,9 +13,9 @@ repositories {
 }
 
 dependencies {
-    implementation("com.gianluz.kite:kite-core:0.1.0-alpha8")
-    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha8")
-    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha8")
+    implementation("com.gianluz.kite:kite-core:0.1.0-alpha9")
+    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha9")
+    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha9")
 }
 ```
 
@@ -39,9 +39,9 @@ repositories {
 
 dependencies {
     // Kite dependencies
-    implementation("com.gianluz.kite:kite-core:0.1.0-alpha8")
-    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha8")
-    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha8")
+    implementation("com.gianluz.kite:kite-core:0.1.0-alpha9")
+    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha9")
+    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha9")
 }
 ```
 
@@ -86,35 +86,100 @@ dependencies {
 
 **Use case**: Contributing to Kite or testing unreleased features.
 
-### Method 3: CLI Binary (CI/CD)
+### Method 3: CLI Binary (CI/CD and Local)
 
-**For CI/CD environments**, use the Kite CLI binary.
+**For running Kite workflows** without embedding it as a library dependency.
 
-Download or build the CLI:
+> **Prerequisite:** All install methods except Docker require **Java 17+**.
+> Check with `java -version`. Install from [adoptium.net](https://adoptium.net/) if needed.
+
+#### Option A — Docker (recommended for CI, no Java needed)
 
 ```bash
-# Clone Kite
-git clone https://github.com/gianluz/kite.git
-cd kite
+# GitHub Container Registry
+docker run --rm -v $(pwd):/workspace \
+  ghcr.io/gianluz/kite:latest ride CI
 
-# Build CLI
-./gradlew :kite-cli:installDist
-
-# Use it
-kite-cli/build/install/kite-cli/bin/kite-cli ride CI
+# Docker Hub
+docker run --rm -v $(pwd):/workspace \
+  gianluz/kite:latest ride CI
 ```
 
-Or in your project:
+Pass environment variables with `-e`:
 
 ```bash
-# Add as submodule
-git submodule add https://github.com/gianluz/kite.git tools/kite
+docker run --rm \
+  -v $(pwd):/workspace \
+  -e DEPLOY_TOKEN=$DEPLOY_TOKEN \
+  -e CI_COMMIT_TAG=v1.0.0 \
+  ghcr.io/gianluz/kite:latest ride Deploy
+```
 
-# Build and use
-cd tools/kite
+#### Option B — Install script (macOS / Linux)
+
+```bash
+curl -sSL https://github.com/gianluz/kite/releases/latest/download/install.sh | bash
+```
+
+This downloads the latest release, installs to `~/.kite/`, and prints the `PATH` update needed.
+Pin to a specific version:
+
+```bash
+curl -sSL https://github.com/gianluz/kite/releases/latest/download/install.sh \
+  | KITE_VERSION=v0.1.0-alpha9 bash
+```
+
+#### Option C — Homebrew (macOS / Linux)
+
+> **Status:** Homebrew tap coming soon. Track progress in [GitHub Issues](https://github.com/gianluz/kite/issues).
+
+Once available:
+
+```bash
+brew install gianluz/kite/kite-cli
+```
+
+#### Option D — GitHub Releases (manual)
+
+Download the archive for your platform from [GitHub Releases](https://github.com/gianluz/kite/releases):
+
+```bash
+# Download and extract
+curl -LO https://github.com/gianluz/kite/releases/latest/download/kite-cli-0.1.0-alpha9.tar
+tar -xf kite-cli-0.1.0-alpha9.tar
+
+# Add to PATH
+export PATH="$PWD/kite-cli-0.1.0-alpha9/bin:$PATH"
+kite-cli --version
+```
+
+Windows: download the `.zip` file, extract, and add the `bin\` folder to your `PATH`.
+
+#### Option E — Build from source
+
+```bash
+git clone https://github.com/gianluz/kite.git
+cd kite
 ./gradlew :kite-cli:installDist
-cd ../..
-tools/kite/kite-cli/build/install/kite-cli/bin/kite-cli ride CI
+export PATH="$PWD/kite-cli/build/install/kite-cli/bin:$PATH"
+kite-cli --version
+```
+
+#### Using in CI (GitHub Actions example)
+
+```yaml
+- name: Run Kite workflow (Docker — recommended)
+  run: |
+    docker run --rm \
+      -v ${{ github.workspace }}:/workspace \
+      -e GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} \
+      ghcr.io/gianluz/kite:latest ride CI
+
+- name: Run Kite workflow (install script alternative)
+  run: |
+    curl -sSL https://github.com/gianluz/kite/releases/latest/download/install.sh | bash
+    export PATH="$HOME/.kite/bin:$PATH"
+    kite-cli ride CI
 ```
 
 ## Version Requirements
@@ -129,7 +194,7 @@ tools/kite/kite-cli/build/install/kite-cli/bin/kite-cli ride CI
 
 | Kite Version  | Min Java | Min Kotlin | Min Gradle |
 |---------------|----------|------------|------------|
-| 0.1.0-alpha8  | 17       | 2.1        | 8.0        |
+| 0.1.0-alpha9  | 17       | 2.1        | 8.0        |
 
 ## Verify Installation
 
@@ -280,9 +345,9 @@ cd /path/to/your-project
 
    Should show:
    ```
-   +--- com.gianluz.kite:kite-core:0.1.0-alpha8
-   +--- com.gianluz.kite:kite-dsl:0.1.0-alpha8
-   +--- com.gianluz.kite:kite-runtime:0.1.0-alpha8
+   +--- com.gianluz.kite:kite-core:0.1.0-alpha9
+   +--- com.gianluz.kite:kite-dsl:0.1.0-alpha9
+   +--- com.gianluz.kite:kite-runtime:0.1.0-alpha9
    ```
 
 4. **Verify Script Definition**:
@@ -347,7 +412,7 @@ cd /path/to/your-project
    ```
 
 2. **Check Version**:
-   Ensure you're using a published version (e.g., `0.1.0-alpha8`, not `0.1.0-SNAPSHOT`)
+   Ensure you're using a published version (e.g., `0.1.0-alpha9`, not `0.1.0-SNAPSHOT`)
 
 3. **Refresh Dependencies**:
    ```bash

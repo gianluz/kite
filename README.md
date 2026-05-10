@@ -165,9 +165,9 @@ repositories {
 }
 
 dependencies {
-    implementation("com.gianluz.kite:kite-core:0.1.0-alpha8")
-    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha8")
-    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha8")
+    implementation("com.gianluz.kite:kite-core:0.1.0-alpha9")
+    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha9")
+    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha9")
 }
 ```
 
@@ -177,17 +177,17 @@ All artifacts are available on **[Maven Central](https://central.sonatype.com/na
 
 | Artifact | Coordinates | Description | Portal |
 |----------|-------------|-------------|--------|
-| `kite-core` | `com.gianluz.kite:kite-core:0.1.0-alpha8` | Core domain models and interfaces | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-core) |
-| `kite-dsl` | `com.gianluz.kite:kite-dsl:0.1.0-alpha8` | DSL and Kotlin scripting engine | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-dsl) |
-| `kite-runtime` | `com.gianluz.kite:kite-runtime:0.1.0-alpha8` | Execution runtime and schedulers | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-runtime) |
-| `git` plugin | `com.gianluz.kite:git:0.1.0-alpha8` | Type-safe Git operations | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/git) |
-| `gradle` plugin | `com.gianluz.kite:gradle:0.1.0-alpha8` | Flexible Gradle task execution | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/gradle) |
+| `kite-core` | `com.gianluz.kite:kite-core:0.1.0-alpha9` | Core domain models and interfaces | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-core) |
+| `kite-dsl` | `com.gianluz.kite:kite-dsl:0.1.0-alpha9` | DSL and Kotlin scripting engine | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-dsl) |
+| `kite-runtime` | `com.gianluz.kite:kite-runtime:0.1.0-alpha9` | Execution runtime and schedulers | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-runtime) |
+| `git` plugin | `com.gianluz.kite:git:0.1.0-alpha9` | Type-safe Git operations | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/git) |
+| `gradle` plugin | `com.gianluz.kite:gradle:0.1.0-alpha9` | Flexible Gradle task execution | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/gradle) |
 
 Plugins are used via `@file:DependsOn` in your `.kite.kts` scripts:
 
 ```kotlin
-@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha8")
-@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha8")
+@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha9")
+@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha9")
 ```
 
 ### Docker (No Installation Required)
@@ -226,17 +226,26 @@ docker run --rm \
 
 ### CLI Binary
 
-Download the latest `kite-cli` binary from [GitHub Releases](https://github.com/gianluz/kite/releases), or build from source:
+**Install script** (macOS / Linux — requires Java 17+):
 
 ```bash
-git clone https://github.com/gianluz/kite.git
-cd kite
+curl -sSL https://github.com/gianluz/kite/releases/latest/download/install.sh | bash
+export PATH="$HOME/.kite/bin:$PATH"
+kite-cli ride CI
+```
+
+**Download manually** from [GitHub Releases](https://github.com/gianluz/kite/releases) (`.tar` for macOS/Linux, `.zip` for Windows).
+
+**Build from source:**
+
+```bash
+git clone https://github.com/gianluz/kite.git && cd kite
 ./gradlew :kite-cli:installDist
-export PATH="$PATH:$(pwd)/kite-cli/build/install/kite-cli/bin"
+export PATH="$PWD/kite-cli/build/install/kite-cli/bin:$PATH"
 kite-cli --version
 ```
 
-See **[Installation Guide](docs/02-installation.md)** for complete setup instructions and troubleshooting.
+See **[Installation Guide](docs/02-installation.md)** for all methods including Docker, Homebrew (coming soon), and CI examples.
 
 ---
 

@@ -327,11 +327,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Phase 6: Documentation (90% - 12 comprehensive guides)
 - **Phase 7: Integration Testing (70%)** - 64 tests covering all features
 
-## [0.1.0-alpha8] - 2026-05-09
+## [0.1.0-alpha9] - 2026-05-09
 
-### Fixed
+### Added
 
-- **`exec()` / `shell()` in sequential segments** — fixed a `ThreadLocal` vs Kotlin coroutines incompatibility. `ProcessExecutionProvider` is now stored directly on `ExecutionContext` (travels with the coroutine closure) in addition to the `ThreadLocal`. When a coroutine suspends and resumes on a different dispatcher thread, the provider is still accessible. The `deploy-docker` segment now works correctly end-to-end in Kite.
+- **Install script** (`install.sh`) — `curl -sSL .../install.sh | bash` installs kite-cli to `~/.kite/bin` on macOS/Linux. Attached to every GitHub Release.
+- **Docker CI examples** in docs — Docker is now the recommended CI installation method (no Java needed).
+
+### Changed
+
+- `docs/02-installation.md` — CLI Binary section rewritten with all install options: Docker, install script, Homebrew (coming soon), GitHub Releases manual download, build from source.
+- `docs/11-ci-integration.md` — GitHub Actions examples updated to show Docker-first and install-script approaches.
+- `docs/12-cli-reference.md` — Installation section simplified with all methods.
+- `create-github-release` segment now also uploads `install.sh` as a release asset.
 
 ## [0.1.0-alpha7] - 2026-05-09
 
@@ -379,8 +387,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Upgraded detekt from `1.23.7` → `1.23.8`
 - Downgraded Gradle wrapper from `9.2.0` → `8.12.1` for stability
 
-[Unreleased]: https://github.com/gianluz/kite/compare/v0.1.0-alpha8...HEAD
+[Unreleased]: https://github.com/gianluz/kite/compare/v0.1.0-alpha9...HEAD
 
+[0.1.0-alpha9]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha9
 [0.1.0-alpha8]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha8
 [0.1.0-alpha7]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha7
 [0.1.0-alpha6]: https://github.com/gianluz/kite/releases/tag/v0.1.0-alpha6

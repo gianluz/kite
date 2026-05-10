@@ -11,10 +11,13 @@ Kite enforces code quality using **ktlint** (code style) and **detekt** (static 
 # Auto-fix ktlint violations
 ./gradlew ktlintFormat
 
-# Run via Kite (recommended)
-kite-cli/build/install/kite-cli/bin/kite-cli run ktlint
-kite-cli/build/install/kite-cli/bin/kite-cli run detekt
-kite-cli/build/install/kite-cli/bin/kite-cli run quality-checks  # Runs both
+# Run via Kite CLI (after installing — see docs/02-installation.md)
+kite-cli run ktlint
+kite-cli run detekt
+kite-cli run quality-checks  # Runs both
+
+# Or via Docker (no install needed)
+docker run --rm -v $(pwd):/workspace ghcr.io/gianluz/kite:latest run quality-checks
 ```
 
 ---
@@ -241,8 +244,8 @@ ride {
 # Quick check
 ./gradlew ktlintMainSourceSetCheck detekt
 
-# Or use Kite
-kite-cli/build/install/kite-cli/bin/kite-cli run quality-checks
+# Or use Kite CLI
+kite-cli run quality-checks
 ```
 
 ### 2. Auto-fix When Possible

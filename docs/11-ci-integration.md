@@ -16,24 +16,39 @@ Kite integrates seamlessly with popular CI/CD platforms:
 
 All you need is:
 
-1. A Java 17+ environment
-2. Your `.kite/` directory with segments and rides
+1. Your `.kite/` directory with segments and rides
+2. One of: Docker, the install script, or Java 17+ with the CLI binary
 3. Run `kite-cli ride <ride-name>`
 
 ---
 
 ## Quick Start
 
-### Basic CI Workflow
+### Option 1: Docker (recommended — no Java install needed)
 
 ```bash
-# 1. Install Kite
+docker run --rm \
+  -v $(pwd):/workspace \
+  ghcr.io/gianluz/kite:latest \
+  ride CI
+```
+
+### Option 2: Install script + CLI
+
+```bash
+# Install once
+curl -sSL https://github.com/gianluz/kite/releases/latest/download/install.sh | bash
+export PATH="$HOME/.kite/bin:$PATH"
+
+# Run a ride
+kite-cli ride CI
+```
+
+### Option 3: Build from source
+
+```bash
 ./gradlew :kite-cli:installDist
-
-# 2. Run a ride
 kite-cli/build/install/kite-cli/bin/kite-cli ride CI
-
-# That's it!
 ```
 
 ---
@@ -75,7 +90,9 @@ jobs:
 
 ### Manual Setup (Alternative)
 
-If you prefer manual control, you can set up Kite yourself:
+If you prefer to manage the Kite invocation yourself, two approaches:
+
+**Docker approach (simplest — no Java setup needed):**
 
 ```yaml
 name: CI Pipeline
@@ -91,31 +108,41 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      # 1. Checkout code
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       
-      # 2. Setup Java
+      - name: Run CI Ride
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}:/workspace \
+            ghcr.io/gianluz/kite:latest \
+            ride CI
+```
+
+**Install script approach (Java-based, with caching):**
+
+```yaml
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
       
-      # 3. Setup Gradle (with caching)
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+      - name: Install Kite CLI
+        run: |
+          curl -sSL https://github.com/gianluz/kite/releases/latest/download/install.sh | bash
+          echo "$HOME/.kite/bin" >> $GITHUB_PATH
       
-      # 4. Build Kite CLI
-      - name: Build Kite
-        run: ./gradlew :kite-cli:installDist
-      
-      # 5. Run your ride
       - name: Run CI Ride
-        run: kite-cli/build/install/kite-cli/bin/kite-cli ride CI
+        run: kite-cli ride CI
       
-      # 6. Upload artifacts
-      - name: Upload Test Results
+      - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -124,17 +151,25 @@ jobs:
           retention-days: 7
 ```
 
-**Note:** The manual approach requires building Kite on every run. Use the action for better caching!
-
 ### With Secrets
 
 ```yaml
-- name: Run Deployment
+- name: Run Deployment (Docker)
+  run: |
+    docker run --rm \
+      -v ${{ github.workspace }}:/workspace \
+      -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
+      -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
+      ghcr.io/gianluz/kite:latest \
+      ride Deploy
+
+# --- OR via installed CLI ---
+- name: Run Deployment (CLI)
   env:
     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  run: kite-cli/build/install/kite-cli/bin/kite-cli ride Deploy
+  run: kite-cli ride Deploy
 ```
 
 **Your Kite segments automatically access these via `secret()`:**
