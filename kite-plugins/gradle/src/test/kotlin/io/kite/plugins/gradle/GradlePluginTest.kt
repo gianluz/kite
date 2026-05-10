@@ -68,7 +68,9 @@ class GradlePluginTest {
                 }
             }
 
-        ProcessExecutionContext.setProvider(processProvider)
+        // ExecutionContext.processExecutionProvider is checked first by exec() before the
+        // ThreadLocal fallback. Explicitly set it so the mock routes calls to our provider.
+        every { ctx.processExecutionProvider } returns processProvider
 
         plugin = GradlePlugin(ctx)
     }
