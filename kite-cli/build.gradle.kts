@@ -50,6 +50,10 @@ tasks.named<ProcessResources>("processResources") {
     dependsOn(generateVersionResource)
 }
 
+tasks.named<Jar>("sourcesJar") {
+    dependsOn(generateVersionResource)
+}
+
 tasks.named<JavaExec>("run") {
     workingDir = rootProject.projectDir
 }
