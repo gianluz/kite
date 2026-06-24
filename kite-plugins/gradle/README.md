@@ -10,7 +10,7 @@ Kotlin, Android, custom plugins, multi-module projects, etc.
 ### From Maven Central (Recommended)
 
 ```kotlin
-@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha12")
+@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha13")
 
 import io.kite.plugins.gradle.*
 ```
@@ -22,7 +22,7 @@ import io.kite.plugins.gradle.*
 ```
 
 ```kotlin
-@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha12")
+@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha13")
 
 import io.kite.plugins.gradle.*
 ```
