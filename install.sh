@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Kite CLI Installer
 # Usage: curl -sSL https://github.com/gianluz/kite/releases/latest/download/install.sh | bash
-# Or:    curl -sSL https://github.com/gianluz/kite/releases/latest/download/install.sh | KITE_VERSION=v0.1.0-alpha10 bash
+# Or:    curl -sSL https://github.com/gianluz/kite/releases/latest/download/install.sh | KITE_VERSION=v0.1.0-alpha11 bash
 
 set -euo pipefail
 
