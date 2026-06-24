@@ -13,9 +13,9 @@ repositories {
 }
 
 dependencies {
-    implementation("com.gianluz.kite:kite-core:0.1.0-alpha13")
-    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha13")
-    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha13")
+    implementation("com.gianluz.kite:kite-core:0.1.0-alpha14")
+    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha14")
+    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha14")
 }
 ```
 
@@ -39,9 +39,9 @@ repositories {
 
 dependencies {
     // Kite dependencies
-    implementation("com.gianluz.kite:kite-core:0.1.0-alpha13")
-    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha13")
-    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha13")
+    implementation("com.gianluz.kite:kite-core:0.1.0-alpha14")
+    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha14")
+    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha14")
 }
 ```
 
@@ -126,7 +126,7 @@ Pin to a specific version:
 
 ```bash
 curl -sSL https://github.com/gianluz/kite/releases/latest/download/install.sh \
-  | KITE_VERSION=v0.1.0-alpha13 bash
+  | KITE_VERSION=v0.1.0-alpha14 bash
 ```
 
 #### Option C — Homebrew (macOS / Linux)
@@ -145,11 +145,11 @@ Download the archive for your platform from [GitHub Releases](https://github.com
 
 ```bash
 # Download and extract
-curl -LO https://github.com/gianluz/kite/releases/latest/download/kite-cli-0.1.0-alpha13.tar
-tar -xf kite-cli-0.1.0-alpha13.tar
+curl -LO https://github.com/gianluz/kite/releases/latest/download/kite-cli-0.1.0-alpha14.tar
+tar -xf kite-cli-0.1.0-alpha14.tar
 
 # Add to PATH
-export PATH="$PWD/kite-cli-0.1.0-alpha13/bin:$PATH"
+export PATH="$PWD/kite-cli-0.1.0-alpha14/bin:$PATH"
 kite-cli --version
 ```
 
@@ -194,7 +194,7 @@ kite-cli --version
 
 | Kite Version  | Min Java | Min Kotlin | Min Gradle |
 |---------------|----------|------------|------------|
-| 0.1.0-alpha13  | 17       | 2.1        | 8.0        |
+| 0.1.0-alpha14  | 17       | 2.1        | 8.0        |
 
 ## Verify Installation
 
@@ -299,9 +299,9 @@ Kite automatically discovers all `.kite.kts` files in:
 ```kotlin
 // build.gradle.kts
 dependencies {
-    implementation("com.gianluz.kite:kite-core:0.1.0-alpha13") // ← Update version
-    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha13")
-    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha13")
+    implementation("com.gianluz.kite:kite-core:0.1.0-alpha14") // ← Update version
+    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha14")
+    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha14")
 }
 ```
 
@@ -345,9 +345,9 @@ cd /path/to/your-project
 
    Should show:
    ```
-   +--- com.gianluz.kite:kite-core:0.1.0-alpha13
-   +--- com.gianluz.kite:kite-dsl:0.1.0-alpha13
-   +--- com.gianluz.kite:kite-runtime:0.1.0-alpha13
+   +--- com.gianluz.kite:kite-core:0.1.0-alpha14
+   +--- com.gianluz.kite:kite-dsl:0.1.0-alpha14
+   +--- com.gianluz.kite:kite-runtime:0.1.0-alpha14
    ```
 
 4. **Verify Script Definition**:
@@ -412,7 +412,7 @@ cd /path/to/your-project
    ```
 
 2. **Check Version**:
-   Ensure you're using a published version (e.g., `0.1.0-alpha13`, not `0.1.0-SNAPSHOT`)
+   Ensure you're using a published version (e.g., `0.1.0-alpha14`, not `0.1.0-SNAPSHOT`)
 
 3. **Refresh Dependencies**:
    ```bash
