@@ -75,6 +75,8 @@ jobs:
 
       - name: Run Deployment
         env:
+          TERM: xterm-256color
+
           # Maven Central credentials
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}

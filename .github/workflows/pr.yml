@@ -30,6 +30,8 @@ jobs:
         run: ./gradlew :kite-cli:installDist
 
       - name: Run PR Validation
+        env:
+          TERM: xterm-256color
         run: kite-cli/build/install/kite-cli/bin/kite-cli ride PR
 
       - name: Upload Test Results

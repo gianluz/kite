@@ -116,8 +116,9 @@ data class ExecutionContext(
      * @throws IllegalStateException if the environment variable is not set
      */
     fun requireSecret(key: String): String {
-        val value = secret(key)
+        val value = environment[key]
         requireNotNull(value) { "Required secret environment variable '$key' is not set" }
+        SecretMasker.registerSecret(value, hint = key)
         return value
     }
 

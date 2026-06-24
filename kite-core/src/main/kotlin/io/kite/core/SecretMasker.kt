@@ -20,7 +20,9 @@ import java.util.concurrent.ConcurrentHashMap
  */
 object SecretMasker {
     private val secrets = ConcurrentHashMap<String, String>()
+    private val ALREADY_MASKED_TOKEN = Regex("\\[MASKED]")
     private const val MASK = "***"
+    private const val ALREADY_MASKED_PLACEHOLDER_PREFIX = "__KITE_CI_REDACTED_TOKEN_"
 
     /**
      * Registers a value as a secret that should be masked in all outputs.
@@ -73,7 +75,14 @@ object SecretMasker {
     ): String {
         if (secrets.isEmpty()) return text
 
-        var masked = text
+        val maskedTokens = mutableListOf<String>()
+        var masked =
+            text.replace(ALREADY_MASKED_TOKEN) { matchResult ->
+                val placeholder = "${ALREADY_MASKED_PLACEHOLDER_PREFIX}${maskedTokens.size}__"
+                maskedTokens.add(matchResult.value)
+                placeholder
+            }
+
         secrets.forEach { (secret, hint) ->
             if (secret.isNotEmpty()) {
                 val replacement =
@@ -84,6 +93,10 @@ object SecretMasker {
                     }
                 masked = masked.replace(secret, replacement)
             }
+        }
+
+        maskedTokens.forEachIndexed { index, token ->
+            masked = masked.replace("$ALREADY_MASKED_PLACEHOLDER_PREFIX${index}__", token)
         }
         return masked
     }

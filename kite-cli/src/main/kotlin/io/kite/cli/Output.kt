@@ -1,6 +1,7 @@
 package io.kite.cli
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.mordant.rendering.AnsiLevel
 import com.github.ajalt.mordant.rendering.TextColors.cyan
 import com.github.ajalt.mordant.rendering.TextColors.green
 import com.github.ajalt.mordant.rendering.TextColors.red
@@ -30,7 +31,10 @@ val CliktCommand.globalOptions: GlobalOptions
 /**
  * Terminal instance for colorful output.
  */
-val terminal = Terminal()
+val terminal =
+    Terminal(
+        ansiLevel = if (System.getenv("CI") != null) AnsiLevel.ANSI16 else null,
+    )
 
 /**
  * Format duration in human-readable format.
