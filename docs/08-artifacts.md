@@ -40,7 +40,7 @@ Producer Segment          Artifact Manager         Consumer Segment
 - **Declaration**: Segments declare which artifacts they produce (outputs) and consume (inputs)
 - **Storage**: Artifacts are stored in `.kite/artifacts/` directory
 - **Retrieval**: Consumer segments access artifacts via the `artifacts` context property
-- **Dependencies**: Consumers must `dependsOn()` their producers (directly or transitively)
+- **Dependencies**: Consumers must run after their producers, either through sequential `flow {}` ordering or explicit `dependsOn()` edges
 
 ---
 
@@ -67,7 +67,7 @@ segments {
     
     // CONSUMER: Uses the artifact
     segment("test") {
-        dependsOn("build")  // Required: ensures build runs first
+        dependsOn("build")  // Ensures build runs first if not already ordered by the ride flow
         
         inputs {
             artifact("apk")  // Declares we need the "apk" artifact
@@ -416,7 +416,7 @@ inputs {
 **Rules:**
 
 - Must match a producer's output artifact name exactly
-- Segment must `dependsOn()` the producer (directly or via transitive dependency)
+- Consumer must run after the producer through sequential `flow {}` ordering, direct `dependsOn()`, or a transitive dependency
 - If the artifact doesn't exist at runtime, `artifacts.get()` returns `null`
 
 **Example:**
@@ -566,11 +566,22 @@ if (apk != null && apk.toFile().exists()) {
 }
 ```
 
-**5. Use `dependsOn()` for all producers**
+**5. Ensure consumers run after producers**
+
+Use sequential ride ordering when the producer immediately precedes the consumer:
+
+```kotlin
+flow {
+    segment("producer")
+    segment("consumer")  // ✅ Waits for producer automatically
+}
+```
+
+Or use `dependsOn()` when the relationship is not already expressed by the ride flow:
 
 ```kotlin
 segment("consumer") {
-    dependsOn("producer")  // ✅ Required
+    dependsOn("producer")  // ✅ Explicit dependency
     inputs { artifact("data") }
 }
 ```
@@ -591,14 +602,18 @@ artifact("apk", "/tmp/app.apk")  // ❌ Bad
 artifact("apk", "${System.getProperty("user.home")}/app.apk")  // ❌ Bad
 ```
 
-**3. Don't forget dependencies**
+**3. Don't forget producer-before-consumer ordering**
 
 ```kotlin
-segment("consumer") {
-    // ❌ Missing: dependsOn("producer")
-    inputs { artifact("data") }  // Won't work!
+flow {
+    parallel {
+        segment("producer")
+        segment("consumer")  // ❌ May run before producer finishes
+    }
 }
 ```
+
+Fix it with sequential flow order or explicit `dependsOn("producer")`.
 
 **4. Don't store artifacts in temp directories**
 

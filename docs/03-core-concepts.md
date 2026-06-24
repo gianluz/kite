@@ -316,6 +316,8 @@ flow {
 
 **Execution**: clean → compile → test → package
 
+Kite turns this order into dependency edges automatically, so `compile` waits for `clean`, `test` waits for `compile`, and so on. Use explicit `dependsOn()` only for extra dependencies that are not already expressed by the flow order.
+
 ### 2. Parallel Flow
 
 Segments execute concurrently:

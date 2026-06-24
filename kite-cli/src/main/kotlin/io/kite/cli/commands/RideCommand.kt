@@ -7,10 +7,9 @@ import com.github.ajalt.clikt.parameters.options.option
 import io.kite.cli.Output
 import io.kite.cli.globalOptions
 import io.kite.core.FileSystemArtifactManager
-import io.kite.core.FlowNode
+import io.kite.core.FlowResolver
 import io.kite.core.PlatformDetector
 import io.kite.core.Segment
-import io.kite.core.SegmentOverrides
 import io.kite.core.restoreFromManifest
 import io.kite.core.saveManifest
 import io.kite.dsl.FileDiscovery
@@ -60,7 +59,7 @@ class RideCommand : CliktCommand(
 
             // Create artifact manager with .kite/artifacts/ directory
             val artifactsDir = File(".kite/artifacts").toPath()
-            val artifactManager = io.kite.core.FileSystemArtifactManager(artifactsDir)
+            val artifactManager = FileSystemArtifactManager(artifactsDir)
 
             // Restore artifacts from manifest (for cross-ride/CI artifact sharing)
             val restoredCount = artifactManager.restoreFromManifest(artifactsDir.toFile())
@@ -89,7 +88,7 @@ class RideCommand : CliktCommand(
 
             val discovery = FileDiscovery()
             val loadResult =
-                kotlinx.coroutines.runBlocking {
+                runBlocking {
                     discovery.loadAll()
                 }
 
@@ -125,7 +124,9 @@ class RideCommand : CliktCommand(
 
             // Build list of segments to execute
             val segmentMap = loadResult.segmentMap()
-            val (segmentsToExecute, missingSegments) = collectSegmentsWithValidation(ride.flow, segmentMap)
+            val flowResolution = FlowResolver.resolve(ride.flow, segmentMap)
+            val segmentsToExecute = flowResolution.segments
+            val missingSegments = flowResolution.missingSegments
 
             if (segmentsToExecute.isEmpty()) {
                 Output.warning("No segments to execute")
@@ -133,7 +134,7 @@ class RideCommand : CliktCommand(
             }
 
             // Validate and show execution plan
-            val graph = validateAndShowPlan(segmentsToExecute, missingSegments, loadResult.segments)
+            validateAndShowPlan(segmentsToExecute, missingSegments, loadResult.segments)
 
             // Dry run mode
             if (dryRun) {
@@ -158,12 +159,12 @@ class RideCommand : CliktCommand(
                 }
 
             val result =
-                kotlinx.coroutines.runBlocking {
+                runBlocking {
                     scheduler.execute(segmentsToExecute, context)
                 }
 
             // Call ride lifecycle hooks
-            kotlinx.coroutines.runBlocking {
+            runBlocking {
                 if (result.isSuccess) {
                     // Call onSuccess hook
                     ride.onSuccess?.invoke()
@@ -331,85 +332,5 @@ class RideCommand : CliktCommand(
         }
 
         return graph
-    }
-
-    /**
-     * Recursively collect all segments from a flow node with validation tracking.
-     *
-     * Returns a pair of (found segments, missing segment names).
-     */
-    private fun collectSegmentsWithValidation(
-        flow: io.kite.core.FlowNode,
-        segmentMap: Map<String, Segment>,
-    ): Pair<List<Segment>, Set<String>> {
-        val segments = mutableListOf<Segment>()
-        val missingSegments = mutableSetOf<String>()
-
-        fun collectRecursive(node: io.kite.core.FlowNode) {
-            when (node) {
-                is io.kite.core.FlowNode.Sequential -> {
-                    node.nodes.forEach { childNode ->
-                        collectRecursive(childNode)
-                    }
-                }
-
-                is io.kite.core.FlowNode.Parallel -> {
-                    node.nodes.forEach { childNode ->
-                        collectRecursive(childNode)
-                    }
-                }
-
-                is io.kite.core.FlowNode.SegmentRef -> {
-                    val segment = segmentMap[node.segmentName]
-                    if (segment != null) {
-                        // Apply overrides (empty SegmentOverrides is a no-op)
-                        val finalSegment = applyOverrides(segment, node.overrides)
-                        segments.add(finalSegment)
-                    } else {
-                        missingSegments.add(node.segmentName)
-                    }
-                }
-            }
-        }
-
-        collectRecursive(flow)
-        return Pair(segments, missingSegments)
-    }
-
-    /**
-     * Apply ride overrides to a segment.
-     *
-     * Creates a new segment with overridden properties. Only non-null overrides
-     * are applied, allowing fine-grained control over which properties to override.
-     */
-    private fun applyOverrides(
-        segment: Segment,
-        overrides: io.kite.core.SegmentOverrides,
-    ): Segment {
-        // Start with the original segment
-        var result = segment
-
-        // Apply dependsOn override (additive - adds to existing dependencies)
-        overrides.dependsOn?.let { overrideDeps ->
-            val combinedDeps = (segment.dependsOn + overrideDeps).distinct()
-            result = result.copy(dependsOn = combinedDeps)
-        }
-
-        // Apply condition override (replaces original condition)
-        overrides.condition?.let { overrideCondition ->
-            result = result.copy(condition = overrideCondition)
-        }
-
-        // Apply timeout override (replaces original timeout)
-        overrides.timeout?.let { overrideTimeout ->
-            result = result.copy(timeout = overrideTimeout)
-        }
-
-        // Apply enabled flag - if false, wrap condition to always return false
-        if (!overrides.enabled) {
-            result = result.copy(condition = { false })
-        }
-
-        return result
     }
 }

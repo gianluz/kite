@@ -106,6 +106,8 @@ ride {
 
 **Execution**: clean → compile → test → package
 
+Kite turns this order into dependency edges automatically, so each segment waits for the previous flow entry before starting. Use explicit `dependsOn()` only for extra dependencies that are not already expressed by the flow order.
+
 ### Parallel Flow
 
 Segments execute concurrently:

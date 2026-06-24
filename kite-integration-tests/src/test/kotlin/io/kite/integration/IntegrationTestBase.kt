@@ -1,5 +1,6 @@
 package io.kite.integration
 
+import io.kite.core.FlowResolver
 import io.kite.core.PlatformDetector
 import io.kite.dsl.FileDiscovery
 import io.kite.runtime.scheduler.ParallelScheduler
@@ -87,7 +88,7 @@ abstract class IntegrationTestBase {
 
             // Collect segments from the ride's flow
             val segmentMap = loadResult.segmentMap()
-            val segments = collectSegmentsFromFlow(ride.flow, segmentMap)
+            val segments = FlowResolver.resolve(ride.flow, segmentMap).segments
 
             // Create execution context with workspace as working directory
             val platform = PlatformDetector.detect()
@@ -131,39 +132,6 @@ abstract class IntegrationTestBase {
                 System.setProperty("user.dir", originalDir)
             }
         }
-
-    /**
-     * Recursively collect segments from a flow node.
-     */
-    private fun collectSegmentsFromFlow(
-        flow: io.kite.core.FlowNode,
-        segmentMap: Map<String, io.kite.core.Segment>,
-    ): List<io.kite.core.Segment> {
-        val segments = mutableListOf<io.kite.core.Segment>()
-
-        when (flow) {
-            is io.kite.core.FlowNode.Sequential -> {
-                flow.nodes.forEach { node ->
-                    segments.addAll(collectSegmentsFromFlow(node, segmentMap))
-                }
-            }
-
-            is io.kite.core.FlowNode.Parallel -> {
-                flow.nodes.forEach { node ->
-                    segments.addAll(collectSegmentsFromFlow(node, segmentMap))
-                }
-            }
-
-            is io.kite.core.FlowNode.SegmentRef -> {
-                val segment = segmentMap[flow.segmentName]
-                if (segment != null) {
-                    segments.add(segment)
-                }
-            }
-        }
-
-        return segments
-    }
 
     /**
      * Result of executing a ride in tests.

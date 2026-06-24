@@ -151,7 +151,7 @@ class BasicRideExecutionTest : IntegrationTestBase() {
     }
 
     @Test
-    fun `execute ride with parallel segments`() {
+    fun `execute ride with sequential flow segments`() {
         createSegmentFile(
             "parallel.kite.kts",
             """
@@ -194,7 +194,9 @@ class BasicRideExecutionTest : IntegrationTestBase() {
 
         result.assertSuccess()
         assertEquals(3, result.totalSegments)
-        assertTrue(result.duration.inWholeMilliseconds < 5000, "Should complete quickly in parallel")
+        result.assertOutputContains("Running unit tests")
+        result.assertOutputContains("Running lint")
+        result.assertOutputContains("Compiling")
     }
 
     @Test
