@@ -231,9 +231,11 @@ class ErrorHandlingTest : IntegrationTestBase() {
                 name = "Parallel Failure"
                 maxConcurrency = 3
                 flow {
-                    segment("success-1")
-                    segment("fails")
-                    segment("success-2")
+                    parallel {
+                        segment("success-1")
+                        segment("fails")
+                        segment("success-2")
+                    }
                 }
             }
             """.trimIndent(),
