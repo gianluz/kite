@@ -1,5 +1,6 @@
 package io.kite.core
 
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.nio.file.Paths
@@ -9,6 +10,11 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class ExecutionContextTest {
+    @AfterEach
+    fun cleanup() {
+        SecretMasker.clear()
+    }
+
     @Test
     fun `context with minimal properties`() {
         val context =
@@ -87,6 +93,38 @@ class ExecutionContextTest {
 
         assertEquals("value", context.envOrDefault("KEY", "default"))
         assertEquals("default", context.envOrDefault("MISSING", "default"))
+    }
+
+    @Test
+    fun `secret registers environment value before returning`() {
+        val context =
+            ExecutionContext(
+                branch = "main",
+                commitSha = "abc123",
+                environment = mapOf("API_KEY" to "secret-token"),
+            )
+
+        val secret = context.secret("API_KEY")
+
+        assertEquals("secret-token", secret)
+        assertTrue(SecretMasker.isSecret("secret-token"))
+        assertEquals("Using [API_KEY:***]", SecretMasker.mask("Using secret-token"))
+    }
+
+    @Test
+    fun `requireSecret registers environment value before returning`() {
+        val context =
+            ExecutionContext(
+                branch = "main",
+                commitSha = "abc123",
+                environment = mapOf("API_KEY" to "secret-token"),
+            )
+
+        val secret = context.requireSecret("API_KEY")
+
+        assertEquals("secret-token", secret)
+        assertTrue(SecretMasker.isSecret("secret-token"))
+        assertEquals("Using [API_KEY:***]", SecretMasker.mask("Using secret-token"))
     }
 
     @Test

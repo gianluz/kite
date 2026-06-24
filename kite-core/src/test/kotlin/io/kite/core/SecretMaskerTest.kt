@@ -115,6 +115,27 @@ class SecretMaskerTest {
     }
 
     @Test
+    fun `preserves existing CI masked tokens`() {
+        SecretMasker.registerSecret("MASKED", hint = "TOKEN")
+
+        val text = "GitLab already replaced token with [MASKED]"
+        val masked = SecretMasker.mask(text, showHints = true)
+
+        assertEquals("GitLab already replaced token with [MASKED]", masked)
+    }
+
+    @Test
+    fun `preserves existing CI masked tokens while masking other secrets`() {
+        SecretMasker.registerSecret("secret-token", hint = "API_KEY")
+        SecretMasker.registerSecret("MASKED", hint = "TOKEN")
+
+        val text = "GitLab value [MASKED], Kite value secret-token"
+        val masked = SecretMasker.mask(text, showHints = true)
+
+        assertEquals("GitLab value [MASKED], Kite value [API_KEY:***]", masked)
+    }
+
+    @Test
     fun `does not mask empty values`() {
         SecretMasker.registerSecret("")
 

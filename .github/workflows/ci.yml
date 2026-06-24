@@ -29,6 +29,8 @@ jobs:
         run: ./gradlew :kite-cli:installDist
 
       - name: Run CI Build
+        env:
+          TERM: xterm-256color
         run: kite-cli/build/install/kite-cli/bin/kite-cli ride CI
 
       - name: Upload Test Results

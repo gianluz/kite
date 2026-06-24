@@ -6,7 +6,7 @@ package io.kite.cli
  */
 fun main(args: Array<String>) {
     // Show logo if not in quiet mode and no arguments
-    if (args.isEmpty() || (args.isNotEmpty() && !args.contains("--quiet") && !args.contains("-q"))) {
+    if (System.getenv("CI") == null && (args.isEmpty() || (!args.contains("--quiet") && !args.contains("-q")))) {
         Output.logo()
     }
 

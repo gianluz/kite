@@ -213,6 +213,7 @@ data class LogConfig(
  */
 object LogManager {
     private val activeLoggers = mutableMapOf<String, SegmentLogger>()
+    private val ciRenderer: CiRenderer = resolveCiRenderer()
     private var config = LogConfig()
 
     // Thread-local current logger for command execution
@@ -240,6 +241,11 @@ object LogManager {
             )
         activeLoggers[segmentName] = logger
         currentLogger.set(logger)
+        ciRenderer.sectionStart(
+            name = segmentName,
+            title = "Kite segment: $segmentName",
+            collapsed = false,
+        )
         return logger
     }
 
@@ -248,6 +254,7 @@ object LogManager {
      */
     fun stopSegmentLogging(segmentName: String) {
         activeLoggers.remove(segmentName)
+        ciRenderer.sectionEnd(segmentName)
         currentLogger.remove()
     }
 
