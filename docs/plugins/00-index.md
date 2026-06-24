@@ -54,8 +54,8 @@ execute {
 
 ```kotlin
 // .kite/segments/build.kite.kts
-@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha9")
-@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha9")
+@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha10")
+@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha10")
 
 import io.kite.plugins.git.*
 import io.kite.plugins.gradle.*
@@ -94,7 +94,7 @@ When developing a plugin locally, you can publish it to Maven Local and use it i
 
 ```kotlin
 // Kite checks Maven Local automatically before Maven Central
-@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha9")
+@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha10")
 
 import io.kite.plugins.git.*
 ```
@@ -105,8 +105,8 @@ import io.kite.plugins.git.*
 
 ```kotlin
 // .kite/segments/build.kite.kts
-@file:DependsOnJar("../kite-plugins/git/build/libs/git-0.1.0-alpha9.jar")
-@file:DependsOnJar("../kite-plugins/gradle/build/libs/gradle-0.1.0-alpha9.jar")
+@file:DependsOnJar("../kite-plugins/git/build/libs/git-0.1.0-alpha10.jar")
+@file:DependsOnJar("../kite-plugins/gradle/build/libs/gradle-0.1.0-alpha10.jar")
 
 import io.kite.plugins.git.*
 import io.kite.plugins.gradle.*

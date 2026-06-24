@@ -10,7 +10,7 @@ plugins {
 
 allprojects {
     group = "com.gianluz.kite"  // Maven Central namespace (project-specific)
-    version = "0.1.0-alpha9"
+    version = "0.1.0-alpha10"
 
     repositories {
         mavenCentral()

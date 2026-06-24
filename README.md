@@ -3,7 +3,7 @@
 A modern, type-safe CI/CD workflow runner for Kotlin projects.
 
 [![CI](https://github.com/gianluz/kite/actions/workflows/ci.yml/badge.svg)](https://github.com/gianluz/kite/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/badge/version-0.1.0--alpha9-blue.svg)](https://github.com/gianluz/kite/releases)
+[![Version](https://img.shields.io/badge/version-0.1.0--alpha10-blue.svg)](https://github.com/gianluz/kite/releases)
 [![Maven Central](https://img.shields.io/maven-central/v/com.gianluz.kite/kite-core.svg?label=Maven%20Central)](https://central.sonatype.com/namespace/com.gianluz.kite)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Kotlin](https://img.shields.io/badge/kotlin-2.1.20-blue.svg?logo=kotlin)](http://kotlinlang.org)
@@ -166,9 +166,9 @@ repositories {
 }
 
 dependencies {
-    implementation("com.gianluz.kite:kite-core:0.1.0-alpha9")
-    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha9")
-    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha9")
+    implementation("com.gianluz.kite:kite-core:0.1.0-alpha10")
+    implementation("com.gianluz.kite:kite-dsl:0.1.0-alpha10")
+    implementation("com.gianluz.kite:kite-runtime:0.1.0-alpha10")
 }
 ```
 
@@ -178,17 +178,17 @@ All artifacts are available on **[Maven Central](https://central.sonatype.com/na
 
 | Artifact | Coordinates | Description | Portal |
 |----------|-------------|-------------|--------|
-| `kite-core` | `com.gianluz.kite:kite-core:0.1.0-alpha9` | Core domain models and interfaces | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-core) |
-| `kite-dsl` | `com.gianluz.kite:kite-dsl:0.1.0-alpha9` | DSL and Kotlin scripting engine | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-dsl) |
-| `kite-runtime` | `com.gianluz.kite:kite-runtime:0.1.0-alpha9` | Execution runtime and schedulers | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-runtime) |
-| `git` plugin | `com.gianluz.kite:git:0.1.0-alpha9` | Type-safe Git operations | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/git) |
-| `gradle` plugin | `com.gianluz.kite:gradle:0.1.0-alpha9` | Flexible Gradle task execution | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/gradle) |
+| `kite-core` | `com.gianluz.kite:kite-core:0.1.0-alpha10` | Core domain models and interfaces | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-core) |
+| `kite-dsl` | `com.gianluz.kite:kite-dsl:0.1.0-alpha10` | DSL and Kotlin scripting engine | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-dsl) |
+| `kite-runtime` | `com.gianluz.kite:kite-runtime:0.1.0-alpha10` | Execution runtime and schedulers | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/kite-runtime) |
+| `git` plugin | `com.gianluz.kite:git:0.1.0-alpha10` | Type-safe Git operations | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/git) |
+| `gradle` plugin | `com.gianluz.kite:gradle:0.1.0-alpha10` | Flexible Gradle task execution | [🔗](https://central.sonatype.com/artifact/com.gianluz.kite/gradle) |
 
 Plugins are used via `@file:DependsOn` in your `.kite.kts` scripts:
 
 ```kotlin
-@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha9")
-@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha9")
+@file:DependsOn("com.gianluz.kite:git:0.1.0-alpha10")
+@file:DependsOn("com.gianluz.kite:gradle:0.1.0-alpha10")
 ```
 
 ### Docker (No Installation Required)
