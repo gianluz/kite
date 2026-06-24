@@ -39,12 +39,12 @@ object GitHubCiRenderer : CiRenderer {
         title: String,
         collapsed: Boolean,
     ) {
-        println("::group::$title")
+        // GitHub Actions groups must be strictly nested, but Kite segments can run in parallel.
+        // Emitting group markers for overlapping segments creates misleading nested log groups,
+        // so keep GitHub output flat while GitLab uses named sections that can overlap safely.
     }
 
-    override fun sectionEnd(name: String) {
-        println("::endgroup::")
-    }
+    override fun sectionEnd(name: String) = Unit
 }
 
 object PlainCiRenderer : CiRenderer {
