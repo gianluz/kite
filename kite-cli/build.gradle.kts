@@ -25,6 +25,31 @@ application {
     mainClass.set("io.kite.cli.MainKt")
 }
 
+val generatedResourcesDir = layout.buildDirectory.dir("generated/resources/version")
+
+val generateVersionResource by tasks.registering {
+    val versionFile = generatedResourcesDir.map { it.file("kite-version.properties") }
+    inputs.property("kiteVersion", rootProject.version.toString())
+    outputs.file(versionFile)
+
+    doLast {
+        val file = versionFile.get().asFile
+        val version = inputs.properties["kiteVersion"]
+        file.parentFile.mkdirs()
+        file.writeText("version=$version\n")
+    }
+}
+
+sourceSets {
+    main {
+        resources.srcDir(generatedResourcesDir)
+    }
+}
+
+tasks.named<ProcessResources>("processResources") {
+    dependsOn(generateVersionResource)
+}
+
 tasks.named<JavaExec>("run") {
     workingDir = rootProject.projectDir
 }

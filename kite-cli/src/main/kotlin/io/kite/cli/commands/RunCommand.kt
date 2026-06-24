@@ -41,7 +41,7 @@ class RunCommand : CliktCommand(
         try {
             // Show header
             if (!opts.quiet) {
-                Output.header("🏃 Running Segments")
+                Output.header("Running Segments")
             }
 
             // Detect platform and create execution context
@@ -130,7 +130,7 @@ class RunCommand : CliktCommand(
                             ""
                         }
                     val requested = if (segment.name in segmentNames) " [requested]" else ""
-                    Output.progress("• ${segment.name}$deps$requested")
+                    Output.progress(Output.bullet("${segment.name}$deps$requested"))
                 }
             }
 

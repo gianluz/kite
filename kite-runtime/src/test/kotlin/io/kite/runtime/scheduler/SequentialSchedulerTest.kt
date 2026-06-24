@@ -364,16 +364,16 @@ class SequentialSchedulerTest {
         val segment = Segment(name = "test", execute = { })
 
         val success = SegmentResult(segment, SegmentStatus.SUCCESS, durationMs = 100)
-        assertTrue(success.toString().contains("✓"))
+        assertTrue(success.toString().contains("OK"))
         assertTrue(success.toString().contains("test"))
         assertTrue(success.toString().contains("100ms"))
 
         val failure = SegmentResult(segment, SegmentStatus.FAILURE, error = "Failed")
-        assertTrue(failure.toString().contains("✗"))
+        assertTrue(failure.toString().contains("FAILED"))
         assertTrue(failure.toString().contains("Failed"))
 
         val skipped = SegmentResult(segment, SegmentStatus.SKIPPED, message = "Condition")
-        assertTrue(skipped.toString().contains("○"))
+        assertTrue(skipped.toString().contains("SKIPPED"))
         assertTrue(skipped.toString().contains("Condition"))
     }
 }

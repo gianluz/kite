@@ -163,7 +163,7 @@ class SegmentLogger(
         durationMs: Long,
     ) {
         val timestamp = LocalDateTime.now().format(timeFormat)
-        val status = if (exitCode == 0) "✓" else "✗"
+        val status = if (exitCode == 0) "OK" else "FAIL"
         val message = "Command $status (exit: $exitCode, ${durationMs}ms)"
         val logEntry = "[$timestamp] [$segmentName] $message"
 

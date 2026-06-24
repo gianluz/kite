@@ -12,15 +12,25 @@ import io.kite.cli.commands.RideCommand
 import io.kite.cli.commands.RidesCommand
 import io.kite.cli.commands.RunCommand
 import io.kite.cli.commands.SegmentsCommand
+import java.util.Properties
 
 /**
  * Main Kite CLI application.
  */
+private fun kiteVersion(): String {
+    val properties = Properties()
+    val stream =
+        KiteCli::class.java.classLoader.getResourceAsStream("kite-version.properties")
+            ?: return "unknown"
+    stream.use { properties.load(it) }
+    return properties.getProperty("version", "unknown")
+}
+
 class KiteCli : CliktCommand(
     name = "kite",
     help =
         """
-        🪁 Kite - A modern CI/CD workflow runner
+        Kite - A modern CI/CD workflow runner
         
         Kite helps you define and execute CI/CD workflows using type-safe Kotlin DSL.
         Define segments (units of work) and rides (workflows) in .kite.kts files.
@@ -32,7 +42,7 @@ class KiteCli : CliktCommand(
     private val quiet by option("--quiet", "-q", help = "Suppress non-essential output").flag()
 
     init {
-        versionOption("0.1.0-SNAPSHOT", names = setOf("--version", "-V"))
+        versionOption(kiteVersion(), names = setOf("--version", "-V"))
 
         // Use Mordant for beautiful help formatting
         context {

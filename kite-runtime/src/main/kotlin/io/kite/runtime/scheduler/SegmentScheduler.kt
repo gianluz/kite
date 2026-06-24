@@ -143,10 +143,10 @@ data class SegmentResult(
     override fun toString(): String {
         val durationStr = if (durationMs > 0) " (${durationMs}ms)" else ""
         return when (status) {
-            SegmentStatus.SUCCESS -> "✓ ${segment.name}$durationStr"
-            SegmentStatus.SKIPPED -> "○ ${segment.name} - ${message ?: "skipped"}"
-            SegmentStatus.FAILURE -> "✗ ${segment.name}$durationStr - ${error ?: "failed"}"
-            SegmentStatus.TIMEOUT -> "⏱ ${segment.name}$durationStr - timeout"
+            SegmentStatus.SUCCESS -> "OK ${segment.name}$durationStr"
+            SegmentStatus.SKIPPED -> "SKIPPED ${segment.name} - ${message ?: "skipped"}"
+            SegmentStatus.FAILURE -> "FAILED ${segment.name}$durationStr - ${error ?: "failed"}"
+            SegmentStatus.TIMEOUT -> "TIMEOUT ${segment.name}$durationStr - timeout"
             else -> "${segment.name}: $status"
         }
     }

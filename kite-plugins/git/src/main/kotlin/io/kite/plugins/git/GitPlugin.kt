@@ -186,7 +186,7 @@ class GitPlugin(private val ctx: ExecutionContext) {
 
         val branchRef = repository.resolve(branch)
         if (branchRef == null) {
-            ctx.logger.error("❌ Branch not found: $branch")
+            ctx.logger.error("Branch not found: $branch")
             error("Branch not found: $branch")
         }
 
@@ -208,12 +208,12 @@ class GitPlugin(private val ctx: ExecutionContext) {
             }
 
             result.conflicts != null -> {
-                ctx.logger.error("❌ Merge conflicts in: ${result.conflicts.keys.joinToString()}")
+                ctx.logger.error("Merge conflicts in: ${result.conflicts.keys.joinToString()}")
                 error("Merge conflicts detected")
             }
 
             else -> {
-                ctx.logger.error("❌ Merge failed: ${result.mergeStatus}")
+                ctx.logger.error("Merge failed: ${result.mergeStatus}")
                 error("Merge failed: ${result.mergeStatus}")
             }
         }

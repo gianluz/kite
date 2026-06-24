@@ -8,6 +8,7 @@ import com.github.ajalt.mordant.rendering.TextColors.yellow
 import com.github.ajalt.mordant.rendering.TextStyles.bold
 import com.github.ajalt.mordant.rendering.TextStyles.dim
 import io.kite.cli.Output
+import io.kite.cli.OutputSymbols
 import io.kite.cli.globalOptions
 import io.kite.cli.terminal
 import io.kite.dsl.FileDiscovery
@@ -62,7 +63,7 @@ class SegmentsCommand : CliktCommand(
             } else {
                 // Pretty terminal output
                 if (!opts.quiet) {
-                    Output.header("📦 Available Segments")
+                    Output.header("Available Segments")
                 }
 
                 if (segments.isEmpty()) {
@@ -99,7 +100,7 @@ class SegmentsCommand : CliktCommand(
 
                     // Conditional
                     if (segment.condition != null) {
-                        terminal.println(yellow("    ⚠ Conditional execution"))
+                        terminal.println(yellow("    ${OutputSymbols.warning} Conditional execution"))
                     }
 
                     terminal.println()

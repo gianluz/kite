@@ -49,7 +49,7 @@ class RideCommand : CliktCommand(
         try {
             // Show header
             if (!opts.quiet) {
-                Output.header("🪁 Kite Ride: $rideName")
+                Output.header("Kite Ride: $rideName")
             }
 
             // Detect platform and create execution context
@@ -229,7 +229,7 @@ class RideCommand : CliktCommand(
                 if (!opts.quiet) {
                     Output.error("Failed Segments:")
                     result.failedSegments().forEach { segResult ->
-                        Output.error("  • ${segResult.segment.name}")
+                        Output.error("  ${Output.bullet(segResult.segment.name)}")
                         if (segResult.error != null) {
                             Output.error("    ${segResult.error}")
                         }
@@ -270,7 +270,7 @@ class RideCommand : CliktCommand(
         if (missingSegments.isNotEmpty()) {
             validationErrors.add("Missing segment references:")
             for (segmentName in missingSegments) {
-                validationErrors.add("  • Segment '$segmentName' is referenced but not found")
+                validationErrors.add("  ${Output.bullet("Segment '$segmentName' is referenced but not found")}")
             }
         }
 
@@ -279,7 +279,7 @@ class RideCommand : CliktCommand(
         val graphValidation = graph.validate()
 
         if (!graphValidation.isValid) {
-            validationErrors.addAll(graphValidation.errors.map { "  • $it" })
+            validationErrors.addAll(graphValidation.errors.map { "  ${Output.bullet(it)}" })
         }
 
         // If there are validation errors, fail immediately
@@ -300,9 +300,9 @@ class RideCommand : CliktCommand(
         }
 
         if (opts.verbose) {
-            Output.info("✓ All segment references valid")
-            Output.info("✓ No circular dependencies detected")
-            Output.info("✓ Dependency graph is valid")
+            Output.success("All segment references valid")
+            Output.success("No circular dependencies detected")
+            Output.success("Dependency graph is valid")
         }
 
         // Show execution plan
@@ -316,7 +316,7 @@ class RideCommand : CliktCommand(
                     } else {
                         ""
                     }
-                Output.progress("• ${segment.name}$deps")
+                Output.progress(Output.bullet("${segment.name}$deps"))
             }
 
             // Show graph statistics
@@ -324,9 +324,9 @@ class RideCommand : CliktCommand(
                 val stats = graph.stats()
                 Output.info("")
                 Output.info("Graph statistics:")
-                Output.info("  • Total dependencies: ${stats.totalEdges}")
-                Output.info("  • Max dependencies per segment: ${stats.maxDependencies}")
-                Output.info("  • Isolated segments: ${stats.isolatedSegments}")
+                Output.info("  ${Output.bullet("Total dependencies: ${stats.totalEdges}")}")
+                Output.info("  ${Output.bullet("Max dependencies per segment: ${stats.maxDependencies}")}")
+                Output.info("  ${Output.bullet("Isolated segments: ${stats.isolatedSegments}")}")
             }
         }
 
